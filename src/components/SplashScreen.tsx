@@ -12,7 +12,7 @@ const SplashScreen = () => {
   return (
     <WinWindow
       icon="🍔"
-      title="BurgerQR — Sipariş Sistemi"
+      title="JU — Sipariş Sistemi"
       menuItems={[
         { label: 'Dosya', onClick: () => {} },
         { label: 'Düzen', onClick: () => {} },
