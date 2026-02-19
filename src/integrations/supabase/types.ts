@@ -82,28 +82,37 @@ export type Database = {
       }
       settings: {
         Row: {
+          auto_print_enabled: boolean
           card_enabled: boolean
           cash_enabled: boolean
           id: string
+          paper_size: string
           pos_enabled: boolean
+          printer_name: string
           sound_enabled: boolean
           updated_at: string
           waiter_enabled: boolean
         }
         Insert: {
+          auto_print_enabled?: boolean
           card_enabled?: boolean
           cash_enabled?: boolean
           id?: string
+          paper_size?: string
           pos_enabled?: boolean
+          printer_name?: string
           sound_enabled?: boolean
           updated_at?: string
           waiter_enabled?: boolean
         }
         Update: {
+          auto_print_enabled?: boolean
           card_enabled?: boolean
           cash_enabled?: boolean
           id?: string
+          paper_size?: string
           pos_enabled?: boolean
+          printer_name?: string
           sound_enabled?: boolean
           updated_at?: string
           waiter_enabled?: boolean

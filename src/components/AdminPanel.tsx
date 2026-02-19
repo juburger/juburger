@@ -15,11 +15,17 @@ const AdminPanel = () => {
   const [tab, setTab] = useState<TabType>('orders');
   const [filter, setFilter] = useState<FilterType>('all');
   const [orders, setOrders] = useState<Order[]>([]);
-  const [settings, setSettings] = useState({ card_enabled: true, cash_enabled: true, pos_enabled: true, sound_enabled: true, waiter_enabled: true });
+  const [settings, setSettings] = useState({
+    card_enabled: true, cash_enabled: true, pos_enabled: true,
+    sound_enabled: true, waiter_enabled: true,
+    auto_print_enabled: true, paper_size: '80', printer_name: '',
+  });
   const [printOrder, setPrintOrder] = useState<Order | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
   const knownOrderIds = useRef<Set<string>>(new Set());
   const initialLoadDone = useRef(false);
+  const settingsRef = useRef(settings);
+  useEffect(() => { settingsRef.current = settings; }, [settings]);
 
   const triggerPrint = useCallback((order: Order) => {
     setPrintOrder(order);
@@ -50,7 +56,10 @@ const AdminPanel = () => {
         const newOrder = payload.new as unknown as Order;
         if (!knownOrderIds.current.has(newOrder.id)) {
           knownOrderIds.current.add(newOrder.id);
-          triggerPrint(newOrder);
+          // Only auto-print if enabled in settings
+          if (settingsRef.current.auto_print_enabled) {
+            triggerPrint(newOrder);
+          }
         }
         fetchOrders();
       })
@@ -75,7 +84,7 @@ const AdminPanel = () => {
     else showToast('Sipariş güncellendi ✓');
   };
 
-  const saveSettings = async (key: string, val: boolean) => {
+  const saveSettings = async (key: string, val: boolean | string) => {
     const updated = { ...settings, [key]: val };
     setSettings(updated);
     await supabase.from('settings').update({ [key]: val }).eq('id', 'payment');
@@ -244,6 +253,39 @@ const AdminPanel = () => {
                 checked={(settings as any)[o.key]} onChange={e => saveSettings(o.key, e.target.checked)} />
             </div>
           ))}
+
+          <hr className="border-t border-foreground my-2.5" />
+          <h2 className="text-[13px] font-bold mb-2">🖨️ Yazıcı Ayarları</h2>
+          
+          <div className="mb-2.5">
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">Yazıcı Adı</div>
+            <input className="win-input" type="text" value={settings.printer_name}
+              onChange={e => saveSettings('printer_name', e.target.value)}
+              placeholder="ör: bar, mutfak" />
+          </div>
+
+          <div className="mb-2.5">
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">Kağıt Boyutu</div>
+            <div className="flex gap-1.5">
+              {['58', '80'].map(size => (
+                <button key={size}
+                  className={`font-mono text-[11px] px-3 py-1 cursor-pointer border-2 ${settings.paper_size === size ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground win-raised'}`}
+                  onClick={() => saveSettings('paper_size', size)}>
+                  {size}mm
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between py-1.5 border-b border-dashed border-muted gap-2.5">
+            <div className="flex-1">
+              <div className="text-[13px]">🖨️ Otomatik Yazdırma</div>
+              <div className="text-[11px] text-muted-foreground">Yeni sipariş geldiğinde fişi otomatik yazdır</div>
+            </div>
+            <input type="checkbox" className="w-4 h-4 flex-shrink-0 cursor-pointer"
+              checked={settings.auto_print_enabled} onChange={e => saveSettings('auto_print_enabled', e.target.checked)} />
+          </div>
+
           <hr className="border-t border-dashed border-muted-foreground/40 my-2.5" />
           <p className="text-muted-foreground text-[11px]">Değişiklikler anında müşteri ekranına yansır.</p>
         </>
@@ -278,6 +320,7 @@ const AdminPanel = () => {
           paymentType={printOrder.payment_type}
           note={printOrder.note}
           createdAt={printOrder.created_at}
+          paperSize={settings.paper_size}
         />
       )}
     </WinWindow>
