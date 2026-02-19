@@ -14,7 +14,11 @@ const statusColors: Record<string, string> = {
   paid: 'bg-muted',
 };
 
-const AdminTables = () => {
+interface Props {
+  onPrintOrder?: (order: Order) => void;
+}
+
+const AdminTables: React.FC<Props> = ({ onPrintOrder }) => {
   const { showToast } = useToast95Context();
   const [areas, setAreas] = useState<TableArea[]>([]);
   const [tables, setTables] = useState<TableConfig[]>([]);
@@ -75,6 +79,7 @@ const AdminTables = () => {
         tableNum={selectedTable.tableNum}
         userName={selectedTable.userName}
         onClose={() => { setSelectedTable(null); fetchAll(); }}
+        onPrintOrder={onPrintOrder}
       />
     );
   }
