@@ -215,20 +215,21 @@ const AdminProducts = () => {
       ) : (
         <div className="grid grid-cols-2 gap-2">
           {filtered.map(p => (
-            <div key={p.id} className={`border border-foreground text-center ${!p.is_available ? 'opacity-50' : ''}`}>
-              <div className="bg-primary text-primary-foreground py-1 px-1 text-[10px] font-bold truncate">
-                {getCatName(p.category_id)}
-              </div>
+            <div key={p.id} className={`border border-foreground ${!p.is_available ? 'opacity-50' : ''}`}>
               <div className="p-2">
-                <div className="w-10 h-10 rounded-full mx-auto mb-1.5 flex items-center justify-center text-primary-foreground font-bold text-[11px]"
-                  style={{ background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))' }}>
-                  {p.name.substring(0, 2).toUpperCase()}
+                <div className="flex justify-between items-start gap-1">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[11px] font-bold truncate">{p.name}</div>
+                    <div className="text-[10px] text-muted-foreground truncate">{p.description}</div>
+                  </div>
+                  <span className="text-[12px] font-bold whitespace-nowrap">₺{p.price}</span>
                 </div>
-                <div className="text-[11px] font-bold truncate">{p.name}</div>
-                <div className="text-[10px] text-muted-foreground truncate">{p.description}</div>
-                {p.tag && <span className="text-[9px] border border-primary text-primary px-1 mt-0.5 inline-block">{p.tag === 'n' ? 'YENİ' : p.tag === 's' ? 'ACI' : p.tag === 'p' ? 'POPÜLER' : p.tag}</span>}
+                <div className="flex items-center gap-1.5 mt-1">
+                  <span className="text-[9px] text-muted-foreground border border-border px-1">{getCatName(p.category_id)}</span>
+                  {p.tag && <span className="text-[9px] border border-primary text-primary px-1">{p.tag === 'n' ? 'YENİ' : p.tag === 's' ? 'ACI' : p.tag === 'p' ? 'POPÜLER' : p.tag}</span>}
+                  {!p.is_available && <span className="text-[9px] text-destructive">Kapalı</span>}
+                </div>
               </div>
-              <div className="bg-primary/10 text-[12px] font-bold py-1">₺{p.price}</div>
               <div className="flex text-[10px] border-t border-foreground">
                 <button className="flex-1 py-1 cursor-pointer bg-transparent border-none border-r border-foreground hover:bg-muted text-foreground" onClick={() => openEdit(p)}>Düzenle</button>
                 <button className="flex-1 py-1 cursor-pointer bg-transparent border-none border-r border-foreground hover:bg-muted text-foreground" onClick={() => toggleAvailable(p)}>{p.is_available ? 'Kapat' : 'Aç'}</button>
