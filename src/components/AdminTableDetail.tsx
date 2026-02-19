@@ -11,19 +11,35 @@ interface Product {
   is_available: boolean;
 }
 
+interface ProductOption {
+  id: string;
+  product_id: string;
+  name: string;
+  extra_price: number;
+  sort_order: number;
+}
+
 interface Category {
   id: string;
   name: string;
   sort_order: number;
 }
 
+interface SelectedOption {
+  id: string;
+  name: string;
+  extra_price: number;
+}
+
 interface PendingItem {
   id: string;
+  uid: string; // unique key per cart line
   name: string;
   price: number;
   qty: number;
   note: string;
   extraCharge: number;
+  selectedOptions: SelectedOption[];
 }
 
 interface Props {
@@ -47,15 +63,20 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
   // Pending cart - items added but not yet confirmed
   const [pendingItems, setPendingItems] = useState<PendingItem[]>([]);
 
+  const [productOptions, setProductOptions] = useState<ProductOption[]>([]);
+  const [expandedPendingId, setExpandedPendingId] = useState<string | null>(null);
+
   const fetchData = async () => {
-    const [{ data: cats }, { data: prods }, { data: ords }] = await Promise.all([
+    const [{ data: cats }, { data: prods }, { data: ords }, { data: opts }] = await Promise.all([
       supabase.from('categories').select('*').order('sort_order'),
       supabase.from('products').select('*').eq('is_available', true).order('sort_order'),
       supabase.from('orders').select('*').eq('table_num', tableNum).in('status', ['waiting', 'preparing', 'ready']).order('created_at', { ascending: false }),
+      supabase.from('product_options').select('*').order('sort_order'),
     ]);
     if (cats) { setCategories(cats); if (!selectedCat && cats.length > 0) setSelectedCat(cats[0].id); }
     if (prods) setProducts(prods);
     if (ords) setOrders(ords as unknown as Order[]);
+    if (opts) setProductOptions(opts as ProductOption[]);
   };
 
   useEffect(() => {
@@ -70,33 +91,46 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
     ? products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
     : selectedCat ? products.filter(p => p.category_id === selectedCat) : products;
 
-  // Add product to pending cart (not direct insert)
+  // Add product to pending cart - each click adds a new line with unique uid
   const addToPending = (product: Product) => {
-    setPendingItems(prev => {
-      const existing = prev.find(i => i.id === product.id);
-      if (existing) return prev.map(i => i.id === product.id ? { ...i, qty: i.qty + 1 } : i);
-      return [...prev, { id: product.id, name: product.name, price: product.price, qty: 1, note: '', extraCharge: 0 }];
-    });
+    const uid = crypto.randomUUID();
+    setPendingItems(prev => [
+      ...prev,
+      { id: product.id, uid, name: product.name, price: product.price, qty: 1, note: '', extraCharge: 0, selectedOptions: [] }
+    ]);
+    setExpandedPendingId(uid);
   };
 
-  const updatePendingQty = (id: string, delta: number) => {
+  const toggleOption = (uid: string, option: ProductOption) => {
     setPendingItems(prev => prev.map(i => {
-      if (i.id !== id) return i;
+      if (i.uid !== uid) return i;
+      const exists = i.selectedOptions.find(o => o.id === option.id);
+      const newOpts = exists
+        ? i.selectedOptions.filter(o => o.id !== option.id)
+        : [...i.selectedOptions, { id: option.id, name: option.name, extra_price: option.extra_price }];
+      const extraTotal = newOpts.reduce((s, o) => s + o.extra_price, 0);
+      return { ...i, selectedOptions: newOpts, extraCharge: extraTotal };
+    }));
+  };
+
+  const updatePendingQty = (uid: string, delta: number) => {
+    setPendingItems(prev => prev.map(i => {
+      if (i.uid !== uid) return i;
       const newQty = i.qty + delta;
       return newQty <= 0 ? null : { ...i, qty: newQty };
     }).filter(Boolean) as PendingItem[]);
   };
 
-  const updatePendingNote = (id: string, note: string) => {
-    setPendingItems(prev => prev.map(i => i.id === id ? { ...i, note } : i));
+  const updatePendingNote = (uid: string, note: string) => {
+    setPendingItems(prev => prev.map(i => i.uid === uid ? { ...i, note } : i));
   };
 
-  const updatePendingExtra = (id: string, extraCharge: number) => {
-    setPendingItems(prev => prev.map(i => i.id === id ? { ...i, extraCharge: isNaN(extraCharge) ? 0 : extraCharge } : i));
+  const updatePendingExtra = (uid: string, extraCharge: number) => {
+    setPendingItems(prev => prev.map(i => i.uid === uid ? { ...i, extraCharge: isNaN(extraCharge) ? 0 : extraCharge } : i));
   };
 
-  const removePending = (id: string) => {
-    setPendingItems(prev => prev.filter(i => i.id !== id));
+  const removePending = (uid: string) => {
+    setPendingItems(prev => prev.filter(i => i.uid !== uid));
   };
 
   const pendingTotal = pendingItems.reduce((s, i) => s + (i.price + i.extraCharge) * i.qty, 0);
@@ -107,7 +141,10 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
 
-    const orderItems = pendingItems.map(i => ({ id: i.id, name: i.name, price: i.price + i.extraCharge, qty: i.qty, note: i.note }));
+    const orderItems = pendingItems.map(i => ({
+      id: i.id, name: i.name, price: i.price + i.extraCharge, qty: i.qty, note: i.note,
+      options: i.selectedOptions.map(o => o.name),
+    }));
 
     const { data: newOrder, error } = await supabase.from('orders').insert({
       user_id: userData.user.id,
@@ -292,41 +329,55 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
                 🛒 Sepet
               </div>
               <div className="p-1.5 max-h-[40vh] overflow-y-auto">
-                {pendingItems.map(item => (
-                  <div key={item.id} className="py-1.5 border-b border-dashed border-muted text-[11px]">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1 min-w-0">
-                        <div className="truncate font-medium">{item.name}</div>
-                        <div className="text-[9px] text-muted-foreground">₺{item.price} × {item.qty}{item.extraCharge > 0 ? ` + ₺${item.extraCharge} ekstra` : ''}</div>
+                {pendingItems.map(item => {
+                  const itemOptions = productOptions.filter(o => o.product_id === item.id);
+                  const isExpanded = expandedPendingId === item.uid;
+                  return (
+                    <div key={item.uid} className="py-1.5 border-b border-dashed border-muted text-[11px]">
+                      <div className="flex items-center justify-between cursor-pointer" onClick={() => setExpandedPendingId(isExpanded ? null : item.uid)}>
+                        <div className="flex-1 min-w-0">
+                          <div className="truncate font-medium">{item.name} {itemOptions.length > 0 && <span className="text-[9px] text-primary">▾</span>}</div>
+                          <div className="text-[9px] text-muted-foreground">
+                            ₺{item.price} × {item.qty}{item.extraCharge > 0 ? ` + ₺${item.extraCharge}` : ''}
+                            {item.selectedOptions.length > 0 && ` (${item.selectedOptions.map(o => o.name).join(', ')})`}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 ml-1">
+                          <button className="w-5 h-5 flex items-center justify-center border border-foreground/30 text-[10px] font-bold bg-[#e74c3c] text-white"
+                            onClick={e => { e.stopPropagation(); updatePendingQty(item.uid, -1); }}>−</button>
+                          <span className="text-[11px] font-bold w-4 text-center">{item.qty}</span>
+                          <button className="w-5 h-5 flex items-center justify-center border border-foreground/30 text-[10px] font-bold bg-[#f39c12] text-white"
+                            onClick={e => { e.stopPropagation(); updatePendingQty(item.uid, 1); }}>+</button>
+                          <span className="text-[10px] ml-1 text-muted-foreground">₺{(item.price + item.extraCharge) * item.qty}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1 ml-1">
-                        <button className="w-5 h-5 flex items-center justify-center border border-foreground/30 text-[10px] font-bold bg-[#e74c3c] text-white"
-                          onClick={() => updatePendingQty(item.id, -1)}>−</button>
-                        <span className="text-[11px] font-bold w-4 text-center">{item.qty}</span>
-                        <button className="w-5 h-5 flex items-center justify-center border border-foreground/30 text-[10px] font-bold bg-[#f39c12] text-white"
-                          onClick={() => updatePendingQty(item.id, 1)}>+</button>
-                        <span className="text-[10px] ml-1 text-muted-foreground">₺{(item.price + item.extraCharge) * item.qty}</span>
-                      </div>
+                      {/* Collapsible options */}
+                      {isExpanded && (
+                        <div className="mt-1 pl-1 space-y-1">
+                          {itemOptions.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {itemOptions.map(opt => {
+                                const isSelected = item.selectedOptions.some(o => o.id === opt.id);
+                                return (
+                                  <button key={opt.id}
+                                    className={`text-[9px] px-1.5 py-0.5 border cursor-pointer ${isSelected ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground border-border'}`}
+                                    onClick={() => toggleOption(item.uid, opt)}>
+                                    {opt.name}{opt.extra_price > 0 ? ` +₺${opt.extra_price}` : ''}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                          <div className="flex gap-1">
+                            <input type="text" className="win-input flex-1 text-[9px] py-0.5"
+                              placeholder="Not..." value={item.note}
+                              onChange={e => updatePendingNote(item.uid, e.target.value)} />
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    {/* Note + Extra charge */}
-                    <div className="flex gap-1 mt-1">
-                      <input
-                        type="text"
-                        className="win-input flex-1 text-[9px] py-0.5"
-                        placeholder="Not..."
-                        value={item.note}
-                        onChange={e => updatePendingNote(item.id, e.target.value)}
-                      />
-                      <input
-                        type="number"
-                        className="win-input w-14 text-[9px] py-0.5"
-                        placeholder="Ekstra ₺"
-                        value={item.extraCharge || ''}
-                        onChange={e => updatePendingExtra(item.id, Number(e.target.value))}
-                      />
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               <div className="p-1.5 flex gap-1">
                 <button className="win-btn win-btn-primary text-[10px] py-1.5 flex-1 font-bold"

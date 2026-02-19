@@ -19,6 +19,14 @@ interface Product {
   sort_order: number;
 }
 
+interface ProductOption {
+  id: string;
+  product_id: string;
+  name: string;
+  extra_price: number;
+  sort_order: number;
+}
+
 const AdminProducts = () => {
   const { showToast } = useToast95Context();
   const [categories, setCategories] = useState<Category[]>([]);
@@ -29,6 +37,9 @@ const AdminProducts = () => {
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [form, setForm] = useState({ name: '', description: '', price: '', tag: '', category_id: '', is_available: true });
   const [catName, setCatName] = useState('');
+  const [productOptions, setProductOptions] = useState<ProductOption[]>([]);
+  const [newOptionName, setNewOptionName] = useState('');
+  const [newOptionPrice, setNewOptionPrice] = useState('');
 
   const fetchData = async () => {
     const [{ data: cats }, { data: prods }] = await Promise.all([
@@ -46,13 +57,39 @@ const AdminProducts = () => {
   const openAdd = () => {
     setEditProduct(null);
     setForm({ name: '', description: '', price: '', tag: '', category_id: categories[0]?.id || '', is_available: true });
+    setProductOptions([]);
     setShowForm(true);
   };
 
-  const openEdit = (p: Product) => {
+  const openEdit = async (p: Product) => {
     setEditProduct(p);
     setForm({ name: p.name, description: p.description, price: String(p.price), tag: p.tag, category_id: p.category_id || '', is_available: p.is_available });
+    const { data } = await supabase.from('product_options').select('*').eq('product_id', p.id).order('sort_order');
+    setProductOptions((data as ProductOption[]) || []);
     setShowForm(true);
+  };
+
+  const addOption = async () => {
+    if (!editProduct || !newOptionName.trim()) return;
+    const { error } = await supabase.from('product_options').insert({
+      product_id: editProduct.id,
+      name: newOptionName.trim(),
+      extra_price: Number(newOptionPrice) || 0,
+      sort_order: productOptions.length,
+    });
+    if (error) { showToast('Seçenek eklenemedi', false); return; }
+    setNewOptionName('');
+    setNewOptionPrice('');
+    const { data } = await supabase.from('product_options').select('*').eq('product_id', editProduct.id).order('sort_order');
+    setProductOptions((data as ProductOption[]) || []);
+    showToast('Seçenek eklendi ✓');
+  };
+
+  const deleteOption = async (optId: string) => {
+    if (!editProduct) return;
+    await supabase.from('product_options').delete().eq('id', optId);
+    setProductOptions(prev => prev.filter(o => o.id !== optId));
+    showToast('Seçenek silindi');
   };
 
   const saveProduct = async () => {
@@ -154,6 +191,38 @@ const AdminProducts = () => {
           <input type="checkbox" className="w-4 h-4 cursor-pointer" checked={form.is_available} onChange={e => setForm({ ...form, is_available: e.target.checked })} />
           <span className="text-[12px]">Satışta</span>
         </div>
+
+        {/* Product Options - only when editing */}
+        {editProduct && (
+          <>
+            <hr className="border-t border-foreground my-2" />
+            <div className="text-[11px] font-bold mb-1.5">Ek Seçenekler</div>
+            {productOptions.length > 0 && (
+              <div className="mb-2 space-y-1">
+                {productOptions.map((opt, idx) => (
+                  <div key={opt.id} className="flex items-center justify-between text-[11px] border border-border p-1 px-2">
+                    <span>{idx}. {opt.name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground">{opt.extra_price > 0 ? `+₺${opt.extra_price}` : '₺0'}</span>
+                      <button className="text-[10px] text-destructive cursor-pointer bg-transparent border-none" onClick={() => deleteOption(opt.id)}>Sil</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-1 items-end mb-2">
+              <div className="flex-1">
+                <div className="text-[9px] text-muted-foreground">Seçenek Adı</div>
+                <input className="win-input text-[11px]" value={newOptionName} onChange={e => setNewOptionName(e.target.value)} placeholder="ör: Ekstra Peynir" />
+              </div>
+              <div className="w-20">
+                <div className="text-[9px] text-muted-foreground">Ekstra ₺</div>
+                <input className="win-input text-[11px]" type="number" value={newOptionPrice} onChange={e => setNewOptionPrice(e.target.value)} placeholder="0" />
+              </div>
+              <button className="win-btn win-btn-primary text-[10px] py-1" onClick={addOption}>Ekle</button>
+            </div>
+          </>
+        )}
 
         <hr className="border-t border-foreground my-2" />
         <div className="flex gap-1.5">
