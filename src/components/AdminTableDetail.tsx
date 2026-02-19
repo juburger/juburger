@@ -57,6 +57,8 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
   const [selectedCat, setSelectedCat] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showPayment, setShowPayment] = useState(false);
+  const [showAccountTransfer, setShowAccountTransfer] = useState(false);
+  const [accountsList, setAccountsList] = useState<{ id: string; name: string; balance: number }[]>([]);
   const [paymentNote, setPaymentNote] = useState('');
   const [discount, setDiscount] = useState(0);
 
@@ -225,6 +227,73 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
     showToast('Siparişler iptal edildi');
     onClose();
   };
+
+  const fetchAccounts = async () => {
+    const { data } = await supabase.from('accounts').select('id, name, balance').order('name');
+    if (data) setAccountsList(data as any);
+  };
+
+  const transferToAccount = async (accountId: string, accountName: string) => {
+    // Move all orders to account as debt
+    await supabase.from('account_transactions').insert({
+      account_id: accountId,
+      type: 'debt',
+      amount: tableTotal,
+      description: `Masa ${tableNum} - ${userName}`,
+      table_num: tableNum,
+    } as any);
+    // Update account balance
+    const account = accountsList.find(a => a.id === accountId);
+    if (account) {
+      await supabase.from('accounts').update({ balance: Number(account.balance) + tableTotal }).eq('id', accountId);
+    }
+    // Mark orders as paid (transferred to account)
+    for (const o of orders) {
+      await supabase.from('orders').update({ status: 'paid', payment_status: 'account', payment_type: 'cari' }).eq('id', o.id);
+    }
+    await supabase.from('table_logs').insert({
+      table_num: tableNum,
+      user_name: 'Administrator',
+      action: 'Cariye taşındı',
+      details: `(${userName} → ${accountName} ₺${tableTotal})`,
+      amount: tableTotal,
+    });
+    showToast(`₺${tableTotal} → ${accountName} cariye aktarıldı ✓`);
+    onClose();
+  };
+
+  // Account transfer dialog
+  if (showAccountTransfer) {
+    return (
+      <div className="p-3">
+        <div className="text-center mb-3">
+          <div className="text-2xl mb-1">📋</div>
+          <div className="text-sm font-bold">Cariye Taşı</div>
+          <div className="text-[11px] text-muted-foreground">Masa {tableNum} — {userName} — ₺{tableTotal.toLocaleString('tr')}</div>
+        </div>
+
+        {accountsList.length === 0 ? (
+          <p className="text-muted-foreground text-center py-3 text-[11px]">Henüz cari hesap eklenmedi. Önce "Cari Hesaplar" sekmesinden hesap ekleyin.</p>
+        ) : (
+          <div className="border border-foreground">
+            {accountsList.map(a => (
+              <div key={a.id}
+                className="flex items-center justify-between px-2.5 py-2 text-[11px] border-b border-dashed border-muted-foreground/20 last:border-b-0 cursor-pointer hover:bg-muted/30"
+                onClick={() => transferToAccount(a.id, a.name)}>
+                <div>
+                  <div className="font-bold">{a.name}</div>
+                  <div className="text-[9px] text-muted-foreground">Mevcut borç: ₺{Number(a.balance).toLocaleString('tr')}</div>
+                </div>
+                <span className="text-primary text-[10px]">Seç →</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <button className="win-btn text-[11px] py-1 w-full mt-2.5" onClick={() => setShowAccountTransfer(false)}>← Geri</button>
+      </div>
+    );
+  }
 
   // Payment dialog
   if (showPayment) {
@@ -441,6 +510,11 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
                 💰 Ödeme Al — ₺{tableTotal.toLocaleString('tr')}
               </button>
             )}
+            <button className="win-btn text-[10px] py-1 w-full mb-1 bg-[#9b59b6] text-white border-[#8e44ad] font-bold"
+              disabled={allItems.length === 0 || pendingItems.length > 0}
+              onClick={() => { fetchAccounts(); setShowAccountTransfer(true); }}>
+              📋 Cariye Taşı
+            </button>
             <button className="win-btn text-[10px] py-0.5 w-full text-destructive"
               disabled={allItems.length === 0 && pendingItems.length === 0}
               onClick={pendingItems.length > 0 ? () => setPendingItems([]) : cancelOrders}>
