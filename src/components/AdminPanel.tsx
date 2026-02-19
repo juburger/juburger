@@ -8,6 +8,7 @@ import ReceiptPrint from '@/components/ReceiptPrint';
 import AdminProducts from '@/components/AdminProducts';
 import AdminStaff from '@/components/AdminStaff';
 import AdminTables from '@/components/AdminTables';
+import AdminTableManagement from '@/components/AdminTableManagement';
 
 type TabType = 'orders' | 'tables' | 'stats' | 'products' | 'settings' | 'qr';
 type FilterType = 'all' | 'waiting' | 'preparing' | 'ready' | 'paid';
@@ -299,6 +300,10 @@ const AdminPanel = () => {
 
           <hr className="border-t border-dashed border-muted-foreground/40 my-2.5" />
           <p className="text-muted-foreground text-[11px]">Değişiklikler anında müşteri ekranına yansır.</p>
+
+          <hr className="border-t border-foreground my-2.5" />
+          <h2 className="text-[13px] font-bold mb-2">🪑 Masa Yönetimi</h2>
+          <AdminTableManagement />
 
           <hr className="border-t border-foreground my-2.5" />
           <AdminStaff />
