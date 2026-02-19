@@ -14,7 +14,6 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: corsHeaders });
     }
 
-    // Verify caller is admin
     const anonClient = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_ANON_KEY')!,
@@ -31,7 +30,6 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    // Check admin role
     const { data: role } = await adminClient.from('user_roles').select('role').eq('user_id', claims.claims.sub).eq('role', 'admin').maybeSingle();
     if (!role) {
       return new Response(JSON.stringify({ error: 'Admin yetkisi gerekli' }), { status: 403, headers: corsHeaders });
@@ -47,7 +45,6 @@ Deno.serve(async (req) => {
 
       const email = `${username}@staff.ju.local`;
 
-      // Create auth user
       const { data: userData, error: userError } = await adminClient.auth.admin.createUser({
         email,
         password,
@@ -57,10 +54,8 @@ Deno.serve(async (req) => {
         return new Response(JSON.stringify({ error: userError.message }), { status: 400, headers: corsHeaders });
       }
 
-      // Add user role
       await adminClient.from('user_roles').insert({ user_id: userData.user.id, role: 'user' });
 
-      // Create staff record
       const { error: staffError } = await adminClient.from('staff').insert({
         user_id: userData.user.id,
         name,
@@ -87,17 +82,37 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'update') {
-      const { staff_id, ...updates } = body;
-      const { password, ...staffUpdates } = updates;
+      const { staff_id, permissions, password, ...staffUpdates } = body;
       
-      if (Object.keys(staffUpdates).length > 0) {
-        await adminClient.from('staff').update(staffUpdates).eq('id', staff_id);
+      // Update staff fields
+      const validFields = ['name', 'pin', 'work_days', 'shift_start', 'shift_end'];
+      const filtered: Record<string, unknown> = {};
+      for (const k of validFields) {
+        if (staffUpdates[k] !== undefined) filtered[k] = staffUpdates[k];
+      }
+      if (Object.keys(filtered).length > 0) {
+        await adminClient.from('staff').update(filtered).eq('id', staff_id);
       }
 
+      // Update password
       if (password) {
         const { data: staff } = await adminClient.from('staff').select('user_id').eq('id', staff_id).single();
         if (staff?.user_id) {
           await adminClient.auth.admin.updateUserById(staff.user_id, { password });
+        }
+      }
+
+      // Update permissions
+      if (permissions && typeof permissions === 'object') {
+        // Delete existing then insert all
+        await adminClient.from('staff_permissions').delete().eq('staff_id', staff_id);
+        const rows = Object.entries(permissions).map(([perm_key, enabled]) => ({
+          staff_id,
+          perm_key,
+          enabled: !!enabled,
+        }));
+        if (rows.length > 0) {
+          await adminClient.from('staff_permissions').insert(rows);
         }
       }
 
