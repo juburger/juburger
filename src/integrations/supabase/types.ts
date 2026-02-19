@@ -187,6 +187,45 @@ export type Database = {
         }
         Relationships: []
       }
+      staff: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          pin: string
+          shift_end: string
+          shift_start: string
+          user_id: string | null
+          username: string
+          work_days: string[]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          pin?: string
+          shift_end?: string
+          shift_start?: string
+          user_id?: string | null
+          username: string
+          work_days?: string[]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          pin?: string
+          shift_end?: string
+          shift_start?: string
+          user_id?: string | null
+          username?: string
+          work_days?: string[]
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
