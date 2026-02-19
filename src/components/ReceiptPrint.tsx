@@ -15,14 +15,17 @@ interface ReceiptProps {
   paymentType: string;
   note?: string | null;
   createdAt: string;
+  paperSize?: string;
 }
 
 const payLabels: Record<string, string> = { card: 'Kart', cash: 'Nakit', pos: 'POS' };
 
 const ReceiptPrint = forwardRef<HTMLDivElement, ReceiptProps>(
-  ({ orderId, tableNum, userName, items, total, paymentType, note, createdAt }, ref) => {
+  ({ orderId, tableNum, userName, items, total, paymentType, note, createdAt, paperSize = '80' }, ref) => {
     const time = new Date(createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
     const date = new Date(createdAt).toLocaleDateString('tr-TR');
+    const width = paperSize === '58' ? '58mm' : '80mm';
+    const fontSize = paperSize === '58' ? '10px' : '12px';
 
     return (
       <div ref={ref} className="receipt-print">
@@ -34,10 +37,10 @@ const ReceiptPrint = forwardRef<HTMLDivElement, ReceiptProps>(
               position: fixed !important;
               left: 0 !important;
               top: 0 !important;
-              width: 80mm !important;
-              padding: 4mm !important;
+              width: ${width} !important;
+              padding: ${paperSize === '58' ? '2mm' : '4mm'} !important;
               font-family: 'Courier New', monospace !important;
-              font-size: 12px !important;
+              font-size: ${fontSize} !important;
               color: #000 !important;
               background: #fff !important;
             }
