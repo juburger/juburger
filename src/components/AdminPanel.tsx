@@ -229,7 +229,7 @@ const AdminPanel = () => {
       )}
 
       {/* TABLES TAB */}
-      {tab === 'tables' && <AdminTables />}
+      {tab === 'tables' && <AdminTables onPrintOrder={triggerPrint} />}
 
       {/* PRODUCTS TAB */}
       {tab === 'products' && <AdminProducts />}
