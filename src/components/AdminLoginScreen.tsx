@@ -7,8 +7,9 @@ import { supabase } from '@/integrations/supabase/client';
 const AdminLoginScreen = () => {
   const navigate = useNavigate();
   const { showToast } = useToast95Context();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() => localStorage.getItem('admin_email') || '');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem('admin_email'));
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
@@ -30,6 +31,11 @@ const AdminLoginScreen = () => {
         return;
       }
 
+      if (rememberMe) {
+        localStorage.setItem('admin_email', email);
+      } else {
+        localStorage.removeItem('admin_email');
+      }
       navigate('/admin');
     } catch (err: any) {
       showToast('Giriş hatası: ' + err.message, false);
@@ -58,7 +64,10 @@ const AdminLoginScreen = () => {
         <input className="win-input" type="password" value={password} onChange={e => setPassword(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleLogin()} />
       </div>
-      <div className="flex gap-1.5">
+      <div className="flex items-center gap-2 mb-2.5">
+        <input type="checkbox" className="w-4 h-4 cursor-pointer" checked={rememberMe}
+          onChange={e => setRememberMe(e.target.checked)} id="rememberMe" />
+        <label htmlFor="rememberMe" className="text-[11px] cursor-pointer select-none">Beni Hatırla</label>
         <button className="win-btn win-btn-primary" onClick={handleLogin} disabled={loading}>
           {loading ? 'Giriş...' : 'Giriş Yap'}
         </button>
