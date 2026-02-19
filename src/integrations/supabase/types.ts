@@ -226,6 +226,56 @@ export type Database = {
         }
         Relationships: []
       }
+      table_areas: {
+        Row: {
+          id: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          id?: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          id?: string
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      tables: {
+        Row: {
+          area_id: string | null
+          capacity: number
+          id: string
+          is_active: boolean
+          table_num: number
+        }
+        Insert: {
+          area_id?: string | null
+          capacity?: number
+          id?: string
+          is_active?: boolean
+          table_num: number
+        }
+        Update: {
+          area_id?: string | null
+          capacity?: number
+          id?: string
+          is_active?: boolean
+          table_num?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tables_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "table_areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
