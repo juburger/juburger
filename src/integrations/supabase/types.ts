@@ -300,6 +300,35 @@ export type Database = {
         }
         Relationships: []
       }
+      staff_permissions: {
+        Row: {
+          enabled: boolean
+          id: string
+          perm_key: string
+          staff_id: string
+        }
+        Insert: {
+          enabled?: boolean
+          id?: string
+          perm_key: string
+          staff_id: string
+        }
+        Update: {
+          enabled?: boolean
+          id?: string
+          perm_key?: string
+          staff_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_permissions_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       table_areas: {
         Row: {
           id: string
