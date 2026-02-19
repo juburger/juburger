@@ -160,11 +160,11 @@ const AdminPanel = () => {
       icon="⚙️"
       title="JU — Yönetici Paneli"
       menuItems={[
-        { label: '← Geri', onClick: () => navigate('/') },
+        { label: '← Geri', onClick: () => navigate(-1 as any) },
         { label: 'Yenile', onClick: () => window.location.reload() },
         { label: '🚪 Çıkış', onClick: handleLogout },
       ]}
-      controls={[{ label: '×', onClick: () => navigate('/') }]}
+      controls={[{ label: '×', onClick: handleLogout }]}
       statusItems={['Yönetici girişi yapıldı']}
     >
       {/* Tabs */}
