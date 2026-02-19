@@ -78,6 +78,16 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
   const [editNote, setEditNote] = useState('');
   const [editExtra, setEditExtra] = useState(0);
 
+  // Selection for partial payment/cancel
+  const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
+  const toggleCheck = (key: string) => {
+    setCheckedItems(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
+
   const fetchData = async () => {
     const [{ data: cats }, { data: prods }, { data: ords }, { data: opts }] = await Promise.all([
       supabase.from('categories').select('*').order('sort_order'),
@@ -346,6 +356,88 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
     showToast('Siparişler iptal edildi');
     onClose();
   };
+
+  // Get checked items details
+  const getCheckedItemsList = () => allItems.filter((_, i) => checkedItems.has(`${i}`));
+  const checkedTotal = getCheckedItemsList().reduce((s, i) => s + i.price, 0);
+  const hasChecked = checkedItems.size > 0;
+
+  const cancelSelectedItems = async () => {
+    const selected = getCheckedItemsList();
+    if (selected.length === 0) return;
+    // Group by orderId
+    const byOrder = new Map<string, { itemIndex: number; name: string; qty: number }[]>();
+    selected.forEach(s => {
+      if (!byOrder.has(s.orderId)) byOrder.set(s.orderId, []);
+      byOrder.get(s.orderId)!.push({ itemIndex: s.itemIndex, name: s.name, qty: s.qty });
+    });
+    for (const [orderId, cancelItems] of byOrder) {
+      const order = orders.find(o => o.id === orderId);
+      if (!order) continue;
+      const items = Array.isArray(order.items) ? [...order.items] as any[] : [];
+      // Remove from end to preserve indices
+      const indices = cancelItems.map(c => c.itemIndex).sort((a, b) => b - a);
+      for (const idx of indices) items.splice(idx, 1);
+      if (items.length === 0) {
+        await supabase.from('orders').update({ status: 'paid', payment_status: 'cancelled' }).eq('id', orderId);
+      } else {
+        const newTotal = items.reduce((s: number, i: any) => s + i.price * i.qty, 0);
+        await supabase.from('orders').update({ items: items as any, total: newTotal }).eq('id', orderId);
+      }
+    }
+    const names = selected.map(s => `${s.qty}x ${s.name}`).join(', ');
+    await supabase.from('table_logs').insert({
+      table_num: tableNum, user_name: 'Administrator',
+      action: 'Seçili ürünler iptal edildi',
+      details: `(${userName} - ${names})`,
+    });
+    showToast(`${selected.length} ürün iptal edildi`);
+    setCheckedItems(new Set());
+    fetchData();
+  };
+
+  const handleSelectedPayment = async (paymentType: string) => {
+    const selected = getCheckedItemsList();
+    if (selected.length === 0) return;
+    // If all items selected, do full payment
+    if (selected.length === allItems.length) {
+      await handlePayment(paymentType);
+      return;
+    }
+    // Partial payment: remove selected items from orders, log payment
+    const byOrder = new Map<string, number[]>();
+    selected.forEach(s => {
+      if (!byOrder.has(s.orderId)) byOrder.set(s.orderId, []);
+      byOrder.get(s.orderId)!.push(s.itemIndex);
+    });
+    for (const [orderId, indices] of byOrder) {
+      const order = orders.find(o => o.id === orderId);
+      if (!order) continue;
+      const items = Array.isArray(order.items) ? [...order.items] as any[] : [];
+      const sorted = [...indices].sort((a, b) => b - a);
+      for (const idx of sorted) items.splice(idx, 1);
+      if (items.length === 0) {
+        await supabase.from('orders').update({ status: 'paid', payment_type: paymentType, payment_status: 'paid' }).eq('id', orderId);
+      } else {
+        const newTotal = items.reduce((s: number, i: any) => s + i.price * i.qty, 0);
+        await supabase.from('orders').update({ items: items as any, total: newTotal }).eq('id', orderId);
+      }
+    }
+    const names = selected.map(s => `${s.qty}x ${s.name}`).join(', ');
+    await supabase.from('table_logs').insert({
+      table_num: tableNum, user_name: 'Administrator',
+      action: 'Kısmi ödeme alındı!',
+      details: `(${userName} - ${paymentType} ₺${checkedTotal} - ${names})`,
+      amount: checkedTotal,
+      payment_type: paymentType,
+    });
+    showToast(`Kısmi ödeme — ₺${checkedTotal} (${paymentType}) ✓`);
+    setCheckedItems(new Set());
+    fetchData();
+  };
+
+  // Show partial payment dialog
+  const [showPartialPayment, setShowPartialPayment] = useState(false);
 
   const fetchAccounts = async () => {
     const { data } = await supabase.from('accounts').select('id, name, balance').order('name');
@@ -626,8 +718,14 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
           )}
 
           {/* Confirmed orders */}
-          <div className="p-1.5 text-[10px] uppercase tracking-widest text-muted-foreground border-b border-foreground/20">
-            Siparişler — {userName}
+          <div className="p-1.5 text-[10px] uppercase tracking-widest text-muted-foreground border-b border-foreground/20 flex justify-between items-center">
+            <div className="flex items-center gap-1.5">
+              <input type="checkbox" className="w-3.5 h-3.5 accent-primary cursor-pointer"
+                checked={allItems.length > 0 && checkedItems.size === allItems.length}
+                onChange={() => { if (checkedItems.size === allItems.length) setCheckedItems(new Set()); else setCheckedItems(new Set(allItems.map((_, i) => `${i}`))); }} />
+              <span>Siparişler</span>
+            </div>
+            <span>{tableNum}.Hesap: {userName.toUpperCase()}</span>
           </div>
 
           <div className="flex-1 overflow-y-auto p-1.5">
@@ -636,15 +734,16 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
             ) : (
               allItems.map((item, idx) => (
                 <div key={idx}
-                  className="flex justify-between items-center py-1.5 border-b border-dashed border-muted text-[11px] cursor-pointer hover:bg-muted/30"
-                  onClick={() => openEditItem(item)}>
+                  className={`flex justify-between items-center py-1.5 border-b border-dashed border-muted text-[11px] hover:bg-muted/30 ${checkedItems.has(`${idx}`) ? 'bg-primary/10' : ''}`}>
                   <div className="flex items-center gap-1.5">
-                    <input type="checkbox" className="w-3.5 h-3.5 accent-primary" readOnly checked={false} onClick={e => e.stopPropagation()} />
+                    <input type="checkbox" className="w-3.5 h-3.5 accent-primary cursor-pointer"
+                      checked={checkedItems.has(`${idx}`)}
+                      onChange={() => toggleCheck(`${idx}`)} />
                     <span>{item.qty}x {item.name.toUpperCase()}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="text-muted-foreground">₺{item.price}</span>
-                    <span className="text-primary cursor-pointer text-[12px]">✏️</span>
+                    <span className="text-primary cursor-pointer text-[12px]" onClick={() => openEditItem(item)}>✏️</span>
                   </div>
                 </div>
               ))
@@ -675,6 +774,17 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
                 onClick={confirmPendingOrder}>
                 ✔ Siparişleri Kabul Et — ₺{pendingTotal.toLocaleString('tr')}
               </button>
+            ) : hasChecked ? (
+              <>
+                <button className="win-btn win-btn-primary text-[11px] py-1.5 w-full mb-1"
+                  onClick={() => setShowPartialPayment(true)}>
+                  💰 Seçilenlerin Ödemesini Al — ₺{checkedTotal.toLocaleString('tr')}
+                </button>
+                <button className="win-btn text-[10px] py-1 w-full mb-1 bg-destructive text-white border-destructive font-bold"
+                  onClick={cancelSelectedItems}>
+                  ❌ Seçilenleri İptal Et ({checkedItems.size})
+                </button>
+              </>
             ) : (
               <button className="win-btn win-btn-primary text-[11px] py-1.5 w-full mb-1"
                 disabled={allItems.length === 0}
@@ -695,11 +805,34 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
             <button className="win-btn text-[10px] py-0.5 w-full text-destructive"
               disabled={allItems.length === 0 && pendingItems.length === 0}
               onClick={pendingItems.length > 0 ? () => setPendingItems([]) : cancelOrders}>
-              {pendingItems.length > 0 ? '🗑 Sepeti Temizle' : '❌ İptal'}
+              {pendingItems.length > 0 ? '🗑 Sepeti Temizle' : '❌ Tümünü İptal'}
             </button>
           </div>
         </div>
       </div>
+      {/* Partial Payment Dialog */}
+      <Dialog open={showPartialPayment} onOpenChange={setShowPartialPayment}>
+        <DialogContent className="max-w-[320px]">
+          <DialogHeader>
+            <DialogTitle className="text-center">Seçili Ürünler Ödeme</DialogTitle>
+          </DialogHeader>
+          <div className="text-center mb-2">
+            <div className="text-[11px] text-muted-foreground mb-1">{checkedItems.size} ürün seçili</div>
+            <div className="text-xl font-bold">₺{checkedTotal.toLocaleString('tr')}</div>
+          </div>
+          <div className="grid grid-cols-2 gap-1.5">
+            <button className="win-btn text-[12px] py-2 bg-[#2ecc71] text-white border-[#27ae60] font-bold" onClick={() => { handleSelectedPayment('nakit'); setShowPartialPayment(false); }}>
+              💵 Nakit
+            </button>
+            <button className="win-btn text-[12px] py-2 bg-[#e74c3c] text-white border-[#c0392b] font-bold" onClick={() => { handleSelectedPayment('kredi kartı'); setShowPartialPayment(false); }}>
+              💳 Kredi Kartı
+            </button>
+            <button className="win-btn text-[12px] py-2 bg-[#3498db] text-white border-[#2980b9] font-bold" onClick={() => { handleSelectedPayment('havale'); setShowPartialPayment(false); }}>
+              🏦 Havale
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
       {/* Edit Item Dialog */}
       <Dialog open={!!editItem} onOpenChange={open => { if (!open) setEditItem(null); }}>
         <DialogContent className="max-w-[360px] p-0">
