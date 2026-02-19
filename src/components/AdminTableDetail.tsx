@@ -22,6 +22,8 @@ interface PendingItem {
   name: string;
   price: number;
   qty: number;
+  note: string;
+  extraCharge: number;
 }
 
 interface Props {
@@ -73,25 +75,31 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
     setPendingItems(prev => {
       const existing = prev.find(i => i.id === product.id);
       if (existing) return prev.map(i => i.id === product.id ? { ...i, qty: i.qty + 1 } : i);
-      return [...prev, { id: product.id, name: product.name, price: product.price, qty: 1 }];
+      return [...prev, { id: product.id, name: product.name, price: product.price, qty: 1, note: '', extraCharge: 0 }];
     });
   };
 
   const updatePendingQty = (id: string, delta: number) => {
-    setPendingItems(prev => {
-      return prev.map(i => {
-        if (i.id !== id) return i;
-        const newQty = i.qty + delta;
-        return newQty <= 0 ? null : { ...i, qty: newQty };
-      }).filter(Boolean) as PendingItem[];
-    });
+    setPendingItems(prev => prev.map(i => {
+      if (i.id !== id) return i;
+      const newQty = i.qty + delta;
+      return newQty <= 0 ? null : { ...i, qty: newQty };
+    }).filter(Boolean) as PendingItem[]);
+  };
+
+  const updatePendingNote = (id: string, note: string) => {
+    setPendingItems(prev => prev.map(i => i.id === id ? { ...i, note } : i));
+  };
+
+  const updatePendingExtra = (id: string, extraCharge: number) => {
+    setPendingItems(prev => prev.map(i => i.id === id ? { ...i, extraCharge: isNaN(extraCharge) ? 0 : extraCharge } : i));
   };
 
   const removePending = (id: string) => {
     setPendingItems(prev => prev.filter(i => i.id !== id));
   };
 
-  const pendingTotal = pendingItems.reduce((s, i) => s + i.price * i.qty, 0);
+  const pendingTotal = pendingItems.reduce((s, i) => s + (i.price + i.extraCharge) * i.qty, 0);
 
   // Confirm pending items → create order in DB + print
   const confirmPendingOrder = async () => {
@@ -99,7 +107,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
 
-    const orderItems = pendingItems.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty }));
+    const orderItems = pendingItems.map(i => ({ id: i.id, name: i.name, price: i.price + i.extraCharge, qty: i.qty, note: i.note }));
 
     const { data: newOrder, error } = await supabase.from('orders').insert({
       user_id: userData.user.id,
@@ -283,20 +291,39 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
               <div className="p-1.5 text-[10px] uppercase tracking-widest text-primary font-bold border-b border-primary/20">
                 🛒 Sepet
               </div>
-              <div className="p-1.5 max-h-[30vh] overflow-y-auto">
+              <div className="p-1.5 max-h-[40vh] overflow-y-auto">
                 {pendingItems.map(item => (
-                  <div key={item.id} className="flex items-center justify-between py-1 border-b border-dashed border-muted text-[11px]">
-                    <div className="flex-1 min-w-0">
-                      <div className="truncate font-medium">{item.name}</div>
-                      <div className="text-[9px] text-muted-foreground">₺{item.price} × {item.qty}</div>
+                  <div key={item.id} className="py-1.5 border-b border-dashed border-muted text-[11px]">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="truncate font-medium">{item.name}</div>
+                        <div className="text-[9px] text-muted-foreground">₺{item.price} × {item.qty}{item.extraCharge > 0 ? ` + ₺${item.extraCharge} ekstra` : ''}</div>
+                      </div>
+                      <div className="flex items-center gap-1 ml-1">
+                        <button className="w-5 h-5 flex items-center justify-center border border-foreground/30 text-[10px] font-bold bg-[#e74c3c] text-white"
+                          onClick={() => updatePendingQty(item.id, -1)}>−</button>
+                        <span className="text-[11px] font-bold w-4 text-center">{item.qty}</span>
+                        <button className="w-5 h-5 flex items-center justify-center border border-foreground/30 text-[10px] font-bold bg-[#f39c12] text-white"
+                          onClick={() => updatePendingQty(item.id, 1)}>+</button>
+                        <span className="text-[10px] ml-1 text-muted-foreground">₺{(item.price + item.extraCharge) * item.qty}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1 ml-1">
-                      <button className="w-5 h-5 flex items-center justify-center border border-foreground/30 text-[10px] font-bold bg-[#e74c3c] text-white"
-                        onClick={() => updatePendingQty(item.id, -1)}>−</button>
-                      <span className="text-[11px] font-bold w-4 text-center">{item.qty}</span>
-                      <button className="w-5 h-5 flex items-center justify-center border border-foreground/30 text-[10px] font-bold bg-[#f39c12] text-white"
-                        onClick={() => updatePendingQty(item.id, 1)}>+</button>
-                      <span className="text-[10px] ml-1 text-muted-foreground">₺{item.price * item.qty}</span>
+                    {/* Note + Extra charge */}
+                    <div className="flex gap-1 mt-1">
+                      <input
+                        type="text"
+                        className="win-input flex-1 text-[9px] py-0.5"
+                        placeholder="Not..."
+                        value={item.note}
+                        onChange={e => updatePendingNote(item.id, e.target.value)}
+                      />
+                      <input
+                        type="number"
+                        className="win-input w-14 text-[9px] py-0.5"
+                        placeholder="Ekstra ₺"
+                        value={item.extraCharge || ''}
+                        onChange={e => updatePendingExtra(item.id, Number(e.target.value))}
+                      />
                     </div>
                   </div>
                 ))}
