@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
 import type { Order } from '@/data/menu';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface Product {
   id: string;
@@ -70,6 +71,12 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
 
   const [productOptions, setProductOptions] = useState<ProductOption[]>([]);
   const [expandedPendingId, setExpandedPendingId] = useState<string | null>(null);
+
+  // Edit modal for confirmed items
+  const [editItem, setEditItem] = useState<{ orderId: string; itemIndex: number; name: string; qty: number; price: number; note: string; extraCharge: number; options?: string[] } | null>(null);
+  const [editQty, setEditQty] = useState(1);
+  const [editNote, setEditNote] = useState('');
+  const [editExtra, setEditExtra] = useState(0);
 
   const fetchData = async () => {
     const [{ data: cats }, { data: prods }, { data: ords }, { data: opts }] = await Promise.all([
@@ -217,6 +224,89 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
       details: `(${userName} - ${itemQty}x ${itemName} ₺${removedTotal})`,
     });
     showToast(`${itemName} iptal edildi`);
+    fetchData();
+  };
+
+  const openEditItem = (item: typeof allItems[0]) => {
+    const order = orders.find(o => o.id === item.orderId);
+    if (!order) return;
+    const orderItems = Array.isArray(order.items) ? order.items : [];
+    const raw = orderItems[item.itemIndex] as any;
+    setEditItem({
+      orderId: item.orderId,
+      itemIndex: item.itemIndex,
+      name: item.name,
+      qty: item.qty,
+      price: raw.price,
+      note: raw.note || '',
+      extraCharge: raw.extraCharge || 0,
+      options: raw.options || [],
+    });
+    setEditQty(item.qty);
+    setEditNote(raw.note || '');
+    setEditExtra(raw.extraCharge || 0);
+  };
+
+  const saveEditItem = async () => {
+    if (!editItem) return;
+    const order = orders.find(o => o.id === editItem.orderId);
+    if (!order) return;
+    const items = Array.isArray(order.items) ? [...order.items] as any[] : [];
+    const oldQty = editItem.qty;
+    const diff = editQty - oldQty;
+
+    if (editQty <= 0) {
+      await cancelSingleItem(editItem.orderId, editItem.itemIndex, editItem.name, oldQty);
+      setEditItem(null);
+      return;
+    }
+
+    items[editItem.itemIndex] = {
+      ...items[editItem.itemIndex],
+      qty: editQty,
+      note: editNote,
+    };
+    const newTotal = items.reduce((s: number, i: any) => s + i.price * i.qty, 0);
+    await supabase.from('orders').update({ items: items as any, total: newTotal }).eq('id', editItem.orderId);
+
+    const { data: userData } = await supabase.auth.getUser();
+
+    if (diff > 0) {
+      await supabase.from('table_logs').insert({
+        table_num: tableNum, user_name: 'Administrator', action: 'Ürün eklendi',
+        details: `(${userName} - +${diff}x ${editItem.name})`,
+      });
+      if (onPrintOrder && userData?.user) {
+        const fakeOrder = {
+          id: crypto.randomUUID(), user_id: userData.user.id, user_name: userName, table_num: tableNum,
+          items: [{ id: '', name: editItem.name, price: editItem.price, qty: diff, note: editNote, options: editItem.options || [] }],
+          total: editItem.price * diff, status: 'preparing', payment_type: 'cash', payment_status: 'pending',
+          note: `EK SİPARİŞ: +${diff}x ${editItem.name}`, created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+        } as unknown as Order;
+        onPrintOrder(fakeOrder);
+      }
+      showToast(`+${diff}x ${editItem.name} eklendi ✓`);
+    } else if (diff < 0) {
+      const cancelledCount = Math.abs(diff);
+      await supabase.from('table_logs').insert({
+        table_num: tableNum, user_name: 'Administrator', action: 'Ürün azaltıldı',
+        details: `(${userName} - -${cancelledCount}x ${editItem.name})`,
+      });
+      if (onPrintOrder && userData?.user) {
+        const fakeOrder = {
+          id: crypto.randomUUID(), user_id: userData.user.id, user_name: userName, table_num: tableNum,
+          items: [{ id: '', name: `İPTAL: ${editItem.name}`, price: editItem.price, qty: cancelledCount, note: '', options: [] }],
+          total: editItem.price * cancelledCount, status: 'preparing', payment_type: 'cash', payment_status: 'pending',
+          note: `İPTAL FİŞİ: -${cancelledCount}x ${editItem.name}`, created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+        } as unknown as Order;
+        onPrintOrder(fakeOrder);
+      }
+      showToast(`-${cancelledCount}x ${editItem.name} iptal edildi`);
+    } else {
+      showToast(`${editItem.name} güncellendi ✓`);
+    }
+
+    setEditItem(null);
     fetchData();
   };
 
@@ -545,16 +635,16 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
               <p className="text-muted-foreground text-center py-3 text-[10px]">Sipariş yok</p>
             ) : (
               allItems.map((item, idx) => (
-                <div key={idx} className="flex justify-between items-center py-1 border-b border-dashed border-muted text-[11px]">
-                  <span>{item.qty}x {item.name}</span>
+                <div key={idx}
+                  className="flex justify-between items-center py-1.5 border-b border-dashed border-muted text-[11px] cursor-pointer hover:bg-muted/30"
+                  onClick={() => openEditItem(item)}>
+                  <div className="flex items-center gap-1.5">
+                    <input type="checkbox" className="w-3.5 h-3.5 accent-primary" readOnly checked={false} onClick={e => e.stopPropagation()} />
+                    <span>{item.qty}x {item.name.toUpperCase()}</span>
+                  </div>
                   <div className="flex items-center gap-1.5">
                     <span className="text-muted-foreground">₺{item.price}</span>
-                    <button
-                      className="w-5 h-5 flex items-center justify-center text-[10px] font-bold bg-destructive text-white border-none cursor-pointer rounded-sm"
-                      title="Ürünü iptal et"
-                      onClick={() => cancelSingleItem(item.orderId, item.itemIndex, item.name, item.qty)}>
-                      ×
-                    </button>
+                    <span className="text-primary cursor-pointer text-[12px]">✏️</span>
                   </div>
                 </div>
               ))
@@ -610,6 +700,64 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
           </div>
         </div>
       </div>
+      {/* Edit Item Dialog */}
+      <Dialog open={!!editItem} onOpenChange={open => { if (!open) setEditItem(null); }}>
+        <DialogContent className="max-w-[360px] p-0">
+          {editItem && (
+            <>
+              <div className="flex flex-col items-center pt-6 pb-2">
+                <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xl font-bold mb-2">
+                  {editItem.name.substring(0, 2).toUpperCase()}
+                </div>
+                <DialogHeader className="text-center">
+                  <DialogTitle className="text-lg font-bold">{editItem.name.toUpperCase()}</DialogTitle>
+                </DialogHeader>
+                <div className="text-sm text-muted-foreground">Fiyat {(editItem.price).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</div>
+              </div>
+
+              <div className="px-6 pb-4 space-y-3">
+                {/* Qty controls */}
+                <div className="flex items-center justify-center gap-3">
+                  <button className="w-10 h-10 rounded-full bg-primary text-primary-foreground text-xl font-bold flex items-center justify-center"
+                    onClick={() => setEditQty(Math.max(0, editQty - 1))}>−</button>
+                  <input type="number" className="win-input text-center text-xl font-bold w-24 py-2"
+                    value={editQty} onChange={e => setEditQty(Math.max(0, parseInt(e.target.value) || 0))} />
+                  <button className="w-10 h-10 rounded-full bg-primary text-primary-foreground text-xl font-bold flex items-center justify-center"
+                    onClick={() => setEditQty(editQty + 1)}>+</button>
+                </div>
+
+                {/* Quick qty buttons */}
+                <div className="flex justify-center gap-2">
+                  {[1, 2, 3, 4, 5].map(n => (
+                    <button key={n}
+                      className={`w-9 h-9 rounded-lg text-sm font-bold flex items-center justify-center border-2 ${editQty === n ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted text-foreground border-border'}`}
+                      onClick={() => setEditQty(n)}>{n}</button>
+                  ))}
+                </div>
+
+                {/* Note */}
+                <textarea className="win-input w-full text-sm" rows={2} placeholder="Sipariş Notu"
+                  value={editNote} onChange={e => setEditNote(e.target.value)} />
+
+                {/* Extra charge */}
+                <input type="number" className="win-input w-full text-sm" placeholder="Ekstra Ücret"
+                  value={editExtra || ''} onChange={e => setEditExtra(parseFloat(e.target.value) || 0)} />
+
+                {/* Options display */}
+                {editItem.options && editItem.options.length > 0 && (
+                  <div className="text-xs text-muted-foreground">{editItem.options.join(', ')}</div>
+                )}
+
+                {/* Save button */}
+                <button className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold text-base"
+                  onClick={saveEditItem}>
+                  Kaydet ({((editItem.price + editExtra) * editQty).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺)
+                </button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
