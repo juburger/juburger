@@ -244,6 +244,39 @@ export type Database = {
         }
         Relationships: []
       }
+      table_logs: {
+        Row: {
+          action: string
+          amount: number | null
+          created_at: string
+          details: string | null
+          id: string
+          payment_type: string | null
+          table_num: number
+          user_name: string
+        }
+        Insert: {
+          action: string
+          amount?: number | null
+          created_at?: string
+          details?: string | null
+          id?: string
+          payment_type?: string | null
+          table_num: number
+          user_name?: string
+        }
+        Update: {
+          action?: string
+          amount?: number | null
+          created_at?: string
+          details?: string | null
+          id?: string
+          payment_type?: string | null
+          table_num?: number
+          user_name?: string
+        }
+        Relationships: []
+      }
       tables: {
         Row: {
           area_id: string | null

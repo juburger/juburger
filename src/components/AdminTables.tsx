@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
 import type { Order } from '@/data/menu';
+import AdminTableDetail from '@/components/AdminTableDetail';
 
 interface TableArea { id: string; name: string; sort_order: number; }
 interface TableConfig { id: string; table_num: number; area_id: string | null; capacity: number; is_active: boolean; }
@@ -19,6 +20,7 @@ const AdminTables = () => {
   const [tables, setTables] = useState<TableConfig[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedArea, setSelectedArea] = useState<string>('open');
+  const [selectedTable, setSelectedTable] = useState<{ tableNum: number; userName: string } | null>(null);
 
   const fetchAll = async () => {
     const [{ data: a }, { data: t }, { data: o }] = await Promise.all([
@@ -49,7 +51,6 @@ const AdminTables = () => {
   const openTableNums = Object.keys(ordersByTable).map(Number);
   const getAreaName = (areaId: string | null) => areas.find(a => a.id === areaId)?.name || '—';
 
-  // Filter tables based on selected area
   const getVisibleTables = () => {
     if (selectedArea === 'open') {
       return tables.filter(t => openTableNums.includes(t.table_num));
@@ -66,6 +67,17 @@ const AdminTables = () => {
     const hours = Math.floor(mins / 60);
     return `${hours} saat önce`;
   };
+
+  // If a table is selected, show the detail view
+  if (selectedTable) {
+    return (
+      <AdminTableDetail
+        tableNum={selectedTable.tableNum}
+        userName={selectedTable.userName}
+        onClose={() => { setSelectedTable(null); fetchAll(); }}
+      />
+    );
+  }
 
   return (
     <>
@@ -96,14 +108,19 @@ const AdminTables = () => {
             const latestOrder = tableOrders[0];
             const tableTotal = tableOrders.reduce((s, o) => s + Number(o.total), 0);
 
-            // Determine card color based on most urgent status
             const hasWaiting = tableOrders.some(o => o.status === 'waiting');
             const hasPreparing = tableOrders.some(o => o.status === 'preparing');
             const bgColor = hasWaiting ? statusColors.waiting : hasPreparing ? statusColors.preparing : hasOrders ? statusColors.ready : 'bg-card';
             const textColor = hasOrders ? 'text-white' : 'text-foreground';
 
             return (
-              <div key={t.id} className={`border border-foreground ${bgColor} ${textColor}`}>
+              <div key={t.id}
+                className={`border border-foreground ${bgColor} ${textColor} cursor-pointer hover:opacity-90 active:opacity-75 transition-opacity`}
+                onClick={() => {
+                  if (hasOrders) {
+                    setSelectedTable({ tableNum: t.table_num, userName: latestOrder.user_name });
+                  }
+                }}>
                 <div className="p-2.5">
                   <div className="flex justify-between items-start">
                     <div>
@@ -127,7 +144,6 @@ const AdminTables = () => {
                   )}
                 </div>
 
-                {/* Area label */}
                 <div className={`px-2.5 py-1 text-[9px] uppercase tracking-widest border-t ${hasOrders ? 'border-white/20 opacity-70' : 'border-foreground/20 text-muted-foreground'}`}>
                   {getAreaName(t.area_id)}
                 </div>
