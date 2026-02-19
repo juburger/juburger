@@ -11,8 +11,9 @@ import AdminTables from '@/components/AdminTables';
 import AdminTableManagement from '@/components/AdminTableManagement';
 import AdminLogs from '@/components/AdminLogs';
 import AdminReports from '@/components/AdminReports';
+import AdminQuickOrder from '@/components/AdminQuickOrder';
 
-type TabType = 'orders' | 'tables' | 'stats' | 'reports' | 'products' | 'settings' | 'qr' | 'logs';
+type TabType = 'orders' | 'tables' | 'quick' | 'stats' | 'reports' | 'products' | 'settings' | 'qr' | 'logs';
 type FilterType = 'all' | 'waiting' | 'preparing' | 'ready' | 'paid';
 
 const AdminPanel = () => {
@@ -129,6 +130,7 @@ const AdminPanel = () => {
   const tabs: { id: TabType; label: string }[] = [
     { id: 'orders', label: `Siparişler ${waitingCount > 0 ? `(${waitingCount})` : ''}` },
     { id: 'tables', label: 'Masalar' },
+    { id: 'quick', label: 'Hızlı Sipariş' },
     { id: 'stats', label: 'İstatistik' },
     { id: 'reports', label: 'Raporlar' },
     { id: 'products', label: 'Ürünler' },
@@ -235,6 +237,9 @@ const AdminPanel = () => {
 
       {/* TABLES TAB */}
       {tab === 'tables' && <AdminTables onPrintOrder={triggerPrint} />}
+
+      {/* QUICK ORDER TAB */}
+      {tab === 'quick' && <AdminQuickOrder onPrintOrder={triggerPrint} />}
 
       {/* PRODUCTS TAB */}
       {tab === 'products' && <AdminProducts />}
