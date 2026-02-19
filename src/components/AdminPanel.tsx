@@ -5,8 +5,9 @@ import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
 import type { Order } from '@/data/menu';
 import ReceiptPrint from '@/components/ReceiptPrint';
+import AdminProducts from '@/components/AdminProducts';
 
-type TabType = 'orders' | 'stats' | 'settings' | 'qr';
+type TabType = 'orders' | 'stats' | 'products' | 'settings' | 'qr';
 type FilterType = 'all' | 'waiting' | 'preparing' | 'ready' | 'paid';
 
 const AdminPanel = () => {
@@ -123,6 +124,7 @@ const AdminPanel = () => {
   const tabs: { id: TabType; label: string }[] = [
     { id: 'orders', label: `Siparişler ${waitingCount > 0 ? `(${waitingCount})` : ''}` },
     { id: 'stats', label: 'İstatistik' },
+    { id: 'products', label: 'Ürünler' },
     { id: 'settings', label: 'Ayarlar' },
     { id: 'qr', label: 'QR Kodlar' },
   ];
@@ -219,6 +221,9 @@ const AdminPanel = () => {
           ))}
         </>
       )}
+
+      {/* PRODUCTS TAB */}
+      {tab === 'products' && <AdminProducts />}
 
       {/* SETTINGS TAB */}
       {tab === 'settings' && (
