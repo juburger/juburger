@@ -17,11 +17,29 @@ interface Category {
   sort_order: number;
 }
 
+interface ProductOption {
+  id: string;
+  product_id: string;
+  name: string;
+  extra_price: number;
+  sort_order: number;
+}
+
+interface SelectedOption {
+  id: string;
+  name: string;
+  extra_price: number;
+}
+
 interface QuickItem {
   id: string;
+  uid: string;
   name: string;
   price: number;
   qty: number;
+  note: string;
+  extraCharge: number;
+  selectedOptions: SelectedOption[];
 }
 
 interface Props {
@@ -32,20 +50,24 @@ const AdminQuickOrder: React.FC<Props> = ({ onPrintOrder }) => {
   const { showToast } = useToast95Context();
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [productOptions, setProductOptions] = useState<ProductOption[]>([]);
   const [selectedCat, setSelectedCat] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [accountName, setAccountName] = useState('');
   const [items, setItems] = useState<QuickItem[]>([]);
   const [nameError, setNameError] = useState(false);
+  const [expandedUid, setExpandedUid] = useState<string | null>(null);
 
   useEffect(() => {
     const fetch = async () => {
-      const [{ data: cats }, { data: prods }] = await Promise.all([
+      const [{ data: cats }, { data: prods }, { data: opts }] = await Promise.all([
         supabase.from('categories').select('*').order('sort_order'),
         supabase.from('products').select('*').eq('is_available', true).order('sort_order'),
+        supabase.from('product_options').select('*').order('sort_order'),
       ]);
       if (cats) { setCategories(cats); if (cats.length > 0) setSelectedCat(cats[0].id); }
       if (prods) setProducts(prods);
+      if (opts) setProductOptions(opts as ProductOption[]);
     };
     fetch();
   }, []);
@@ -55,22 +77,36 @@ const AdminQuickOrder: React.FC<Props> = ({ onPrintOrder }) => {
     : selectedCat ? products.filter(p => p.category_id === selectedCat) : products;
 
   const addItem = (product: Product) => {
-    setItems(prev => {
-      const existing = prev.find(i => i.id === product.id);
-      if (existing) return prev.map(i => i.id === product.id ? { ...i, qty: i.qty + 1 } : i);
-      return [...prev, { id: product.id, name: product.name, price: product.price, qty: 1 }];
-    });
+    const uid = crypto.randomUUID();
+    setItems(prev => [...prev, { id: product.id, uid, name: product.name, price: product.price, qty: 1, note: '', extraCharge: 0, selectedOptions: [] }]);
+    setExpandedUid(uid);
   };
 
-  const updateQty = (id: string, delta: number) => {
+  const updateQty = (uid: string, delta: number) => {
     setItems(prev => prev.map(i => {
-      if (i.id !== id) return i;
+      if (i.uid !== uid) return i;
       const newQty = i.qty + delta;
       return newQty <= 0 ? null : { ...i, qty: newQty };
     }).filter(Boolean) as QuickItem[]);
   };
 
-  const total = items.reduce((s, i) => s + i.price * i.qty, 0);
+  const toggleOption = (uid: string, option: ProductOption) => {
+    setItems(prev => prev.map(i => {
+      if (i.uid !== uid) return i;
+      const exists = i.selectedOptions.find(o => o.id === option.id);
+      const newOpts = exists
+        ? i.selectedOptions.filter(o => o.id !== option.id)
+        : [...i.selectedOptions, { id: option.id, name: option.name, extra_price: option.extra_price }];
+      const extraTotal = newOpts.reduce((s, o) => s + o.extra_price, 0);
+      return { ...i, selectedOptions: newOpts, extraCharge: extraTotal };
+    }));
+  };
+
+  const updateNote = (uid: string, note: string) => {
+    setItems(prev => prev.map(i => i.uid === uid ? { ...i, note } : i));
+  };
+
+  const total = items.reduce((s, i) => s + (i.price + i.extraCharge) * i.qty, 0);
 
   const submitOrder = async () => {
     const trimmed = accountName.trim();
@@ -87,7 +123,10 @@ const AdminQuickOrder: React.FC<Props> = ({ onPrintOrder }) => {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
 
-    const orderItems = items.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty }));
+    const orderItems = items.map(i => ({
+      id: i.id, name: i.name, price: i.price + i.extraCharge, qty: i.qty, note: i.note,
+      options: i.selectedOptions.map(o => o.name),
+    }));
 
     const { data: newOrder, error } = await supabase.from('orders').insert({
       user_id: userData.user.id,
@@ -166,21 +205,52 @@ const AdminQuickOrder: React.FC<Props> = ({ onPrintOrder }) => {
             {items.length === 0 ? (
               <p className="text-muted-foreground text-center py-3 text-[10px]">Ürün ekleyin</p>
             ) : (
-              items.map(item => (
-                <div key={item.id} className="flex items-center justify-between py-1 border-b border-dashed border-muted text-[11px]">
-                  <div className="flex-1 min-w-0">
-                    <div className="truncate font-medium">{item.name}</div>
+              items.map(item => {
+                const itemOptions = productOptions.filter(o => o.product_id === item.id);
+                const isExpanded = expandedUid === item.uid;
+                return (
+                  <div key={item.uid} className="py-1.5 border-b border-dashed border-muted text-[11px]">
+                    <div className="flex items-center justify-between cursor-pointer" onClick={() => setExpandedUid(isExpanded ? null : item.uid)}>
+                      <div className="flex-1 min-w-0">
+                        <div className="truncate font-medium">{item.name} {itemOptions.length > 0 && <span className="text-[9px] text-primary">▾</span>}</div>
+                        <div className="text-[9px] text-muted-foreground">
+                          ₺{item.price} × {item.qty}{item.extraCharge > 0 ? ` + ₺${item.extraCharge}` : ''}
+                          {item.selectedOptions.length > 0 && ` (${item.selectedOptions.map(o => o.name).join(', ')})`}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 ml-1">
+                        <button className="w-5 h-5 flex items-center justify-center border border-foreground/30 text-[10px] font-bold bg-[#e74c3c] text-white"
+                          onClick={e => { e.stopPropagation(); updateQty(item.uid, -1); }}>−</button>
+                        <span className="text-[11px] font-bold w-4 text-center">{item.qty}</span>
+                        <button className="w-5 h-5 flex items-center justify-center border border-foreground/30 text-[10px] font-bold bg-[#f39c12] text-white"
+                          onClick={e => { e.stopPropagation(); updateQty(item.uid, 1); }}>+</button>
+                        <span className="text-[10px] ml-1 text-muted-foreground">₺{(item.price + item.extraCharge) * item.qty}</span>
+                      </div>
+                    </div>
+                    {isExpanded && (
+                      <div className="mt-1 pl-1 space-y-1">
+                        {itemOptions.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {itemOptions.map(opt => {
+                              const isSelected = item.selectedOptions.some(o => o.id === opt.id);
+                              return (
+                                <button key={opt.id}
+                                  className={`text-[9px] px-1.5 py-0.5 border cursor-pointer ${isSelected ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground border-border'}`}
+                                  onClick={() => toggleOption(item.uid, opt)}>
+                                  {opt.name}{opt.extra_price > 0 ? ` +₺${opt.extra_price}` : ''}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                        <input type="text" className="win-input w-full text-[9px] py-0.5"
+                          placeholder="Not..." value={item.note}
+                          onChange={e => updateNote(item.uid, e.target.value)} />
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-1 ml-1">
-                    <button className="w-5 h-5 flex items-center justify-center border border-foreground/30 text-[10px] font-bold bg-[#e74c3c] text-white"
-                      onClick={() => updateQty(item.id, -1)}>−</button>
-                    <span className="text-[11px] font-bold w-4 text-center">{item.qty}</span>
-                    <button className="w-5 h-5 flex items-center justify-center border border-foreground/30 text-[10px] font-bold bg-[#f39c12] text-white"
-                      onClick={() => updateQty(item.id, 1)}>+</button>
-                    <span className="text-[10px] ml-1 text-muted-foreground">₺{item.price * item.qty}</span>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
 
