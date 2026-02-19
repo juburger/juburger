@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import WinWindow from '@/components/WinWindow';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
 import type { Order } from '@/data/menu';
+import ReceiptPrint from '@/components/ReceiptPrint';
 
 type TabType = 'orders' | 'stats' | 'settings' | 'qr';
 type FilterType = 'all' | 'waiting' | 'preparing' | 'ready' | 'paid';
@@ -15,21 +16,49 @@ const AdminPanel = () => {
   const [filter, setFilter] = useState<FilterType>('all');
   const [orders, setOrders] = useState<Order[]>([]);
   const [settings, setSettings] = useState({ card_enabled: true, cash_enabled: true, pos_enabled: true, sound_enabled: true, waiter_enabled: true });
+  const [printOrder, setPrintOrder] = useState<Order | null>(null);
+  const printRef = useRef<HTMLDivElement>(null);
+  const knownOrderIds = useRef<Set<string>>(new Set());
+  const initialLoadDone = useRef(false);
+
+  const triggerPrint = useCallback((order: Order) => {
+    setPrintOrder(order);
+    setTimeout(() => {
+      window.print();
+      showToast(`Fiş yazdırıldı: #${order.id.substring(0, 6).toUpperCase()}`);
+    }, 300);
+  }, [showToast]);
 
   // Load orders realtime
   useEffect(() => {
     const fetchOrders = async () => {
       const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(50);
-      if (data) setOrders(data as unknown as Order[]);
+      if (data) {
+        const typedData = data as unknown as Order[];
+        // Track known order IDs on initial load
+        if (!initialLoadDone.current) {
+          typedData.forEach(o => knownOrderIds.current.add(o.id));
+          initialLoadDone.current = true;
+        }
+        setOrders(typedData);
+      }
     };
     fetchOrders();
 
     const channel = supabase.channel('admin-orders')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => fetchOrders())
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => {
+        const newOrder = payload.new as unknown as Order;
+        if (!knownOrderIds.current.has(newOrder.id)) {
+          knownOrderIds.current.add(newOrder.id);
+          triggerPrint(newOrder);
+        }
+        fetchOrders();
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, () => fetchOrders())
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [triggerPrint]);
 
   // Load settings
   useEffect(() => {
@@ -100,7 +129,7 @@ const AdminPanel = () => {
   return (
     <WinWindow
       icon="⚙️"
-      title="BurgerQR — Yönetici Paneli"
+      title="JU — Yönetici Paneli"
       menuItems={[
         { label: '← Çıkış', onClick: handleLogout },
         { label: 'Yenile', onClick: () => window.location.reload() },
@@ -149,10 +178,13 @@ const AdminPanel = () => {
               <div className="bg-muted px-2 py-1.5 flex justify-between items-center border-t border-muted-foreground/20 gap-2">
                 <strong>₺{o.total}</strong>
                 <div className="flex gap-1">
+                <div className="flex gap-1 items-center">
+                  <button className="win-btn text-[10px] py-0.5 px-2" onClick={() => triggerPrint(o)}>🖨️</button>
                   {o.status === 'waiting' && <button className="win-btn win-btn-primary text-[10px] py-0.5 px-2" onClick={() => updateOrderStatus(o.id, 'preparing')}>Kabul Et</button>}
                   {o.status === 'preparing' && <button className="win-btn win-btn-success text-[10px] py-0.5 px-2" onClick={() => updateOrderStatus(o.id, 'ready')}>Hazır</button>}
                   {o.status === 'ready' && <button className="win-btn text-[10px] py-0.5 px-2" onClick={() => updateOrderStatus(o.id, 'paid')}>Ödendi</button>}
                   {o.status === 'paid' && <span className="text-[10px] text-success">✓ Tamamlandı</span>}
+                </div>
                 </div>
               </div>
             </div>
@@ -232,6 +264,21 @@ const AdminPanel = () => {
             ))}
           </div>
         </>
+      )}
+
+      {/* Hidden receipt for printing */}
+      {printOrder && (
+        <ReceiptPrint
+          ref={printRef}
+          orderId={printOrder.id}
+          tableNum={printOrder.table_num}
+          userName={printOrder.user_name}
+          items={Array.isArray(printOrder.items) ? printOrder.items as any : []}
+          total={printOrder.total}
+          paymentType={printOrder.payment_type}
+          note={printOrder.note}
+          createdAt={printOrder.created_at}
+        />
       )}
     </WinWindow>
   );

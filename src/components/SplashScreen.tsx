@@ -16,7 +16,7 @@ const SplashScreen = () => {
       menuItems={[
         { label: 'Dosya', onClick: () => {} },
         { label: 'Düzen', onClick: () => {} },
-        { label: 'Yardım', onClick: () => {} },
+        { label: 'Yardım', onClick: () => navigate('/admin-login') },
       ]}
       statusItems={['Hazır']}
     >
@@ -30,7 +30,6 @@ const SplashScreen = () => {
         <button className="win-btn win-btn-primary" onClick={() => navigate(`/register?table=${tableNum}`)}>
           Sipariş Ver
         </button>
-        <button className="win-btn" onClick={() => navigate('/admin-login')}>Yönetici</button>
       </div>
       <hr className="border-t border-dashed border-muted-foreground/40 my-2.5" />
       <p className="text-muted-foreground text-[11px]">
