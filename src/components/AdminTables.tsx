@@ -117,9 +117,7 @@ const AdminTables = () => {
               <div key={t.id}
                 className={`border border-foreground ${bgColor} ${textColor} cursor-pointer hover:opacity-90 active:opacity-75 transition-opacity`}
                 onClick={() => {
-                  if (hasOrders) {
-                    setSelectedTable({ tableNum: t.table_num, userName: latestOrder.user_name });
-                  }
+                  setSelectedTable({ tableNum: t.table_num, userName: hasOrders ? latestOrder.user_name : 'Admin' });
                 }}>
                 <div className="p-2.5">
                   <div className="flex justify-between items-start">
