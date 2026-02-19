@@ -10,8 +10,9 @@ import AdminStaff from '@/components/AdminStaff';
 import AdminTables from '@/components/AdminTables';
 import AdminTableManagement from '@/components/AdminTableManagement';
 import AdminLogs from '@/components/AdminLogs';
+import AdminReports from '@/components/AdminReports';
 
-type TabType = 'orders' | 'tables' | 'stats' | 'products' | 'settings' | 'qr' | 'logs';
+type TabType = 'orders' | 'tables' | 'stats' | 'reports' | 'products' | 'settings' | 'qr' | 'logs';
 type FilterType = 'all' | 'waiting' | 'preparing' | 'ready' | 'paid';
 
 const AdminPanel = () => {
@@ -129,6 +130,7 @@ const AdminPanel = () => {
     { id: 'orders', label: `Siparişler ${waitingCount > 0 ? `(${waitingCount})` : ''}` },
     { id: 'tables', label: 'Masalar' },
     { id: 'stats', label: 'İstatistik' },
+    { id: 'reports', label: 'Raporlar' },
     { id: 'products', label: 'Ürünler' },
     { id: 'settings', label: 'Ayarlar' },
     { id: 'qr', label: 'QR Kodlar' },
@@ -227,6 +229,9 @@ const AdminPanel = () => {
           ))}
         </>
       )}
+
+      {/* REPORTS TAB */}
+      {tab === 'reports' && <AdminReports />}
 
       {/* TABLES TAB */}
       {tab === 'tables' && <AdminTables onPrintOrder={triggerPrint} />}
