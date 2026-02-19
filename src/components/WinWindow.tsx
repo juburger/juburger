@@ -12,8 +12,8 @@ interface WinWindowProps {
 
 const WinWindow = ({ icon, title, menuItems, controls, statusItems, children, bodyClass }: WinWindowProps) => {
   return (
-    <div className="min-h-screen p-1.5 bg-background">
-      <div className="bg-card win-raised">
+    <div className="min-h-screen p-1.5 bg-background overflow-x-hidden">
+      <div className="bg-card win-raised max-w-full overflow-hidden">
         {/* Title bar */}
         <div className="bg-primary text-primary-foreground px-1.5 py-0.5 flex items-center justify-between text-xs font-bold select-none tracking-wide">
           <div className="flex items-center gap-1.5">
@@ -49,7 +49,7 @@ const WinWindow = ({ icon, title, menuItems, controls, statusItems, children, bo
         )}
 
         {/* Body */}
-        <div className={`bg-popover win-sunken m-1 p-3.5 text-sm leading-relaxed overflow-y-auto min-h-[calc(100vh-80px)] ${bodyClass || ''}`}>
+        <div className={`bg-popover win-sunken m-1 p-3.5 text-sm leading-relaxed overflow-x-hidden overflow-y-auto min-h-[calc(100vh-80px)] ${bodyClass || ''}`}>
           {children}
         </div>
 
