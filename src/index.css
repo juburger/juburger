@@ -1,88 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 180 100% 25%; /* teal #008080 */
+    --foreground: 0 0% 0%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 0 0% 75%; /* #c0c0c0 */
+    --card-foreground: 0 0% 0%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 0 0% 0%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 240 100% 25%; /* #000080 navy */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 0 0% 75%; /* #c0c0c0 */
+    --secondary-foreground: 0 0% 0%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 40%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 0 0% 75%;
+    --accent-foreground: 0 0% 0%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 100% 25%; /* #800000 */
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --success: 120 100% 20%; /* #006400 */
+    --success-foreground: 0 0% 100%;
 
-    --radius: 0.5rem;
+    --border: 0 0% 50%;
+    --input: 0 0% 100%;
+    --ring: 240 100% 25%;
+
+    --radius: 0px;
+
+    --win-highlight: 0 0% 100%;
+    --win-shadow: 0 0% 50%;
+    --win-dark-shadow: 0 0% 0%;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --background: 180 100% 25%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 75%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 75%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 240 100% 25%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 75%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 50%;
+    --muted-foreground: 0 0% 75%;
+    --accent: 0 0% 75%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 100% 25%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 50%;
+    --input: 0 0% 100%;
+    --ring: 240 100% 25%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -97,9 +87,119 @@ All colors MUST be HSL.
 @layer base {
   * {
     @apply border-border;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Courier Prime', 'Courier New', Courier, monospace;
   }
+}
+
+/* Win95 raised border */
+.win-raised {
+  border: 2px solid;
+  border-color: hsl(var(--win-highlight)) hsl(var(--win-shadow)) hsl(var(--win-shadow)) hsl(var(--win-highlight));
+  box-shadow: 2px 2px 0 hsl(var(--win-dark-shadow));
+}
+
+/* Win95 sunken border */
+.win-sunken {
+  border: 2px solid;
+  border-color: hsl(var(--win-shadow)) hsl(var(--win-highlight)) hsl(var(--win-highlight)) hsl(var(--win-shadow));
+}
+
+/* Win95 button */
+.win-btn {
+  font-family: 'Courier Prime', 'Courier New', Courier, monospace;
+  font-size: 12px;
+  padding: 4px 16px;
+  background: hsl(var(--card));
+  border: 2px solid;
+  border-color: hsl(var(--win-highlight)) hsl(var(--win-shadow)) hsl(var(--win-shadow)) hsl(var(--win-highlight));
+  cursor: pointer;
+  color: hsl(var(--foreground));
+  box-shadow: 1px 1px 0 hsl(var(--win-dark-shadow));
+  white-space: nowrap;
+}
+.win-btn:active {
+  border-color: hsl(var(--win-shadow)) hsl(var(--win-highlight)) hsl(var(--win-highlight)) hsl(var(--win-shadow));
+  box-shadow: none;
+  transform: translate(1px, 1px);
+}
+
+.win-btn-primary {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-color: hsl(240 100% 50%) hsl(240 100% 12.5%) hsl(240 100% 12.5%) hsl(240 100% 50%);
+}
+.win-btn-primary:hover { background: hsl(240 100% 31%); }
+.win-btn-primary:active {
+  border-color: hsl(240 100% 12.5%) hsl(240 100% 50%) hsl(240 100% 50%) hsl(240 100% 12.5%);
+}
+
+.win-btn-danger {
+  background: hsl(var(--destructive));
+  color: hsl(var(--destructive-foreground));
+  border-color: hsl(0 50% 50%) hsl(0 100% 12.5%) hsl(0 100% 12.5%) hsl(0 50% 50%);
+}
+
+.win-btn-success {
+  background: hsl(var(--success));
+  color: hsl(var(--success-foreground));
+  border-color: hsl(120 50% 50%) hsl(120 100% 9%) hsl(120 100% 9%) hsl(120 50% 50%);
+}
+
+/* Win95 input */
+.win-input {
+  font-family: 'Courier Prime', 'Courier New', Courier, monospace;
+  font-size: 13px;
+  background: hsl(var(--input));
+  border: 2px solid;
+  border-color: hsl(var(--win-shadow)) hsl(var(--win-highlight)) hsl(var(--win-highlight)) hsl(var(--win-shadow));
+  padding: 4px 6px;
+  color: hsl(var(--foreground));
+  outline: none;
+  width: 100%;
+}
+.win-input:focus {
+  outline: 1px dotted hsl(var(--primary));
+  outline-offset: 1px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 14px; }
+::-webkit-scrollbar-track { background: hsl(var(--card)); border-left: 1px solid hsl(var(--win-shadow)); }
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--card));
+  border: 2px solid;
+  border-color: hsl(var(--win-highlight)) hsl(var(--win-shadow)) hsl(var(--win-shadow)) hsl(var(--win-highlight));
+}
+
+/* Toast styles */
+.win-toast {
+  position: fixed;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-family: 'Courier Prime', 'Courier New', Courier, monospace;
+  font-size: 12px;
+  padding: 4px 14px;
+  border: 2px solid;
+  border-color: hsl(240 100% 50%) hsl(240 100% 12.5%) hsl(240 100% 12.5%) hsl(240 100% 50%);
+  opacity: 0;
+  transition: opacity 0.18s, transform 0.18s;
+  z-index: 999;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.win-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.win-toast.error {
+  background: hsl(var(--destructive));
+  border-color: hsl(0 50% 50%) hsl(0 100% 12.5%) hsl(0 100% 12.5%) hsl(0 50% 50%);
 }
