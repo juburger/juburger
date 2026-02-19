@@ -58,6 +58,9 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
   const [searchQuery, setSearchQuery] = useState('');
   const [showPayment, setShowPayment] = useState(false);
   const [showAccountTransfer, setShowAccountTransfer] = useState(false);
+  const [showTableTransfer, setShowTableTransfer] = useState(false);
+  const [transferTargetTable, setTransferTargetTable] = useState<number | null>(null);
+  const [allTables, setAllTables] = useState<{ table_num: number }[]>([]);
   const [accountsList, setAccountsList] = useState<{ id: string; name: string; balance: number }[]>([]);
   const [paymentNote, setPaymentNote] = useState('');
   const [discount, setDiscount] = useState(0);
@@ -261,6 +264,51 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
     showToast(`₺${tableTotal} → ${accountName} cariye aktarıldı ✓`);
     onClose();
   };
+
+  const fetchAllTables = async () => {
+    const { data } = await supabase.from('tables').select('table_num').order('table_num');
+    if (data) setAllTables(data as any);
+  };
+
+  const handleTableTransfer = async (targetNum: number) => {
+    for (const o of orders) {
+      await supabase.from('orders').update({ table_num: targetNum }).eq('id', o.id);
+    }
+    await supabase.from('table_logs').insert({
+      table_num: tableNum,
+      user_name: 'Administrator',
+      action: 'Masa taşındı',
+      details: `Masa ${tableNum} → Masa ${targetNum} (₺${tableTotal})`,
+      amount: tableTotal,
+    });
+    showToast(`Masa ${tableNum} → Masa ${targetNum} taşındı ✓`);
+    onClose();
+  };
+
+  // Table transfer dialog
+  if (showTableTransfer) {
+    return (
+      <div className="p-3">
+        <div className="text-center mb-3">
+          <div className="text-2xl mb-1">🪑</div>
+          <div className="text-sm font-bold">Masayı Taşı</div>
+          <div className="text-[11px] text-muted-foreground">Masa {tableNum} — {userName} — ₺{tableTotal.toLocaleString('tr')}</div>
+        </div>
+
+        <div className="grid grid-cols-4 gap-1.5">
+          {allTables.filter(t => t.table_num !== tableNum).map(t => (
+            <button key={t.table_num}
+              className="border border-foreground/30 p-2 text-center cursor-pointer text-[11px] hover:bg-muted/50 active:bg-primary active:text-primary-foreground font-bold"
+              onClick={() => handleTableTransfer(t.table_num)}>
+              Masa {t.table_num}
+            </button>
+          ))}
+        </div>
+
+        <button className="win-btn text-[11px] py-1 w-full mt-2.5" onClick={() => setShowTableTransfer(false)}>← Geri</button>
+      </div>
+    );
+  }
 
   // Account transfer dialog
   if (showAccountTransfer) {
@@ -510,6 +558,11 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
                 💰 Ödeme Al — ₺{tableTotal.toLocaleString('tr')}
               </button>
             )}
+            <button className="win-btn text-[10px] py-1 w-full mb-1 bg-[#e67e22] text-white border-[#d35400] font-bold"
+              disabled={allItems.length === 0 || pendingItems.length > 0}
+              onClick={() => { fetchAllTables(); setShowTableTransfer(true); }}>
+              🪑 Masayı Taşı
+            </button>
             <button className="win-btn text-[10px] py-1 w-full mb-1 bg-[#9b59b6] text-white border-[#8e44ad] font-bold"
               disabled={allItems.length === 0 || pendingItems.length > 0}
               onClick={() => { fetchAccounts(); setShowAccountTransfer(true); }}>
