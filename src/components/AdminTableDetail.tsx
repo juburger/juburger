@@ -70,37 +70,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
     ? products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
     : selectedCat ? products.filter(p => p.category_id === selectedCat) : products;
 
-  // Add product directly to table as order (instant confirm + print)
-  const addProductDirect = async (product: Product) => {
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) return;
-
-    const { data: newOrder, error } = await supabase.from('orders').insert({
-      user_id: userData.user.id,
-      user_name: userName || 'Admin',
-      table_num: tableNum,
-      items: [{ id: product.id, name: product.name, price: product.price, qty: 1 }],
-      total: product.price,
-      status: 'preparing',
-      payment_type: 'cash',
-    }).select().single();
-
-    if (error) { showToast('Ürün eklenemedi', false); return; }
-
-    await supabase.from('table_logs').insert({
-      table_num: tableNum,
-      user_name: 'Administrator',
-      action: 'Sipariş eklendi!',
-      details: `(${userName} - 1x ${product.name})`,
-    });
-
-    if (onPrintOrder && newOrder) {
-      onPrintOrder(newOrder as unknown as Order);
-    }
-    showToast(`${product.name} eklendi ✓`);
-  };
-
-  // Pending cart for batch add (optional)
+  // Add product to pending cart (not direct insert)
   const addToPending = (product: Product) => {
     setPendingItems(prev => {
       const existing = prev.find(i => i.id === product.id);
@@ -305,7 +275,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
             {filteredProducts.map(p => (
               <button key={p.id}
                 className="border border-foreground/30 p-1.5 text-left text-[10px] hover:bg-muted/50 active:bg-muted cursor-pointer"
-                onClick={() => addProductDirect(p)}>
+                onClick={() => addToPending(p)}>
                 <div className="font-bold truncate">{p.name}</div>
                 <div className="text-muted-foreground">₺{p.price}</div>
               </button>
@@ -389,22 +359,41 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
             )}
           </div>
 
+          {/* Note field */}
+          <div className="border-t border-foreground/20 p-1.5">
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">Not</div>
+            <textarea
+              className="win-input w-full text-[10px]"
+              rows={2}
+              value={paymentNote}
+              onChange={e => setPaymentNote(e.target.value)}
+              placeholder="Sipariş notu..."
+            />
+          </div>
+
           {/* Total + actions */}
           <div className="border-t border-foreground/20 p-1.5">
             <div className="flex justify-between items-center mb-1.5">
               <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Toplam</span>
-              <span className="text-[15px] font-bold">₺{tableTotal.toLocaleString('tr')}</span>
+              <span className="text-[15px] font-bold">₺{(tableTotal + pendingTotal).toLocaleString('tr')}</span>
             </div>
 
-            <button className="win-btn win-btn-primary text-[11px] py-1.5 w-full mb-1"
-              disabled={allItems.length === 0}
-              onClick={() => setShowPayment(true)}>
-              💰 Ödeme Al — ₺{tableTotal.toLocaleString('tr')}
-            </button>
+            {pendingItems.length > 0 ? (
+              <button className="win-btn win-btn-primary text-[11px] py-1.5 w-full mb-1 bg-[#2ecc71] border-[#27ae60] text-white font-bold"
+                onClick={confirmPendingOrder}>
+                ✔ Siparişleri Kabul Et — ₺{pendingTotal.toLocaleString('tr')}
+              </button>
+            ) : (
+              <button className="win-btn win-btn-primary text-[11px] py-1.5 w-full mb-1"
+                disabled={allItems.length === 0}
+                onClick={() => setShowPayment(true)}>
+                💰 Ödeme Al — ₺{tableTotal.toLocaleString('tr')}
+              </button>
+            )}
             <button className="win-btn text-[10px] py-0.5 w-full text-destructive"
-              disabled={allItems.length === 0}
-              onClick={cancelOrders}>
-              ❌ İptal
+              disabled={allItems.length === 0 && pendingItems.length === 0}
+              onClick={pendingItems.length > 0 ? () => setPendingItems([]) : cancelOrders}>
+              {pendingItems.length > 0 ? '🗑 Sepeti Temizle' : '❌ İptal'}
             </button>
           </div>
         </div>
