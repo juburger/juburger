@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Order } from '@/data/menu';
 import ReceiptPrint from '@/components/ReceiptPrint';
 import AdminProducts from '@/components/AdminProducts';
+import AdminStaff from '@/components/AdminStaff';
 
 type TabType = 'orders' | 'stats' | 'products' | 'settings' | 'qr';
 type FilterType = 'all' | 'waiting' | 'preparing' | 'ready' | 'paid';
@@ -293,6 +294,9 @@ const AdminPanel = () => {
 
           <hr className="border-t border-dashed border-muted-foreground/40 my-2.5" />
           <p className="text-muted-foreground text-[11px]">Değişiklikler anında müşteri ekranına yansır.</p>
+
+          <hr className="border-t border-foreground my-2.5" />
+          <AdminStaff />
         </>
       )}
 
