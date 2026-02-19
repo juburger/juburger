@@ -25,18 +25,16 @@ const App = () => (
         <CartProvider>
           <Toast95Provider>
             <div className="flex justify-center min-h-screen">
-              <div className="w-full max-w-[480px]">
                 <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/menu" element={<MenuPage />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/success" element={<Success />} />
-                  <Route path="/admin-login" element={<AdminLogin />} />
+                  <Route path="/" element={<div className="max-w-[480px] mx-auto"><Index /></div>} />
+                  <Route path="/register" element={<div className="max-w-[480px] mx-auto"><Register /></div>} />
+                  <Route path="/menu" element={<div className="max-w-[480px] mx-auto"><MenuPage /></div>} />
+                  <Route path="/checkout" element={<div className="max-w-[480px] mx-auto"><Checkout /></div>} />
+                  <Route path="/success" element={<div className="max-w-[480px] mx-auto"><Success /></div>} />
+                  <Route path="/admin-login" element={<div className="max-w-[480px] mx-auto"><AdminLogin /></div>} />
                   <Route path="/admin" element={<Admin />} />
-                  <Route path="*" element={<NotFound />} />
+                  <Route path="*" element={<div className="max-w-[480px] mx-auto"><NotFound /></div>} />
                 </Routes>
-              </div>
             </div>
           </Toast95Provider>
         </CartProvider>
