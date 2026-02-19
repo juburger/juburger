@@ -7,8 +7,9 @@ import type { Order } from '@/data/menu';
 import ReceiptPrint from '@/components/ReceiptPrint';
 import AdminProducts from '@/components/AdminProducts';
 import AdminStaff from '@/components/AdminStaff';
+import AdminTables from '@/components/AdminTables';
 
-type TabType = 'orders' | 'stats' | 'products' | 'settings' | 'qr';
+type TabType = 'orders' | 'tables' | 'stats' | 'products' | 'settings' | 'qr';
 type FilterType = 'all' | 'waiting' | 'preparing' | 'ready' | 'paid';
 
 const AdminPanel = () => {
@@ -124,6 +125,7 @@ const AdminPanel = () => {
 
   const tabs: { id: TabType; label: string }[] = [
     { id: 'orders', label: `Siparişler ${waitingCount > 0 ? `(${waitingCount})` : ''}` },
+    { id: 'tables', label: 'Masalar' },
     { id: 'stats', label: 'İstatistik' },
     { id: 'products', label: 'Ürünler' },
     { id: 'settings', label: 'Ayarlar' },
@@ -222,6 +224,9 @@ const AdminPanel = () => {
           ))}
         </>
       )}
+
+      {/* TABLES TAB */}
+      {tab === 'tables' && <AdminTables />}
 
       {/* PRODUCTS TAB */}
       {tab === 'products' && <AdminProducts />}
