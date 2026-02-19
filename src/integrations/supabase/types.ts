@@ -80,6 +80,45 @@ export type Database = {
         }
         Relationships: []
       }
+      printers: {
+        Row: {
+          auto_print_categories: string[]
+          created_at: string
+          footer_text: string
+          header_text: string
+          id: string
+          ip_address: string
+          is_active: boolean
+          is_default: boolean
+          name: string
+          paper_size: string
+        }
+        Insert: {
+          auto_print_categories?: string[]
+          created_at?: string
+          footer_text?: string
+          header_text?: string
+          id?: string
+          ip_address?: string
+          is_active?: boolean
+          is_default?: boolean
+          name: string
+          paper_size?: string
+        }
+        Update: {
+          auto_print_categories?: string[]
+          created_at?: string
+          footer_text?: string
+          header_text?: string
+          id?: string
+          ip_address?: string
+          is_active?: boolean
+          is_default?: boolean
+          name?: string
+          paper_size?: string
+        }
+        Relationships: []
+      }
       product_options: {
         Row: {
           created_at: string
