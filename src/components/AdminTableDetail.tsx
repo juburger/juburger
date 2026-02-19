@@ -70,7 +70,37 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
     ? products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
     : selectedCat ? products.filter(p => p.category_id === selectedCat) : products;
 
-  // Add product to pending cart (not DB yet)
+  // Add product directly to table as order (instant confirm + print)
+  const addProductDirect = async (product: Product) => {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return;
+
+    const { data: newOrder, error } = await supabase.from('orders').insert({
+      user_id: userData.user.id,
+      user_name: userName || 'Admin',
+      table_num: tableNum,
+      items: [{ id: product.id, name: product.name, price: product.price, qty: 1 }],
+      total: product.price,
+      status: 'preparing',
+      payment_type: 'cash',
+    }).select().single();
+
+    if (error) { showToast('Ürün eklenemedi', false); return; }
+
+    await supabase.from('table_logs').insert({
+      table_num: tableNum,
+      user_name: 'Administrator',
+      action: 'Sipariş eklendi!',
+      details: `(${userName} - 1x ${product.name})`,
+    });
+
+    if (onPrintOrder && newOrder) {
+      onPrintOrder(newOrder as unknown as Order);
+    }
+    showToast(`${product.name} eklendi ✓`);
+  };
+
+  // Pending cart for batch add (optional)
   const addToPending = (product: Product) => {
     setPendingItems(prev => {
       const existing = prev.find(i => i.id === product.id);
@@ -115,7 +145,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
       table_num: tableNum,
       items: orderItems,
       total: pendingTotal,
-      status: 'waiting',
+      status: 'preparing',
       payment_type: 'cash',
     }).select().single();
 
@@ -275,7 +305,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
             {filteredProducts.map(p => (
               <button key={p.id}
                 className="border border-foreground/30 p-1.5 text-left text-[10px] hover:bg-muted/50 active:bg-muted cursor-pointer"
-                onClick={() => addToPending(p)}>
+                onClick={() => addProductDirect(p)}>
                 <div className="font-bold truncate">{p.name}</div>
                 <div className="text-muted-foreground">₺{p.price}</div>
               </button>
