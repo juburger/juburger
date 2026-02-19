@@ -186,13 +186,39 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
   const discountedTotal = tableTotal - (tableTotal * discount / 100);
 
   // All confirmed order items flattened
-  const allItems: { name: string; qty: number; price: number; orderId: string }[] = [];
+  const allItems: { name: string; qty: number; price: number; orderId: string; itemIndex: number }[] = [];
   orders.forEach(o => {
     const items = Array.isArray(o.items) ? o.items : [];
-    items.forEach((i: any) => {
-      allItems.push({ name: i.name, qty: i.qty, price: i.price * i.qty, orderId: o.id });
+    items.forEach((i: any, idx: number) => {
+      allItems.push({ name: i.name, qty: i.qty, price: i.price * i.qty, orderId: o.id, itemIndex: idx });
     });
   });
+
+  const cancelSingleItem = async (orderId: string, itemIndex: number, itemName: string, itemQty: number) => {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+    const items = Array.isArray(order.items) ? [...order.items] as any[] : [];
+    const removedItem = items[itemIndex];
+    const removedTotal = removedItem.price * removedItem.qty;
+    items.splice(itemIndex, 1);
+
+    if (items.length === 0) {
+      // No items left, cancel whole order
+      await supabase.from('orders').update({ status: 'paid', payment_status: 'cancelled' }).eq('id', orderId);
+    } else {
+      const newTotal = items.reduce((s: number, i: any) => s + i.price * i.qty, 0);
+      await supabase.from('orders').update({ items: items as any, total: newTotal }).eq('id', orderId);
+    }
+
+    await supabase.from('table_logs').insert({
+      table_num: tableNum,
+      user_name: 'Administrator',
+      action: 'Ürün iptal edildi',
+      details: `(${userName} - ${itemQty}x ${itemName} ₺${removedTotal})`,
+    });
+    showToast(`${itemName} iptal edildi`);
+    fetchData();
+  };
 
   const handlePayment = async (paymentType: string) => {
     for (const o of orders) {
@@ -521,7 +547,15 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
               allItems.map((item, idx) => (
                 <div key={idx} className="flex justify-between items-center py-1 border-b border-dashed border-muted text-[11px]">
                   <span>{item.qty}x {item.name}</span>
-                  <span className="text-muted-foreground">₺{item.price}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-muted-foreground">₺{item.price}</span>
+                    <button
+                      className="w-5 h-5 flex items-center justify-center text-[10px] font-bold bg-destructive text-white border-none cursor-pointer rounded-sm"
+                      title="Ürünü iptal et"
+                      onClick={() => cancelSingleItem(item.orderId, item.itemIndex, item.name, item.qty)}>
+                      ×
+                    </button>
+                  </div>
                 </div>
               ))
             )}
