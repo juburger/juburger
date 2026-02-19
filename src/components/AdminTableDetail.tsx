@@ -603,7 +603,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
   }
 
   return (
-    <div className="flex flex-col h-full" style={{ minHeight: '70vh' }}>
+    <div className="flex flex-col h-full w-full max-w-full overflow-hidden" style={{ minHeight: '70vh' }}>
       {/* Header */}
       <div className="bg-primary text-primary-foreground px-2.5 py-1.5 flex justify-between items-center">
         <span className="text-[12px] font-bold">Masa {tableNum} — {userName}</span>
@@ -612,7 +612,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
 
       <div className="flex flex-1 overflow-hidden">
         {/* LEFT: Product categories + products */}
-        <div className="flex-1 border-r border-foreground/20 overflow-y-auto p-1.5">
+        <div className="flex-1 min-w-0 border-r border-foreground/20 overflow-y-auto p-1.5">
           <input
             type="text"
             className="win-input w-full text-[11px] mb-1.5"
@@ -763,7 +763,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
           </div>
 
           {/* Total + actions */}
-          <div className="border-t border-foreground/20 p-1.5">
+          <div className="border-t border-foreground/20 p-1.5 overflow-hidden">
             <div className="flex justify-between items-center mb-1.5">
               <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Toplam</span>
               <span className="text-[15px] font-bold">₺{(tableTotal + pendingTotal).toLocaleString('tr')}</span>
