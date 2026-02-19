@@ -29,6 +29,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedCat, setSelectedCat] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [showPayment, setShowPayment] = useState(false);
   const [paymentNote, setPaymentNote] = useState('');
   const [discount, setDiscount] = useState(0);
@@ -52,7 +53,9 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose }) => {
     return () => { supabase.removeChannel(ch); };
   }, [tableNum]);
 
-  const filteredProducts = selectedCat ? products.filter(p => p.category_id === selectedCat) : products;
+  const filteredProducts = searchQuery.trim()
+    ? products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : selectedCat ? products.filter(p => p.category_id === selectedCat) : products;
 
   // Add product as a new order item to the table
   const addProductToTable = async (product: Product) => {
@@ -201,16 +204,27 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose }) => {
       <div className="flex flex-1 overflow-hidden">
         {/* LEFT: Product categories + products */}
         <div className="flex-1 border-r border-foreground/20 overflow-y-auto p-1.5">
+          {/* Search bar */}
+          <input
+            type="text"
+            className="win-input w-full text-[11px] mb-1.5"
+            placeholder="🔍 Ürün ara..."
+            value={searchQuery}
+            onChange={e => { setSearchQuery(e.target.value); if (e.target.value) setSelectedCat(null); }}
+          />
+
           {/* Category tabs */}
-          <div className="flex gap-1 flex-wrap mb-1.5">
-            {categories.map(c => (
-              <button key={c.id}
-                className={`font-mono text-[9px] px-1.5 py-0.5 cursor-pointer border ${selectedCat === c.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground border-border'}`}
-                onClick={() => setSelectedCat(c.id)}>
-                {c.name}
-              </button>
-            ))}
-          </div>
+          {!searchQuery && (
+            <div className="flex gap-1 flex-wrap mb-1.5">
+              {categories.map(c => (
+                <button key={c.id}
+                  className={`font-mono text-[9px] px-1.5 py-0.5 cursor-pointer border ${selectedCat === c.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground border-border'}`}
+                  onClick={() => setSelectedCat(c.id)}>
+                  {c.name}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Products grid */}
           <div className="grid grid-cols-2 gap-1">
