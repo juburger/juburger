@@ -646,7 +646,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
         </div>
 
         {/* RIGHT: Pending cart + confirmed orders + actions */}
-        <div className="w-[45%] flex flex-col">
+        <div className="w-[45%] min-w-0 flex flex-col overflow-hidden">
           {/* Pending cart section */}
           {pendingItems.length > 0 && (
             <div className="border-b-2 border-primary/30 bg-primary/5">
