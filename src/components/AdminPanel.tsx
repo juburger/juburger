@@ -9,8 +9,9 @@ import AdminProducts from '@/components/AdminProducts';
 import AdminStaff from '@/components/AdminStaff';
 import AdminTables from '@/components/AdminTables';
 import AdminTableManagement from '@/components/AdminTableManagement';
+import AdminLogs from '@/components/AdminLogs';
 
-type TabType = 'orders' | 'tables' | 'stats' | 'products' | 'settings' | 'qr';
+type TabType = 'orders' | 'tables' | 'stats' | 'products' | 'settings' | 'qr' | 'logs';
 type FilterType = 'all' | 'waiting' | 'preparing' | 'ready' | 'paid';
 
 const AdminPanel = () => {
@@ -131,6 +132,7 @@ const AdminPanel = () => {
     { id: 'products', label: 'Ürünler' },
     { id: 'settings', label: 'Ayarlar' },
     { id: 'qr', label: 'QR Kodlar' },
+    { id: 'logs', label: 'Logs' },
   ];
 
   const filters: { id: FilterType; label: string }[] = [
@@ -309,6 +311,9 @@ const AdminPanel = () => {
           <AdminStaff />
         </>
       )}
+
+      {/* LOGS TAB */}
+      {tab === 'logs' && <AdminLogs />}
 
       {/* QR TAB */}
       {tab === 'qr' && (
