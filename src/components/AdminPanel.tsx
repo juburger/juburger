@@ -12,6 +12,7 @@ import AdminTableManagement from '@/components/AdminTableManagement';
 import AdminLogs from '@/components/AdminLogs';
 import AdminReports from '@/components/AdminReports';
 import AdminQuickOrder from '@/components/AdminQuickOrder';
+import AdminPrinters from '@/components/AdminPrinters';
 
 type TabType = 'orders' | 'tables' | 'quick' | 'stats' | 'reports' | 'products' | 'settings' | 'qr' | 'logs';
 type FilterType = 'all' | 'waiting' | 'preparing' | 'ready' | 'paid';
@@ -34,12 +35,19 @@ const AdminPanel = () => {
   const settingsRef = useRef(settings);
   useEffect(() => { settingsRef.current = settings; }, [settings]);
 
+  const printIframeRef = useRef<HTMLIFrameElement>(null);
+
   const triggerPrint = useCallback((order: Order) => {
     setPrintOrder(order);
     setTimeout(() => {
-      window.print();
+      // Try to print via hidden iframe for silent printing
+      if (printIframeRef.current?.contentWindow) {
+        printIframeRef.current.contentWindow.print();
+      } else {
+        window.print();
+      }
       showToast(`Fiş yazdırıldı: #${order.id.substring(0, 6).toUpperCase()}`);
-    }, 300);
+    }, 400);
   }, [showToast]);
 
   // Load orders realtime
@@ -279,28 +287,9 @@ const AdminPanel = () => {
           ))}
 
           <hr className="border-t border-foreground my-2.5" />
-          <h2 className="text-[13px] font-bold mb-2">🖨️ Yazıcı Ayarları</h2>
-          
-          <div className="mb-2.5">
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">Yazıcı Adı</div>
-            <input className="win-input" type="text" value={settings.printer_name}
-              onChange={e => saveSettings('printer_name', e.target.value)}
-              placeholder="ör: bar, mutfak" />
-          </div>
+          <AdminPrinters />
 
-          <div className="mb-2.5">
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">Kağıt Boyutu</div>
-            <div className="flex gap-1.5">
-              {['58', '80'].map(size => (
-                <button key={size}
-                  className={`font-mono text-[11px] px-3 py-1 cursor-pointer border-2 ${settings.paper_size === size ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground win-raised'}`}
-                  onClick={() => saveSettings('paper_size', size)}>
-                  {size}mm
-                </button>
-              ))}
-            </div>
-          </div>
-
+          <hr className="border-t border-foreground my-2.5" />
           <div className="flex items-center justify-between py-1.5 border-b border-dashed border-muted gap-2.5">
             <div className="flex-1">
               <div className="text-[13px]">🖨️ Otomatik Yazdırma</div>
