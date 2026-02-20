@@ -148,7 +148,7 @@ const AdminQuickOrder: React.FC<Props> = ({ onPrintOrder }) => {
       amount: total,
     });
 
-    if (onPrintOrder && newOrder) {
+    if (onPrintOrder && newOrder && localStorage.getItem('ju_print_server') === '1') {
       onPrintOrder(newOrder as unknown as Order);
     }
 

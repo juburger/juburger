@@ -189,8 +189,8 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
       details: `(${userName} - ${itemSummary})`,
     });
 
-    // Trigger print
-    if (onPrintOrder && newOrder) {
+    // Trigger print only on designated print server
+    if (onPrintOrder && newOrder && localStorage.getItem('ju_print_server') === '1') {
       onPrintOrder(newOrder as unknown as Order);
     }
 
@@ -286,7 +286,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
         table_num: tableNum, user_name: 'Administrator', action: 'Ürün eklendi',
         details: `(${userName} - +${diff}x ${editItem.name})`,
       });
-      if (onPrintOrder && userData?.user) {
+      if (onPrintOrder && userData?.user && localStorage.getItem('ju_print_server') === '1') {
         const fakeOrder = {
           id: crypto.randomUUID(), user_id: userData.user.id, user_name: userName, table_num: tableNum,
           items: [{ id: '', name: editItem.name, price: editItem.price, qty: diff, note: editNote, options: editItem.options || [] }],
@@ -302,7 +302,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
         table_num: tableNum, user_name: 'Administrator', action: 'Ürün azaltıldı',
         details: `(${userName} - -${cancelledCount}x ${editItem.name})`,
       });
-      if (onPrintOrder && userData?.user) {
+      if (onPrintOrder && userData?.user && localStorage.getItem('ju_print_server') === '1') {
         const fakeOrder = {
           id: crypto.randomUUID(), user_id: userData.user.id, user_name: userName, table_num: tableNum,
           items: [{ id: '', name: `İPTAL: ${editItem.name}`, price: editItem.price, qty: cancelledCount, note: '', options: [] }],
