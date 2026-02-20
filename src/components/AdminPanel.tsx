@@ -15,6 +15,7 @@ import AdminQuickOrder from '@/components/AdminQuickOrder';
 import AdminPrinters from '@/components/AdminPrinters';
 import AdminTableTransfer from '@/components/AdminTableTransfer';
 import AdminAccounts from '@/components/AdminAccounts';
+import AdminQRCodes from '@/components/AdminQRCodes';
 
 type TabType = 'orders' | 'tables' | 'transfer' | 'accounts' | 'quick' | 'stats' | 'reports' | 'products' | 'settings' | 'qr' | 'logs';
 type FilterType = 'all' | 'waiting' | 'preparing' | 'ready' | 'paid';
@@ -326,21 +327,7 @@ const AdminPanel = () => {
       {tab === 'logs' && <AdminLogs />}
 
       {/* QR TAB */}
-      {tab === 'qr' && (
-        <>
-          <p className="text-muted-foreground text-[11px] mb-2.5">Her masa için QR kod oluşturun. Müşteriler okutunca doğrudan o masaya yönlenir.</p>
-          <div className="grid grid-cols-2 gap-2">
-            {Array.from({ length: 10 }, (_, i) => i + 1).map(n => (
-              <div key={n} className="border border-foreground p-2 text-center">
-                <div className="w-[60px] h-[60px] mx-auto mb-1.5" style={{ background: 'repeating-conic-gradient(#000 0% 25%, #fff 0% 50%) 0/8px 8px' }} />
-                <div className="text-xs font-bold mb-1.5">Masa {n}</div>
-                <button className="win-btn text-[10px] py-0.5 px-2 w-full"
-                  onClick={() => showToast('QR indirildi!')}>İndir</button>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+      {tab === 'qr' && <AdminQRCodes />}
 
       {/* Hidden receipt for printing */}
       {printOrder && (
