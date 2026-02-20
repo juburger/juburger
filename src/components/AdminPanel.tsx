@@ -40,6 +40,14 @@ const AdminPanel = () => {
 
   const printIframeRef = useRef<HTMLIFrameElement>(null);
 
+  const [isPrintServer, setIsPrintServer] = useState(() => localStorage.getItem('ju_print_server') === '1');
+
+  const togglePrintServer = (val: boolean) => {
+    setIsPrintServer(val);
+    localStorage.setItem('ju_print_server', val ? '1' : '0');
+    showToast(val ? 'Bu cihaz yazıcı bilgisayar olarak ayarlandı ✓' : 'Yazıcı bilgisayar devre dışı');
+  };
+
   const triggerPrint = useCallback((order: Order) => {
     setPrintOrder(order);
     setTimeout(() => {
@@ -76,7 +84,6 @@ const AdminPanel = () => {
       const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(50);
       if (data) {
         const typedData = data as unknown as Order[];
-        // Track known order IDs on initial load
         if (!initialLoadDone.current) {
           typedData.forEach(o => knownOrderIds.current.add(o.id));
           initialLoadDone.current = true;
@@ -91,8 +98,8 @@ const AdminPanel = () => {
         const newOrder = payload.new as unknown as Order;
         if (!knownOrderIds.current.has(newOrder.id)) {
           knownOrderIds.current.add(newOrder.id);
-          // Only auto-print if enabled in settings
-          if (settingsRef.current.auto_print_enabled) {
+          // Only auto-print if this device is the print server AND auto-print is enabled
+          if (settingsRef.current.auto_print_enabled && localStorage.getItem('ju_print_server') === '1') {
             triggerPrint(newOrder);
           }
         }
@@ -328,8 +335,18 @@ const AdminPanel = () => {
               checked={settings.auto_print_enabled} onChange={e => saveSettings('auto_print_enabled', e.target.checked)} />
           </div>
 
+          <div className="flex items-center justify-between py-1.5 border-b border-dashed border-muted gap-2.5">
+            <div className="flex-1">
+              <div className="text-[13px]">🖥️ Yazıcı Bilgisayar (Bu Cihaz)</div>
+              <div className="text-[11px] text-muted-foreground">Sadece bu cihazda otomatik yazdırma yapılır. Diğer cihazlarda yazdırma tetiklenmez.</div>
+            </div>
+            <input type="checkbox" className="w-4 h-4 flex-shrink-0 cursor-pointer"
+              checked={isPrintServer} onChange={e => togglePrintServer(e.target.checked)} />
+          </div>
+
           <hr className="border-t border-dashed border-muted-foreground/40 my-2.5" />
           <p className="text-muted-foreground text-[11px]">Değişiklikler anında müşteri ekranına yansır.</p>
+
 
           <hr className="border-t border-foreground my-2.5" />
           <h2 className="text-[13px] font-bold mb-2">🪑 Masa Yönetimi</h2>
