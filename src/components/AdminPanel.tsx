@@ -58,11 +58,11 @@ const AdminPanel = () => {
           doc.open();
           doc.write(`
             <html><head><style>
-              body { margin: 0; padding: 4mm; font-family: 'Courier New', monospace; font-size: 12px; }
+              body { margin: 0; padding: 4mm; font-family: 'Courier New', monospace; font-size: 14px; font-weight: 600; -webkit-print-color-adjust: exact; }
               .line { display: flex; justify-content: space-between; }
-              .bold { font-weight: bold; }
+              .bold { font-weight: 900; }
               .center { text-align: center; }
-              .sep { font-size: 11px; }
+              .sep { font-size: 13px; font-weight: 700; }
             </style></head><body>${printRef.current.innerHTML}</body></html>
           `);
           doc.close();
