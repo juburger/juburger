@@ -19,9 +19,12 @@ const SplashScreen = () => {
       ]}
       statusItems={['Hazır']}
     >
-      <div className="flex flex-col items-center justify-center py-8">
+      <div className="flex flex-col items-center justify-center py-8 gap-3">
         <button className="neu-btn text-sm font-medium" onClick={() => navigate(`/register?table=${tableNum}`)}>
           Sipariş Ver
+        </button>
+        <button className="neu-btn text-[11px]" onClick={() => navigate(`/member-signup?table=${tableNum}`)}>
+          ⭐ Üye Ol
         </button>
       </div>
       <div className="h-px bg-border my-3" />
