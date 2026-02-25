@@ -42,7 +42,7 @@ const RegisterScreen = () => {
       icon="📝"
       title="Kayıt — BurgerQR"
       controls={[
-        { label: '←', onClick: () => navigate('/') },
+        { label: '‹', onClick: () => navigate('/') },
         { label: '✕', onClick: () => navigate('/') },
       ]}
     >
