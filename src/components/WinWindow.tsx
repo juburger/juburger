@@ -4,7 +4,7 @@ interface WinWindowProps {
   icon: string;
   title: string;
   menuItems?: { label: string; onClick: () => void }[];
-  controls?: { label: string; onClick: () => void }[];
+  controls?: { label: ReactNode; onClick: () => void }[];
   statusItems?: string[];
   children: ReactNode;
   bodyClass?: string;
