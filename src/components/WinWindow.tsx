@@ -12,25 +12,26 @@ interface WinWindowProps {
 
 const WinWindow = ({ icon, title, menuItems, controls, statusItems, children, bodyClass }: WinWindowProps) => {
   return (
-    <div className="min-h-screen p-3 bg-background overflow-x-hidden">
-      <div className="neu-raised max-w-full overflow-hidden">
+    <div className="min-h-screen p-4 bg-background overflow-x-hidden">
+      <div className="neu-raised max-w-full overflow-hidden p-1">
         {/* Title bar */}
-        <div className="bg-primary text-primary-foreground px-4 py-2.5 flex items-center justify-between text-sm font-semibold select-none rounded-t-[var(--radius)]">
-          <div className="flex items-center gap-2">
+        <div className="bg-primary text-primary-foreground px-5 py-3 flex items-center justify-between text-sm font-semibold select-none" style={{ borderRadius: 'calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0 0' }}>
+          <div className="flex items-center gap-2.5">
             <span className="text-lg">{icon}</span>
-            <span>{title}</span>
+            <span className="tracking-wide">{title}</span>
           </div>
-          <div className="flex gap-1.5">
+          <div className="flex gap-2">
             {controls?.map((c, i) => (
               <button key={i} onClick={c.onClick}
-                className="w-7 h-7 rounded-full bg-primary-foreground/15 text-primary-foreground text-xs flex items-center justify-center cursor-pointer hover:bg-primary-foreground/25 transition-colors">
+                className="w-8 h-8 rounded-full text-primary-foreground text-xs flex items-center justify-center cursor-pointer transition-all"
+                style={{ boxShadow: 'inset 2px 2px 4px hsl(350 65% 28%), inset -2px -2px 4px hsl(350 65% 48%)', background: 'hsl(350 65% 38%)' }}>
                 {c.label}
               </button>
             )) || (
               <>
-                <span className="w-3 h-3 rounded-full bg-primary-foreground/20" />
-                <span className="w-3 h-3 rounded-full bg-primary-foreground/20" />
-                <span className="w-3 h-3 rounded-full bg-primary-foreground/20" />
+                <span className="w-3.5 h-3.5 rounded-full bg-primary-foreground/15" />
+                <span className="w-3.5 h-3.5 rounded-full bg-primary-foreground/15" />
+                <span className="w-3.5 h-3.5 rounded-full bg-primary-foreground/15" />
               </>
             )}
           </div>
@@ -38,10 +39,10 @@ const WinWindow = ({ icon, title, menuItems, controls, statusItems, children, bo
 
         {/* Menu bar */}
         {menuItems && menuItems.length > 0 && (
-          <div className="bg-card px-2 py-1.5 flex gap-0.5 border-b border-border/50">
+          <div className="bg-card px-3 py-2 flex gap-1">
             {menuItems.map((m, i) => (
               <button key={i} onClick={m.onClick}
-                className="px-3 py-1 text-xs cursor-pointer text-card-foreground font-medium bg-transparent border-none rounded-lg hover:bg-accent transition-colors">
+                className="px-4 py-1.5 text-xs cursor-pointer text-card-foreground font-medium bg-transparent border-none rounded-full hover:bg-accent transition-colors">
                 {m.label}
               </button>
             ))}
@@ -49,15 +50,15 @@ const WinWindow = ({ icon, title, menuItems, controls, statusItems, children, bo
         )}
 
         {/* Body */}
-        <div className={`bg-background m-2 p-4 text-sm leading-relaxed overflow-x-hidden overflow-y-auto min-h-[calc(100vh-100px)] rounded-xl neu-sunken ${bodyClass || ''}`}>
+        <div className={`bg-card p-5 text-sm leading-relaxed overflow-x-hidden overflow-y-auto min-h-[calc(100vh-120px)] ${bodyClass || ''}`} style={{ borderRadius: '0 0 calc(var(--radius) - 4px) calc(var(--radius) - 4px)' }}>
           {children}
         </div>
 
         {/* Status bar */}
         {statusItems && (
-          <div className="px-4 py-1.5 text-xs text-muted-foreground flex gap-3">
+          <div className="px-5 py-2 text-xs text-muted-foreground flex gap-3">
             {statusItems.map((s, i) => (
-              <span key={i} className="bg-muted/50 px-2.5 py-0.5 rounded-full text-[11px]">{s}</span>
+              <span key={i} className="px-3 py-1 rounded-full text-[11px] neu-sunken">{s}</span>
             ))}
           </div>
         )}
