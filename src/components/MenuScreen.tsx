@@ -83,11 +83,11 @@ const MenuScreen = () => {
           <>
             {/* Category bar */}
             <div className="flex gap-1.5 mb-3 flex-wrap">
-              <button className={`text-xs px-3 py-1.5 cursor-pointer rounded-full transition-all ${activeCat === 'all' ? 'neu-btn-primary' : 'neu-btn'}`}
+              <button className={`text-xs px-3 py-1.5 cursor-pointer rounded-full transition-all ${activeCat === 'all' ? 'neu-sunken' : 'neu-flat'}`}
                 onClick={() => setActiveCat('all')}>Tümü</button>
               {categories.map(c => (
                 <button key={c.id}
-                  className={`text-xs px-3 py-1.5 cursor-pointer rounded-full transition-all ${activeCat === c.id ? 'neu-btn-primary' : 'neu-btn'}`}
+                  className={`text-xs px-3 py-1.5 cursor-pointer rounded-full transition-all ${activeCat === c.id ? 'neu-sunken' : 'neu-flat'}`}
                   onClick={() => setActiveCat(c.id)}>{c.name}</button>
               ))}
             </div>
@@ -107,17 +107,16 @@ const MenuScreen = () => {
                       <div className="flex-1">
                         <div className="text-sm font-semibold">
                           {p.name}
-                          {p.tag === 'n' && <span className="text-[9px] px-1.5 py-0.5 ml-1.5 rounded-full bg-primary/10 text-primary font-medium">YENİ</span>}
-                          {p.tag === 's' && <span className="text-[9px] px-1.5 py-0.5 ml-1.5 rounded-full bg-destructive/10 text-destructive font-medium">Acılı</span>}
-                          {p.tag === 'p' && <span className="text-[9px] px-1.5 py-0.5 ml-1.5 rounded-full bg-accent text-accent-foreground font-medium">POPÜLER</span>}
+                          {p.tag === 'n' && <span className="text-[9px] px-1.5 py-0.5 ml-1.5 rounded-full neu-sunken text-foreground font-medium">YENİ</span>}
+                          {p.tag === 's' && <span className="text-[9px] px-1.5 py-0.5 ml-1.5 rounded-full neu-sunken text-foreground font-medium">Acılı</span>}
+                          {p.tag === 'p' && <span className="text-[9px] px-1.5 py-0.5 ml-1.5 rounded-full neu-sunken text-foreground font-medium">POPÜLER</span>}
                         </div>
                         <div className="text-xs text-muted-foreground mt-0.5 leading-snug">{p.description}</div>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0 pt-0.5">
                         <span className="text-sm font-bold min-w-[46px] text-right">₺{p.price}</span>
                         {qty === 0 ? (
-                          <button className="neu-btn-primary w-8 h-8 text-sm cursor-pointer flex items-center justify-center font-bold flex-shrink-0 rounded-full"
-                            style={{ boxShadow: '3px 3px 6px hsl(var(--neu-dark)), -3px -3px 6px hsl(var(--neu-light))' }}
+                          <button className="neu-btn w-8 h-8 text-sm cursor-pointer flex items-center justify-center font-bold flex-shrink-0 rounded-full"
                             onClick={() => { addItem(item); showToast(item.name + ' eklendi'); }}>+</button>
                         ) : (
                           <div className="flex items-center gap-1">
@@ -139,11 +138,10 @@ const MenuScreen = () => {
       </WinWindow>
 
       {/* Sticky cart bar */}
-      <div className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-primary text-primary-foreground px-4 py-2.5 text-sm cursor-pointer z-[99] flex justify-between items-center rounded-t-2xl transition-transform ${count > 0 ? 'translate-y-0' : 'translate-y-full'}`}
-        style={{ boxShadow: '0 -4px 12px hsl(var(--neu-dark))' }}
+      <div className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] neu-raised text-foreground px-4 py-2.5 text-sm cursor-pointer z-[99] flex justify-between items-center rounded-t-2xl transition-transform ${count > 0 ? 'translate-y-0' : 'translate-y-full'}`}
         onClick={() => setDrawerOpen(true)}>
         <div>
-          <span className="bg-primary-foreground text-primary px-2 py-0.5 rounded-full font-bold mr-2 text-xs">{count}</span>
+          <span className="neu-sunken text-foreground px-2 py-0.5 rounded-full font-bold mr-2 text-xs">{count}</span>
           ürün sepette
         </div>
         <div><strong>₺{total}</strong> → Sepeti Gör</div>
