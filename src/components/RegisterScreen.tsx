@@ -68,8 +68,8 @@ const RegisterScreen = () => {
       
       <div className="h-px bg-border/40 my-3" />
       <div className="flex gap-2 mt-3 flex-wrap">
-        <button className="neu-btn neu-btn-primary" onClick={handleRegister} disabled={loading}>
-          {loading ? 'Giriş yapılıyor...' : 'Menüye Geç →'}
+        <button className="neu-btn" onClick={handleRegister} disabled={loading}>
+          {loading ? 'Giriş yapılıyor...' : 'MENU'}
         </button>
         <button className="neu-btn" onClick={() => navigate('/')}>İptal</button>
       </div>
