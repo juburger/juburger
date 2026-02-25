@@ -21,25 +21,25 @@ const SplashScreen = () => {
       statusItems={['Hazır']}
     >
       <p className="text-muted-foreground text-xs">Masa Sipariş Sistemi v1.0</p>
-      <hr className="border-t border-foreground my-2.5" />
-      <p className="text-[13px] mb-1">QR kodu okutarak masanıza özel<br/>sipariş verebilirsiniz.</p>
-      <hr className="border-t border-dashed border-muted-foreground/40 my-2.5" />
+      <div className="h-px bg-border my-3" />
+      <p className="text-sm mb-1">QR kodu okutarak masanıza özel<br/>sipariş verebilirsiniz.</p>
+      <div className="h-px bg-border/40 my-3" />
       <p className="text-muted-foreground text-xs">Masa: <strong className="text-foreground">#{tableNum}</strong></p>
-      <hr className="border-t border-dashed border-muted-foreground/40 my-2.5" />
-      <div className="flex gap-1.5 mt-2 flex-wrap">
-        <button className="win-btn win-btn-primary" onClick={() => navigate(`/register?table=${tableNum}`)}>
+      <div className="h-px bg-border/40 my-3" />
+      <div className="flex gap-2 mt-3 flex-wrap">
+        <button className="neu-btn neu-btn-primary" onClick={() => navigate(`/register?table=${tableNum}`)}>
           Sipariş Ver
         </button>
       </div>
-      <hr className="border-t border-dashed border-muted-foreground/40 my-2.5" />
-      <p className="text-muted-foreground text-[11px]">
+      <div className="h-px bg-border/40 my-3" />
+      <p className="text-muted-foreground text-xs">
         Garson çağırmak için:<br/>
-        <button className="bg-transparent border-none font-mono text-xs text-[#0000cc] cursor-pointer underline p-0"
+        <button className="bg-transparent border-none text-sm text-primary cursor-pointer underline p-0 mt-1"
           onClick={() => showToast('Garson çağrıldı 🔔')}>
           → Garson Çağır
         </button>
       </p>
-      <hr className="border-t border-foreground my-2.5" />
+      <div className="h-px bg-border my-3" />
       <p className="text-muted-foreground text-[11px]">© 2025 BurgerQR</p>
     </WinWindow>
   );

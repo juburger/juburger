@@ -24,49 +24,50 @@ const CartDrawer = ({ open, onClose, tableNum, userName }: CartDrawerProps) => {
   return (
     <>
       {/* Overlay */}
-      <div className={`fixed inset-0 bg-foreground/45 z-[100] ${open ? 'block' : 'hidden'}`} onClick={onClose} />
+      <div className={`fixed inset-0 bg-foreground/30 backdrop-blur-sm z-[100] ${open ? 'block' : 'hidden'}`} onClick={onClose} />
       
       {/* Drawer */}
-      <div className={`fixed bottom-0 left-1/2 w-full max-w-[480px] bg-card border-t-2 border-l-2 border-r-2 z-[101] transition-transform duration-300 max-h-[88vh] overflow-y-auto ${open ? '-translate-x-1/2 translate-y-0' : '-translate-x-1/2 translate-y-full'}`}
-        style={{ borderColor: 'hsl(0 0% 100%) hsl(0 0% 50%) hsl(0 0% 50%) hsl(0 0% 100%)', boxShadow: '-2px -2px 0 hsl(0 0% 0%)' }}>
-        <div className="bg-primary text-primary-foreground px-2 py-0.5 text-xs font-bold flex justify-between items-center">
-          <span>🛒 Sepetim</span>
-          <button className="win-btn w-4 h-3.5 text-[9px] p-0 flex items-center justify-center bg-card text-card-foreground" onClick={onClose}>×</button>
-        </div>
-        <div className="bg-popover m-1 p-3 win-sunken">
-          {!cart.length ? (
-            <p className="text-muted-foreground text-center py-2.5 text-xs">Sepetiniz boş.</p>
-          ) : (
-            <>
-              {cart.map(item => (
-                <div key={item.id} className="flex items-center justify-between py-1 border-b border-dashed border-muted text-[13px] gap-2">
-                  <span className="flex-1">{item.name} × {item.qty}</span>
-                  <div className="flex items-center gap-1.5">
-                    <div className="flex items-center gap-0.5">
-                      <button className="win-btn w-[18px] h-[18px] text-xs p-0 flex items-center justify-center"
-                        onClick={() => removeItem(item.id)}>−</button>
-                      <button className="win-btn w-[18px] h-[18px] text-xs p-0 flex items-center justify-center"
-                        onClick={() => addItem(item)}>+</button>
+      <div className={`fixed bottom-0 left-1/2 w-full max-w-[480px] z-[101] transition-transform duration-300 max-h-[88vh] overflow-y-auto ${open ? '-translate-x-1/2 translate-y-0' : '-translate-x-1/2 translate-y-full'}`}>
+        <div className="neu-raised m-2 overflow-hidden">
+          <div className="bg-primary text-primary-foreground px-4 py-2.5 text-sm font-semibold flex justify-between items-center rounded-t-[var(--radius)]">
+            <span>🛒 Sepetim</span>
+            <button className="w-7 h-7 rounded-full bg-primary-foreground/15 text-xs flex items-center justify-center cursor-pointer hover:bg-primary-foreground/25 transition-colors" onClick={onClose}>×</button>
+          </div>
+          <div className="p-4">
+            {!cart.length ? (
+              <p className="text-muted-foreground text-center py-4 text-sm">Sepetiniz boş.</p>
+            ) : (
+              <>
+                {cart.map(item => (
+                  <div key={item.id} className="flex items-center justify-between py-2 border-b border-border/50 text-sm gap-2">
+                    <span className="flex-1">{item.name} × {item.qty}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
+                        <button className="neu-btn w-7 h-7 text-xs p-0 flex items-center justify-center rounded-full"
+                          onClick={() => removeItem(item.id)}>−</button>
+                        <button className="neu-btn w-7 h-7 text-xs p-0 flex items-center justify-center rounded-full"
+                          onClick={() => addItem(item)}>+</button>
+                      </div>
+                      <span className="text-xs text-muted-foreground min-w-[50px] text-right">₺{item.price * item.qty}</span>
                     </div>
-                    <span className="text-xs text-muted-foreground min-w-[50px] text-right">₺{item.price * item.qty}</span>
                   </div>
+                ))}
+                <div className="h-px bg-border/40 my-3" />
+                <div className="flex items-center justify-between py-1 text-sm">
+                  <span>Ara toplam</span><span>₺{total}</span>
                 </div>
-              ))}
-              <hr className="border-t border-dashed border-muted-foreground/40 my-2.5" />
-              <div className="flex items-center justify-between py-1 text-[13px]">
-                <span>Ara toplam</span><span>₺{total}</span>
-              </div>
-              <div className="flex items-center justify-between py-1 text-[13px]">
-                <span>Servis (%5)</span><span>₺{svc}</span>
-              </div>
-              <div className="flex items-center justify-between py-1 text-[13px] font-bold border-t border-foreground pt-1 mt-0.5">
-                <span>TOPLAM</span><span>₺{total + svc}</span>
-              </div>
-            </>
-          )}
-          <div className="flex gap-1.5 mt-2">
-            <button className="win-btn win-btn-primary" onClick={goCheckout}>Ödemeye Geç →</button>
-            <button className="win-btn win-btn-danger" onClick={() => { clearCart(); onClose(); }}>Temizle</button>
+                <div className="flex items-center justify-between py-1 text-sm">
+                  <span>Servis (%5)</span><span>₺{svc}</span>
+                </div>
+                <div className="flex items-center justify-between py-1 text-sm font-bold border-t border-border pt-2 mt-1">
+                  <span>TOPLAM</span><span>₺{total + svc}</span>
+                </div>
+              </>
+            )}
+            <div className="flex gap-2 mt-3">
+              <button className="neu-btn neu-btn-primary" onClick={goCheckout}>Ödemeye Geç →</button>
+              <button className="neu-btn neu-btn-danger" onClick={() => { clearCart(); onClose(); }}>Temizle</button>
+            </div>
           </div>
         </div>
       </div>
