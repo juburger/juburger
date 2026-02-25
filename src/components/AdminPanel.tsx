@@ -99,7 +99,7 @@ const AdminPanel = () => {
         if (!knownOrderIds.current.has(newOrder.id)) {
           knownOrderIds.current.add(newOrder.id);
           // Only auto-print if this device is the print server AND auto-print is enabled
-          if (settingsRef.current.auto_print_enabled && localStorage.getItem('ju_print_server') === '1') {
+          if (localStorage.getItem('ju_print_server') === '1') {
             triggerPrint(newOrder);
           }
         }
