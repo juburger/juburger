@@ -12,25 +12,25 @@ interface WinWindowProps {
 
 const WinWindow = ({ icon, title, menuItems, controls, statusItems, children, bodyClass }: WinWindowProps) => {
   return (
-    <div className="min-h-screen p-1.5 bg-background overflow-x-hidden">
-      <div className="bg-card win-raised max-w-full overflow-hidden">
+    <div className="min-h-screen p-3 bg-background overflow-x-hidden">
+      <div className="neu-raised max-w-full overflow-hidden">
         {/* Title bar */}
-        <div className="bg-primary text-primary-foreground px-1.5 py-0.5 flex items-center justify-between text-xs font-bold select-none tracking-wide">
-          <div className="flex items-center gap-1.5">
-            <span>{icon}</span>
+        <div className="bg-primary text-primary-foreground px-4 py-2.5 flex items-center justify-between text-sm font-semibold select-none rounded-t-[var(--radius)]">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">{icon}</span>
             <span>{title}</span>
           </div>
-          <div className="flex gap-0.5">
+          <div className="flex gap-1.5">
             {controls?.map((c, i) => (
               <button key={i} onClick={c.onClick}
-                className="w-4 h-3.5 win-raised bg-card text-[9px] flex items-center justify-center cursor-pointer text-card-foreground font-mono font-bold leading-none">
+                className="w-7 h-7 rounded-full bg-primary-foreground/15 text-primary-foreground text-xs flex items-center justify-center cursor-pointer hover:bg-primary-foreground/25 transition-colors">
                 {c.label}
               </button>
             )) || (
               <>
-                <span className="w-4 h-3.5 win-raised bg-card text-[9px] flex items-center justify-center text-card-foreground font-bold">_</span>
-                <span className="w-4 h-3.5 win-raised bg-card text-[9px] flex items-center justify-center text-card-foreground font-bold">□</span>
-                <span className="w-4 h-3.5 win-raised bg-card text-[9px] flex items-center justify-center text-card-foreground font-bold">×</span>
+                <span className="w-3 h-3 rounded-full bg-primary-foreground/20" />
+                <span className="w-3 h-3 rounded-full bg-primary-foreground/20" />
+                <span className="w-3 h-3 rounded-full bg-primary-foreground/20" />
               </>
             )}
           </div>
@@ -38,10 +38,10 @@ const WinWindow = ({ icon, title, menuItems, controls, statusItems, children, bo
 
         {/* Menu bar */}
         {menuItems && menuItems.length > 0 && (
-          <div className="bg-card border-b border-border px-1 py-px flex gap-0">
+          <div className="bg-card px-2 py-1.5 flex gap-0.5 border-b border-border/50">
             {menuItems.map((m, i) => (
               <button key={i} onClick={m.onClick}
-                className="px-2 py-0.5 text-xs cursor-pointer text-card-foreground font-mono bg-transparent border-none hover:bg-primary hover:text-primary-foreground">
+                className="px-3 py-1 text-xs cursor-pointer text-card-foreground font-medium bg-transparent border-none rounded-lg hover:bg-accent transition-colors">
                 {m.label}
               </button>
             ))}
@@ -49,15 +49,15 @@ const WinWindow = ({ icon, title, menuItems, controls, statusItems, children, bo
         )}
 
         {/* Body */}
-        <div className={`bg-popover win-sunken m-1 p-3.5 text-sm leading-relaxed overflow-x-hidden overflow-y-auto min-h-[calc(100vh-80px)] ${bodyClass || ''}`}>
+        <div className={`bg-background m-2 p-4 text-sm leading-relaxed overflow-x-hidden overflow-y-auto min-h-[calc(100vh-100px)] rounded-xl neu-sunken ${bodyClass || ''}`}>
           {children}
         </div>
 
         {/* Status bar */}
         {statusItems && (
-          <div className="px-2 py-0.5 text-[11px] text-muted-foreground flex gap-3 border-t border-border">
+          <div className="px-4 py-1.5 text-xs text-muted-foreground flex gap-3">
             {statusItems.map((s, i) => (
-              <span key={i} className="win-sunken px-1.5 py-px">{s}</span>
+              <span key={i} className="bg-muted/50 px-2.5 py-0.5 rounded-full text-[11px]">{s}</span>
             ))}
           </div>
         )}

@@ -24,19 +24,19 @@ const SuccessScreen = () => {
         <br />
         <p className="text-[32px]">✅</p>
         <br />
-        <h1 className="text-[15px] font-bold">SİPARİŞ ALINDI</h1>
-        <hr className="border-t border-dashed border-muted-foreground/40 my-2.5" />
+        <h1 className="text-base font-bold">SİPARİŞ ALINDI</h1>
+        <div className="h-px bg-border/40 my-3" />
         <p className="text-muted-foreground text-xs">
           Siparişiniz mutfağa iletildi.<br />Kısa süre içinde hazırlanacak.
         </p>
-        <div className="border-2 border-foreground p-4 text-center my-4 bg-[#f9fff9]">
-          <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">Sipariş Numaranız</div>
+        <div className="neu-raised p-5 text-center my-5">
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Sipariş Numaranız</div>
           <div className="text-[34px] font-bold tracking-[4px]">#{orderId}</div>
         </div>
-        <p className="text-muted-foreground text-xs mb-3.5">{payLabels[pay]}</p>
-        <div className="flex gap-1.5 justify-center flex-wrap">
-          <button className="win-btn win-btn-primary" onClick={() => navigate('/')}>← Yeni Sipariş</button>
-          <button className="win-btn" onClick={() => navigate('/')}>Ana Sayfa</button>
+        <p className="text-muted-foreground text-xs mb-4">{payLabels[pay]}</p>
+        <div className="flex gap-2 justify-center flex-wrap">
+          <button className="neu-btn neu-btn-primary" onClick={() => navigate('/')}>← Yeni Sipariş</button>
+          <button className="neu-btn" onClick={() => navigate('/')}>Ana Sayfa</button>
         </div>
       </div>
     </WinWindow>

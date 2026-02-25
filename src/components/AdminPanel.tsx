@@ -139,10 +139,10 @@ const AdminPanel = () => {
   const statusLabels: Record<string, string> = { waiting: 'Bekliyor', preparing: 'Hazırlanıyor', ready: 'Hazır', paid: 'Tamamlandı' };
   const payLabels: Record<string, string> = { card: 'Kart', cash: 'Nakit', pos: 'POS' };
   const statusClass: Record<string, string> = {
-    waiting: 'border-muted-foreground text-muted-foreground bg-muted',
-    preparing: 'border-primary text-primary bg-primary/10',
-    ready: 'border-success text-success bg-success/10',
-    paid: 'border-muted-foreground/50 text-muted-foreground/50',
+    waiting: 'text-muted-foreground bg-muted/50',
+    preparing: 'text-primary bg-primary/10',
+    ready: 'text-success bg-success/10',
+    paid: 'text-muted-foreground/50 bg-muted/30',
   };
 
   const totalRevenue = orders.reduce((s, o) => s + Number(o.total), 0);
@@ -197,10 +197,10 @@ const AdminPanel = () => {
       statusItems={['Yönetici girişi yapıldı']}
     >
       {/* Tabs */}
-      <div className="flex border-b-2 border-foreground mb-2.5 overflow-x-auto">
+      <div className="flex gap-1.5 mb-3 overflow-x-auto pb-1">
         {tabs.map(t => (
           <button key={t.id}
-            className={`px-3 py-0.5 font-mono text-[11px] font-bold cursor-pointer border border-b-0 mr-0.5 -mb-[2px] whitespace-nowrap ${tab === t.id ? 'bg-popover text-foreground border-foreground border-b-2 border-b-popover' : 'bg-card text-muted-foreground border-border'}`}
+            className={`px-3 py-1.5 text-xs font-medium cursor-pointer rounded-full whitespace-nowrap transition-all ${tab === t.id ? 'neu-btn-primary' : 'neu-btn'}`}
             onClick={() => setTab(t.id)}>{t.label}</button>
         ))}
       </div>
@@ -208,42 +208,40 @@ const AdminPanel = () => {
       {/* ORDERS TAB */}
       {tab === 'orders' && (
         <>
-          <div className="flex gap-1 flex-wrap mb-2">
+          <div className="flex gap-1.5 flex-wrap mb-3">
             {filters.map(f => (
               <button key={f.id}
-                className={`font-mono text-[11px] px-2.5 py-0.5 cursor-pointer border-2 ${filter === f.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground win-raised'}`}
+                className={`text-xs px-3 py-1.5 cursor-pointer rounded-full transition-all ${filter === f.id ? 'neu-btn-primary' : 'neu-btn'}`}
                 onClick={() => setFilter(f.id)}>{f.label}</button>
             ))}
           </div>
           {!filteredOrders.length ? (
             <p className="text-muted-foreground text-center py-3.5 text-xs">Sipariş bulunamadı.</p>
           ) : filteredOrders.map(o => (
-            <div key={o.id} className="border border-foreground mb-2.5 text-xs">
-              <div className="bg-primary text-primary-foreground px-2 py-0.5 flex justify-between items-center text-[11px]">
+            <div key={o.id} className="neu-raised mb-3 text-xs overflow-hidden">
+              <div className="bg-primary text-primary-foreground px-3 py-2 flex justify-between items-center text-xs rounded-t-[var(--radius)]">
                 <span>#{o.id.substring(0, 6).toUpperCase()} — Masa {o.table_num} — {o.user_name}</span>
-                <span className={`text-[10px] px-1.5 border font-bold uppercase tracking-wider ${statusClass[o.status] || ''}`}>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider ${statusClass[o.status] || ''}`}>
                   {statusLabels[o.status] || o.status}
                 </span>
               </div>
-              <div className="p-2">
+              <div className="p-3">
                 {(Array.isArray(o.items) ? o.items : []).map((i: any, idx: number) => (
                   <div key={idx}>• {i.name} × {i.qty} — ₺{i.price * i.qty}</div>
                 ))}
-                {o.note && <div className="text-[10px] text-muted-foreground mt-0.5">Not: {o.note}</div>}
-                <div className="text-[10px] text-muted-foreground mt-0.5">
+                {o.note && <div className="text-[10px] text-muted-foreground mt-1">Not: {o.note}</div>}
+                <div className="text-[10px] text-muted-foreground mt-1">
                   {new Date(o.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })} — {payLabels[o.payment_type] || o.payment_type}
                 </div>
               </div>
-              <div className="bg-muted px-2 py-1.5 flex justify-between items-center border-t border-muted-foreground/20 gap-2">
+              <div className="bg-muted/30 px-3 py-2 flex justify-between items-center border-t border-border/30 gap-2">
                 <strong>₺{o.total}</strong>
-                <div className="flex gap-1">
-                <div className="flex gap-1 items-center">
-                  <button className="win-btn text-[10px] py-0.5 px-2" onClick={() => triggerPrint(o)}>🖨️</button>
-                  {o.status === 'waiting' && <button className="win-btn win-btn-primary text-[10px] py-0.5 px-2" onClick={() => updateOrderStatus(o.id, 'preparing')}>Kabul Et</button>}
-                  {o.status === 'preparing' && <button className="win-btn win-btn-success text-[10px] py-0.5 px-2" onClick={() => updateOrderStatus(o.id, 'ready')}>Hazır</button>}
-                  {o.status === 'ready' && <button className="win-btn text-[10px] py-0.5 px-2" onClick={() => updateOrderStatus(o.id, 'paid')}>Ödendi</button>}
+                <div className="flex gap-1.5 items-center">
+                  <button className="neu-btn text-[10px] py-1 px-2.5" onClick={() => triggerPrint(o)}>🖨️</button>
+                  {o.status === 'waiting' && <button className="neu-btn neu-btn-primary text-[10px] py-1 px-2.5" onClick={() => updateOrderStatus(o.id, 'preparing')}>Kabul Et</button>}
+                  {o.status === 'preparing' && <button className="neu-btn neu-btn-success text-[10px] py-1 px-2.5" onClick={() => updateOrderStatus(o.id, 'ready')}>Hazır</button>}
+                  {o.status === 'ready' && <button className="neu-btn text-[10px] py-1 px-2.5" onClick={() => updateOrderStatus(o.id, 'paid')}>Ödendi</button>}
                   {o.status === 'paid' && <span className="text-[10px] text-success">✓ Tamamlandı</span>}
-                </div>
                 </div>
               </div>
             </div>
@@ -254,11 +252,11 @@ const AdminPanel = () => {
       {/* STATS TAB */}
       {tab === 'stats' && (
         <>
-          <div className="grid grid-cols-2 gap-2 mb-3.5">
-            <div className="border border-foreground p-2.5"><div className="text-[22px] font-bold">₺{totalRevenue.toLocaleString('tr')}</div><div className="text-[10px] text-muted-foreground uppercase tracking-widest">Günlük Ciro</div></div>
-            <div className="border border-foreground p-2.5"><div className="text-[22px] font-bold">{orders.length}</div><div className="text-[10px] text-muted-foreground uppercase tracking-widest">Toplam Sipariş</div></div>
-            <div className="border border-foreground p-2.5"><div className="text-[22px] font-bold">{doneCount}</div><div className="text-[10px] text-muted-foreground uppercase tracking-widest">Tamamlanan</div></div>
-            <div className="border border-foreground p-2.5"><div className="text-[22px] font-bold">{activeCount}</div><div className="text-[10px] text-muted-foreground uppercase tracking-widest">Aktif Sipariş</div></div>
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="neu-raised p-4"><div className="text-xl font-bold">₺{totalRevenue.toLocaleString('tr')}</div><div className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">Günlük Ciro</div></div>
+            <div className="neu-raised p-4"><div className="text-xl font-bold">{orders.length}</div><div className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">Toplam Sipariş</div></div>
+            <div className="neu-raised p-4"><div className="text-xl font-bold">{doneCount}</div><div className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">Tamamlanan</div></div>
+            <div className="neu-raised p-4"><div className="text-xl font-bold">{activeCount}</div><div className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">Aktif Sipariş</div></div>
           </div>
           <hr className="border-t border-foreground my-2.5" />
           <h2 className="text-[13px] font-bold mb-1.5">EN ÇOK SİPARİŞ</h2>

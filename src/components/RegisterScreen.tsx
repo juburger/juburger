@@ -18,11 +18,9 @@ const RegisterScreen = () => {
     
     setLoading(true);
     try {
-      // Anonymous sign-in for customer
       const { data, error } = await supabase.auth.signInAnonymously();
       if (error) throw error;
       
-      // Create profile
       if (data.user) {
         await supabase.from('profiles').insert({
           user_id: data.user.id,
@@ -46,31 +44,31 @@ const RegisterScreen = () => {
       menuItems={[{ label: '← Geri', onClick: () => navigate('/') }]}
       controls={[{ label: '×', onClick: () => navigate('/') }]}
     >
-      <h1 className="text-[15px] font-bold mb-1">Bilgilerinizi girin</h1>
+      <h1 className="text-base font-bold mb-1">Bilgilerinizi girin</h1>
       <p className="text-muted-foreground text-xs">Sipariş takibi için ad ve masa no gereklidir.</p>
-      <hr className="border-t border-foreground my-2.5" />
+      <div className="h-px bg-border my-3" />
       
-      <div className="mb-2.5">
-        <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">Adınız *</div>
-        <input className="win-input" type="text" placeholder="örn. Ahmet" value={name}
+      <div className="mb-3">
+        <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Adınız *</div>
+        <input className="neu-input" type="text" placeholder="örn. Ahmet" value={name}
           onChange={e => setName(e.target.value)} autoComplete="off" />
       </div>
       
-      <div className="mb-2.5">
-        <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">Masa Numarası *</div>
-        <select className="win-input" value={table} onChange={e => setTable(e.target.value)}>
+      <div className="mb-3">
+        <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Masa Numarası *</div>
+        <select className="neu-input" value={table} onChange={e => setTable(e.target.value)}>
           {Array.from({ length: 10 }, (_, i) => i + 1).map(n => (
             <option key={n} value={n}>Masa {n}</option>
           ))}
         </select>
       </div>
       
-      <hr className="border-t border-dashed border-muted-foreground/40 my-2.5" />
-      <div className="flex gap-1.5 mt-2 flex-wrap">
-        <button className="win-btn win-btn-primary" onClick={handleRegister} disabled={loading}>
+      <div className="h-px bg-border/40 my-3" />
+      <div className="flex gap-2 mt-3 flex-wrap">
+        <button className="neu-btn neu-btn-primary" onClick={handleRegister} disabled={loading}>
           {loading ? 'Giriş yapılıyor...' : 'Menüye Geç →'}
         </button>
-        <button className="win-btn" onClick={() => navigate('/')}>İptal</button>
+        <button className="neu-btn" onClick={() => navigate('/')}>İptal</button>
       </div>
     </WinWindow>
   );

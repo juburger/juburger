@@ -39,7 +39,6 @@ const MenuScreen = () => {
   const count = cartCount();
   const total = cartTotal();
 
-  // Group products by category
   const grouped = categories.map(c => ({
     cat: c.name,
     catId: c.id,
@@ -64,31 +63,31 @@ const MenuScreen = () => {
           { label: `Sepet (${count})`, onClick: () => setDrawerOpen(true) },
         ]}
         controls={[{ label: '🛒', onClick: () => setDrawerOpen(true) }]}
-        bodyClass="pb-12"
+        bodyClass="pb-14"
       >
-        <div className="flex justify-between items-start mb-1.5">
+        <div className="flex justify-between items-start mb-2">
           <div>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Merhaba,</div>
-            <h1 className="text-[15px] font-bold">{userName}</h1>
+            <h1 className="text-base font-bold">{userName}</h1>
           </div>
           <div className="text-right">
             <div className="text-muted-foreground text-xs">Masa</div>
             <strong className="text-lg">#{tableNum}</strong>
           </div>
         </div>
-        <hr className="border-t border-foreground my-2.5" />
+        <div className="h-px bg-border my-3" />
 
         {loading ? (
-          <p className="text-muted-foreground text-center py-3.5 text-xs">Menü yükleniyor...</p>
+          <p className="text-muted-foreground text-center py-4 text-sm">Menü yükleniyor...</p>
         ) : (
           <>
             {/* Category bar */}
-            <div className="flex gap-1 mb-2.5 flex-wrap">
-              <button className={`font-mono text-[11px] px-2.5 py-0.5 cursor-pointer border-2 ${activeCat === 'all' ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground win-raised'}`}
+            <div className="flex gap-1.5 mb-3 flex-wrap">
+              <button className={`text-xs px-3 py-1.5 cursor-pointer rounded-full transition-all ${activeCat === 'all' ? 'neu-btn-primary' : 'neu-btn'}`}
                 onClick={() => setActiveCat('all')}>Tümü</button>
               {categories.map(c => (
                 <button key={c.id}
-                  className={`font-mono text-[11px] px-2.5 py-0.5 cursor-pointer border-2 ${activeCat === c.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground win-raised'}`}
+                  className={`text-xs px-3 py-1.5 cursor-pointer rounded-full transition-all ${activeCat === c.id ? 'neu-btn-primary' : 'neu-btn'}`}
                   onClick={() => setActiveCat(c.id)}>{c.name}</button>
               ))}
             </div>
@@ -96,7 +95,7 @@ const MenuScreen = () => {
             {/* Menu items */}
             {grouped.filter(g => activeCat === 'all' || g.catId === activeCat).map(group => (
               <div key={group.catId}>
-                <div className="text-xs font-bold mt-3 mb-1.5 border-b border-foreground pb-0.5 uppercase tracking-widest">
+                <div className="text-xs font-bold mt-4 mb-2 pb-1 uppercase tracking-widest text-muted-foreground border-b border-border/50">
                   {group.cat}
                 </div>
                 {group.items.map(p => {
@@ -104,28 +103,28 @@ const MenuScreen = () => {
                   const ci = cart.find(c => c.id === item.id);
                   const qty = ci ? ci.qty : 0;
                   return (
-                    <div key={p.id} className="flex items-start justify-between py-1.5 border-b border-dashed border-muted gap-2">
+                    <div key={p.id} className="flex items-start justify-between py-2.5 border-b border-border/30 gap-2">
                       <div className="flex-1">
-                        <div className="text-[13px] font-bold">
+                        <div className="text-sm font-semibold">
                           {p.name}
-                          {p.tag === 'n' && <span className="text-[9px] px-0.5 ml-1 border border-primary text-primary align-middle tracking-wider">YENİ</span>}
-                          {p.tag === 's' && <span className="text-[9px] px-0.5 ml-1 border border-destructive text-destructive align-middle tracking-wider">Acılı</span>}
-                          {p.tag === 'p' && <span className="text-[9px] px-0.5 ml-1 border border-accent text-accent-foreground align-middle tracking-wider">POPÜLER</span>}
+                          {p.tag === 'n' && <span className="text-[9px] px-1.5 py-0.5 ml-1.5 rounded-full bg-primary/10 text-primary font-medium">YENİ</span>}
+                          {p.tag === 's' && <span className="text-[9px] px-1.5 py-0.5 ml-1.5 rounded-full bg-destructive/10 text-destructive font-medium">Acılı</span>}
+                          {p.tag === 'p' && <span className="text-[9px] px-1.5 py-0.5 ml-1.5 rounded-full bg-accent text-accent-foreground font-medium">POPÜLER</span>}
                         </div>
-                        <div className="text-[11px] text-muted-foreground mt-px leading-snug">{p.description}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5 leading-snug">{p.description}</div>
                       </div>
-                      <div className="flex items-center gap-1.5 flex-shrink-0 pt-0.5">
-                        <span className="text-[13px] font-bold min-w-[46px] text-right">₺{p.price}</span>
+                      <div className="flex items-center gap-2 flex-shrink-0 pt-0.5">
+                        <span className="text-sm font-bold min-w-[46px] text-right">₺{p.price}</span>
                         {qty === 0 ? (
-                          <button className="win-btn-primary w-[22px] h-[22px] text-sm cursor-pointer flex items-center justify-center font-mono font-bold flex-shrink-0 border-2"
-                            style={{ borderColor: 'hsl(240 100% 50%) hsl(240 100% 12.5%) hsl(240 100% 12.5%) hsl(240 100% 50%)' }}
+                          <button className="neu-btn-primary w-8 h-8 text-sm cursor-pointer flex items-center justify-center font-bold flex-shrink-0 rounded-full"
+                            style={{ boxShadow: '3px 3px 6px hsl(var(--neu-dark)), -3px -3px 6px hsl(var(--neu-light))' }}
                             onClick={() => { addItem(item); showToast(item.name + ' eklendi'); }}>+</button>
                         ) : (
-                          <div className="flex items-center gap-0.5">
-                            <button className="win-btn w-[18px] h-[18px] text-xs p-0 flex items-center justify-center"
+                          <div className="flex items-center gap-1">
+                            <button className="neu-btn w-7 h-7 text-xs p-0 flex items-center justify-center rounded-full"
                               onClick={() => removeItem(item.id)}>−</button>
-                            <span className="text-[13px] min-w-[16px] text-center font-bold">{qty}</span>
-                            <button className="win-btn w-[18px] h-[18px] text-xs p-0 flex items-center justify-center"
+                            <span className="text-sm min-w-[18px] text-center font-bold">{qty}</span>
+                            <button className="neu-btn w-7 h-7 text-xs p-0 flex items-center justify-center rounded-full"
                               onClick={() => { addItem(item); showToast(item.name + ' eklendi'); }}>+</button>
                           </div>
                         )}
@@ -140,10 +139,11 @@ const MenuScreen = () => {
       </WinWindow>
 
       {/* Sticky cart bar */}
-      <div className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-primary text-primary-foreground px-3 py-1.5 text-[13px] font-mono cursor-pointer border-t-2 border-primary transition-transform z-[99] flex justify-between items-center ${count > 0 ? 'translate-y-0' : 'translate-y-full'}`}
+      <div className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-primary text-primary-foreground px-4 py-2.5 text-sm cursor-pointer z-[99] flex justify-between items-center rounded-t-2xl transition-transform ${count > 0 ? 'translate-y-0' : 'translate-y-full'}`}
+        style={{ boxShadow: '0 -4px 12px hsl(var(--neu-dark))' }}
         onClick={() => setDrawerOpen(true)}>
         <div>
-          <span className="bg-popover text-primary px-1.5 font-bold mr-1.5 text-xs">{count}</span>
+          <span className="bg-primary-foreground text-primary px-2 py-0.5 rounded-full font-bold mr-2 text-xs">{count}</span>
           ürün sepette
         </div>
         <div><strong>₺{total}</strong> → Sepeti Gör</div>

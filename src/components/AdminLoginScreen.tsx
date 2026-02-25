@@ -19,7 +19,6 @@ const AdminLoginScreen = () => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
-      // Check admin status
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Kullanıcı bulunamadı');
 
@@ -51,30 +50,30 @@ const AdminLoginScreen = () => {
       menuItems={[{ label: '← Geri', onClick: () => navigate('/') }]}
       controls={[{ label: '×', onClick: () => navigate('/') }]}
     >
-      <h1 className="text-[15px] font-bold mb-1">Yönetici Paneli</h1>
+      <h1 className="text-base font-bold mb-1">Yönetici Paneli</h1>
       <p className="text-muted-foreground text-xs">Giriş bilgilerinizi girin.</p>
-      <hr className="border-t border-foreground my-2.5" />
+      <div className="h-px bg-border my-3" />
       
-      <div className="mb-2.5">
-        <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">E-posta</div>
-        <input className="win-input" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="admin@burgerqr.com" />
+      <div className="mb-3">
+        <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">E-posta</div>
+        <input className="neu-input" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="admin@burgerqr.com" />
       </div>
-      <div className="mb-2.5">
-        <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">Şifre</div>
-        <input className="win-input" type="password" value={password} onChange={e => setPassword(e.target.value)}
+      <div className="mb-3">
+        <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Şifre</div>
+        <input className="neu-input" type="password" value={password} onChange={e => setPassword(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleLogin()} />
       </div>
-      <div className="flex items-center gap-2 mb-2.5">
+      <div className="flex items-center gap-3 mb-3">
         <input type="checkbox" className="w-4 h-4 cursor-pointer" checked={rememberMe}
           onChange={e => setRememberMe(e.target.checked)} id="rememberMe" />
-        <label htmlFor="rememberMe" className="text-[11px] cursor-pointer select-none">Beni Hatırla</label>
-        <button className="win-btn win-btn-primary" onClick={handleLogin} disabled={loading}>
+        <label htmlFor="rememberMe" className="text-xs cursor-pointer select-none">Beni Hatırla</label>
+        <button className="neu-btn neu-btn-primary" onClick={handleLogin} disabled={loading}>
           {loading ? 'Giriş...' : 'Giriş Yap'}
         </button>
-        <button className="win-btn" onClick={() => navigate('/')}>İptal</button>
+        <button className="neu-btn" onClick={() => navigate('/')}>İptal</button>
       </div>
-      <hr className="border-t border-dashed border-muted-foreground/40 my-2.5" />
-      <p className="text-muted-foreground text-[11px]">Admin hesabı Cloud üzerinden oluşturulmalıdır.</p>
+      <div className="h-px bg-border/40 my-3" />
+      <p className="text-muted-foreground text-xs">Admin hesabı Cloud üzerinden oluşturulmalıdır.</p>
     </WinWindow>
   );
 };
