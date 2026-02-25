@@ -127,10 +127,23 @@ const AdminPanel = () => {
     else showToast('Sipariş güncellendi ✓');
   };
 
-  const cancelOrder = async (orderId: string) => {
-    const { error } = await supabase.from('orders').update({ status: 'paid', payment_status: 'cancelled' }).eq('id', orderId);
-    if (error) showToast('İptal hatası', false);
-    else showToast('Sipariş iptal edildi ✓');
+  const cancelOrder = async (order: Order) => {
+    const { error } = await supabase.from('orders').update({ status: 'paid', payment_status: 'cancelled' }).eq('id', order.id);
+    if (error) { showToast('İptal hatası', false); return; }
+
+    // Print cancellation receipt
+    if (localStorage.getItem('ju_print_server') === '1') {
+      const items = Array.isArray(order.items) ? order.items : [];
+      const cancelReceipt = {
+        ...order,
+        id: crypto.randomUUID(),
+        note: `İPTAL FİŞİ: #${order.id.substring(0, 6).toUpperCase()}`,
+        items: (items as any[]).map((i: any) => ({ ...i, name: `İPTAL: ${i.name}` })),
+      } as unknown as Order;
+      triggerPrint(cancelReceipt);
+    }
+
+    showToast('Sipariş iptal edildi ✓');
   };
 
   const saveSettings = async (key: string, val: boolean | string) => {
@@ -257,7 +270,7 @@ const AdminPanel = () => {
                       {o.status === 'ready' && <button className="neu-btn text-[10px] py-1 px-2.5" onClick={() => updateOrderStatus(o.id, 'paid')}>Ödendi</button>}
                       {o.status === 'paid' && <span className="text-[10px] text-muted-foreground">✓ Tamamlandı</span>}
                       {['waiting', 'preparing', 'ready'].includes(o.status) && (
-                        <button className="neu-btn text-[10px] py-1 px-2.5 text-destructive" onClick={() => cancelOrder(o.id)}>İptal</button>
+                        <button className="neu-btn text-[10px] py-1 px-2.5 text-destructive" onClick={() => cancelOrder(o)}>İptal</button>
                       )}
                     </>
                   )}
