@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Home, ShoppingCart, Plus, Minus, ArrowRight } from 'lucide-react';
 import WinWindow from '@/components/WinWindow';
 import { useCart } from '@/contexts/CartContext';
 import { useToast95Context } from '@/contexts/Toast95Context';
@@ -60,9 +61,11 @@ const MenuScreen = () => {
         title={`Menü — Masa ${tableNum}`}
         menuItems={[
           { label: '← Ana Sayfa', onClick: () => navigate('/') },
-          { label: `Sepet (${count})`, onClick: () => setDrawerOpen(true) },
         ]}
-        controls={[{ label: '🛒', onClick: () => setDrawerOpen(true) }]}
+        controls={[
+          { label: <Home size={14} />, onClick: () => navigate('/') },
+          { label: <ShoppingCart size={14} />, onClick: () => setDrawerOpen(true) },
+        ]}
         bodyClass="pb-14"
       >
         <div className="flex justify-between items-start mb-2">
@@ -116,15 +119,15 @@ const MenuScreen = () => {
                       <div className="flex items-center gap-2 flex-shrink-0 pt-0.5">
                         <span className="text-sm font-bold min-w-[46px] text-right">₺{p.price}</span>
                         {qty === 0 ? (
-                          <button className="neu-btn w-8 h-8 text-sm cursor-pointer flex items-center justify-center font-bold flex-shrink-0 rounded-full"
-                            onClick={() => { addItem(item); showToast(item.name + ' eklendi'); }}>+</button>
+                          <button className="neu-btn w-8 h-8 cursor-pointer flex items-center justify-center flex-shrink-0 rounded-full"
+                            onClick={() => { addItem(item); showToast(item.name + ' eklendi'); }}><Plus size={14} /></button>
                         ) : (
                           <div className="flex items-center gap-1">
-                            <button className="neu-btn w-7 h-7 text-xs p-0 flex items-center justify-center rounded-full"
-                              onClick={() => removeItem(item.id)}>−</button>
+                            <button className="neu-btn w-7 h-7 p-0 flex items-center justify-center rounded-full"
+                              onClick={() => removeItem(item.id)}><Minus size={12} /></button>
                             <span className="text-sm min-w-[18px] text-center font-bold">{qty}</span>
-                            <button className="neu-btn w-7 h-7 text-xs p-0 flex items-center justify-center rounded-full"
-                              onClick={() => { addItem(item); showToast(item.name + ' eklendi'); }}>+</button>
+                            <button className="neu-btn w-7 h-7 p-0 flex items-center justify-center rounded-full"
+                              onClick={() => { addItem(item); showToast(item.name + ' eklendi'); }}><Plus size={12} /></button>
                           </div>
                         )}
                       </div>
@@ -144,7 +147,7 @@ const MenuScreen = () => {
           <span className="neu-sunken text-foreground px-2 py-0.5 rounded-full font-bold mr-2 text-xs">{count}</span>
           ürün sepette
         </div>
-        <div><strong>₺{total}</strong> → Sepeti Gör</div>
+        <div className="flex items-center gap-1"><strong>₺{total}</strong> <ArrowRight size={14} /> Sepet</div>
       </div>
 
       <CartDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} tableNum={tableNum} userName={userName} />
