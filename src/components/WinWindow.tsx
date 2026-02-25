@@ -15,7 +15,7 @@ const WinWindow = ({ icon, title, menuItems, controls, statusItems, children, bo
     <div className="min-h-screen p-4 bg-background overflow-x-hidden">
       <div className="neu-raised max-w-full overflow-hidden p-1">
         {/* Title bar */}
-        <div className="bg-primary text-primary-foreground px-5 py-3 flex items-center justify-between text-sm font-semibold select-none" style={{ borderRadius: 'calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0 0' }}>
+        <div className="bg-card text-foreground px-5 py-3 flex items-center justify-between text-sm font-semibold select-none" style={{ borderRadius: 'calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0 0' }}>
           <div className="flex items-center gap-2.5">
             <span className="text-lg">{icon}</span>
             <span className="tracking-wide">{title}</span>
@@ -23,8 +23,7 @@ const WinWindow = ({ icon, title, menuItems, controls, statusItems, children, bo
           <div className="flex gap-2">
             {controls?.map((c, i) => (
               <button key={i} onClick={c.onClick}
-                className="w-8 h-8 rounded-full text-primary-foreground text-xs flex items-center justify-center cursor-pointer transition-all"
-                style={{ boxShadow: 'inset 2px 2px 4px hsl(235 55% 42%), inset -2px -2px 4px hsl(235 55% 68%)', background: 'hsl(235 55% 58%)' }}>
+                className="w-8 h-8 rounded-full text-foreground text-xs flex items-center justify-center cursor-pointer transition-all neu-flat">
                 {c.label}
               </button>
             )) || (
