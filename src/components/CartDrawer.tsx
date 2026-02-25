@@ -29,9 +29,9 @@ const CartDrawer = ({ open, onClose, tableNum, userName }: CartDrawerProps) => {
       {/* Drawer */}
       <div className={`fixed bottom-0 left-1/2 w-full max-w-[480px] z-[101] transition-transform duration-300 max-h-[88vh] overflow-y-auto ${open ? '-translate-x-1/2 translate-y-0' : '-translate-x-1/2 translate-y-full'}`}>
         <div className="neu-raised m-2 overflow-hidden">
-          <div className="bg-primary text-primary-foreground px-4 py-2.5 text-sm font-semibold flex justify-between items-center rounded-t-[var(--radius)]">
+          <div className="bg-card text-foreground px-4 py-2.5 text-sm font-semibold flex justify-between items-center rounded-t-[var(--radius)]">
             <span>🛒 Sepetim</span>
-            <button className="w-7 h-7 rounded-full bg-primary-foreground/15 text-xs flex items-center justify-center cursor-pointer hover:bg-primary-foreground/25 transition-colors" onClick={onClose}>×</button>
+            <button className="neu-flat w-7 h-7 rounded-full text-xs flex items-center justify-center cursor-pointer" onClick={onClose}>✕</button>
           </div>
           <div className="p-4">
             {!cart.length ? (
@@ -65,8 +65,8 @@ const CartDrawer = ({ open, onClose, tableNum, userName }: CartDrawerProps) => {
               </>
             )}
             <div className="flex gap-2 mt-3">
-              <button className="neu-btn neu-btn-primary" onClick={goCheckout}>Ödemeye Geç →</button>
-              <button className="neu-btn neu-btn-danger" onClick={() => { clearCart(); onClose(); }}>Temizle</button>
+              <button className="neu-btn" onClick={goCheckout}>Ödemeye Geç →</button>
+              <button className="neu-btn" onClick={() => { clearCart(); onClose(); }}>Temizle</button>
             </div>
           </div>
         </div>
