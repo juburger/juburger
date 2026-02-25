@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Menu } from 'lucide-react';
 import WinWindow from '@/components/WinWindow';
 import { useToast95Context } from '@/contexts/Toast95Context';
 
@@ -14,7 +15,7 @@ const SplashScreen = () => {
       icon="🍔"
       title={`Masa ${tableNum}`}
       controls={[
-        { label: '☰', onClick: () => navigate('/admin-login') },
+        { label: <Menu size={14} />, onClick: () => navigate('/admin-login') },
       ]}
       statusItems={['Hazır']}
     >

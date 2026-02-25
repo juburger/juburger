@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ChevronLeft, X } from 'lucide-react';
 import WinWindow from '@/components/WinWindow';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,8 +43,8 @@ const RegisterScreen = () => {
       icon="📝"
       title="Kayıt — BurgerQR"
       controls={[
-        { label: '‹', onClick: () => navigate('/') },
-        { label: '✕', onClick: () => navigate('/') },
+        { label: <ChevronLeft size={14} />, onClick: () => navigate('/') },
+        { label: <X size={14} />, onClick: () => navigate('/') },
       ]}
     >
       <h1 className="text-base font-bold mb-1">Bilgilerinizi girin</h1>
