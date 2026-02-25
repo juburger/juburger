@@ -103,11 +103,75 @@ export type Database = {
         }
         Relationships: []
       }
+      loyalty_settings: {
+        Row: {
+          id: string
+          min_redeem_points: number
+          point_value: number
+          points_per_lira: number
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          min_redeem_points?: number
+          point_value?: number
+          points_per_lira?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          min_redeem_points?: number
+          point_value?: number
+          points_per_lira?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      members: {
+        Row: {
+          created_at: string
+          id: string
+          last_visit_at: string | null
+          name: string
+          phone: string
+          total_points: number
+          total_spent: number
+          updated_at: string
+          used_points: number
+          visit_count: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_visit_at?: string | null
+          name?: string
+          phone: string
+          total_points?: number
+          total_spent?: number
+          updated_at?: string
+          used_points?: number
+          visit_count?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_visit_at?: string | null
+          name?: string
+          phone?: string
+          total_points?: number
+          total_spent?: number
+          updated_at?: string
+          used_points?: number
+          visit_count?: number
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           created_at: string
           id: string
           items: Json
+          member_id: string | null
           note: string | null
           payment_status: string
           payment_type: string
@@ -122,6 +186,7 @@ export type Database = {
           created_at?: string
           id?: string
           items?: Json
+          member_id?: string | null
           note?: string | null
           payment_status?: string
           payment_type?: string
@@ -136,6 +201,7 @@ export type Database = {
           created_at?: string
           id?: string
           items?: Json
+          member_id?: string | null
           note?: string | null
           payment_status?: string
           payment_type?: string
@@ -146,7 +212,53 @@ export type Database = {
           user_id?: string
           user_name?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      point_transactions: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          member_id: string
+          order_id: string | null
+          points: number
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          id?: string
+          member_id: string
+          order_id?: string | null
+          points?: number
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          member_id?: string
+          order_id?: string | null
+          points?: number
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "point_transactions_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       printers: {
         Row: {

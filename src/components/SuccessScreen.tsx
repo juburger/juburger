@@ -7,6 +7,7 @@ const SuccessScreen = () => {
   const [searchParams] = useSearchParams();
   const orderId = searchParams.get('order') || '000000';
   const pay = searchParams.get('pay') || 'cash';
+  const earnedPoints = searchParams.get('points');
 
   const payLabels: Record<string, string> = {
     card: '💳 Kart ile ödendi',
@@ -34,6 +35,14 @@ const SuccessScreen = () => {
           <div className="text-[34px] font-bold tracking-[4px]">#{orderId}</div>
         </div>
         <p className="text-muted-foreground text-xs mb-4">{payLabels[pay]}</p>
+
+        {earnedPoints && (
+          <div className="p-3 border border-primary/30 rounded-lg bg-primary/5 mb-4">
+            <div className="text-[14px] font-bold text-primary">⭐ +{earnedPoints} Puan Kazandınız!</div>
+            <div className="text-[10px] text-muted-foreground">Puanlarınız sonraki siparişlerde indirim olarak kullanılabilir.</div>
+          </div>
+        )}
+
         <div className="flex gap-2 justify-center flex-wrap">
           <button className="neu-btn neu-btn-primary" onClick={() => navigate('/')}>← Yeni Sipariş</button>
           <button className="neu-btn" onClick={() => navigate('/')}>Ana Sayfa</button>
