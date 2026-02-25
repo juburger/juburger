@@ -41,8 +41,10 @@ const RegisterScreen = () => {
     <WinWindow
       icon="📝"
       title="Kayıt — BurgerQR"
-      menuItems={[{ label: '← Geri', onClick: () => navigate('/') }]}
-      controls={[{ label: '×', onClick: () => navigate('/') }]}
+      controls={[
+        { label: '←', onClick: () => navigate('/') },
+        { label: '✕', onClick: () => navigate('/') },
+      ]}
     >
       <h1 className="text-base font-bold mb-1">Bilgilerinizi girin</h1>
       <p className="text-muted-foreground text-xs">Sipariş takibi için ad ve masa no gereklidir.</p>
