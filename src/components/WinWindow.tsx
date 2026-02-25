@@ -24,7 +24,7 @@ const WinWindow = ({ icon, title, menuItems, controls, statusItems, children, bo
             {controls?.map((c, i) => (
               <button key={i} onClick={c.onClick}
                 className="w-8 h-8 rounded-full text-primary-foreground text-xs flex items-center justify-center cursor-pointer transition-all"
-                style={{ boxShadow: 'inset 2px 2px 4px hsl(350 65% 28%), inset -2px -2px 4px hsl(350 65% 48%)', background: 'hsl(350 65% 38%)' }}>
+                style={{ boxShadow: 'inset 2px 2px 4px hsl(235 55% 42%), inset -2px -2px 4px hsl(235 55% 68%)', background: 'hsl(235 55% 58%)' }}>
                 {c.label}
               </button>
             )) || (
