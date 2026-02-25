@@ -71,7 +71,7 @@ const RegisterScreen = () => {
         <button className="neu-btn" onClick={handleRegister} disabled={loading}>
           {loading ? 'Giriş yapılıyor...' : 'MENU'}
         </button>
-        <button className="neu-btn" onClick={() => navigate('/')}>İptal</button>
+        
       </div>
     </WinWindow>
   );
