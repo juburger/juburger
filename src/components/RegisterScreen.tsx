@@ -67,7 +67,7 @@ const RegisterScreen = () => {
       </div>
       
       <div className="h-px bg-border/40 my-3" />
-      <div className="flex gap-2 mt-3 flex-wrap">
+      <div className="flex justify-center mt-3">
         <button className="neu-btn" onClick={handleRegister} disabled={loading}>
           {loading ? 'Giriş yapılıyor...' : 'MENU'}
         </button>
