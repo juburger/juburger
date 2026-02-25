@@ -131,17 +131,15 @@ const AdminPanel = () => {
     const { error } = await supabase.from('orders').update({ status: 'paid', payment_status: 'cancelled' }).eq('id', order.id);
     if (error) { showToast('İptal hatası', false); return; }
 
-    // Print cancellation receipt
-    if (localStorage.getItem('ju_print_server') === '1') {
-      const items = Array.isArray(order.items) ? order.items : [];
-      const cancelReceipt = {
-        ...order,
-        id: crypto.randomUUID(),
-        note: `İPTAL FİŞİ: #${order.id.substring(0, 6).toUpperCase()}`,
-        items: (items as any[]).map((i: any) => ({ ...i, name: `İPTAL: ${i.name}` })),
-      } as unknown as Order;
-      triggerPrint(cancelReceipt);
-    }
+    // Always print cancellation receipt
+    const items = Array.isArray(order.items) ? order.items : [];
+    const cancelReceipt = {
+      ...order,
+      id: crypto.randomUUID(),
+      note: `İPTAL FİŞİ: #${order.id.substring(0, 6).toUpperCase()}`,
+      items: (items as any[]).map((i: any) => ({ ...i, name: `İPTAL: ${i.name}` })),
+    } as unknown as Order;
+    triggerPrint(cancelReceipt);
 
     showToast('Sipariş iptal edildi ✓');
   };
