@@ -510,6 +510,11 @@ export type Database = {
         }
         Returns: boolean
       }
+      hash_pin: { Args: { plain_pin: string }; Returns: string }
+      verify_pin: {
+        Args: { p_staff_id: string; plain_pin: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
