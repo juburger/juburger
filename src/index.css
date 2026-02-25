@@ -6,28 +6,28 @@
 
 @layer base {
   :root {
-    /* Cloud Dancer base — warm off-white (#F0EDE5 ≈ 40 20% 92%) */
-    --background: 40 20% 92%;
-    --foreground: 350 20% 18%;
+    /* Lavender-grey neumorphic base (matching reference) */
+    --background: 228 25% 88%;
+    --foreground: 228 20% 25%;
 
-    --card: 40 18% 90%;
-    --card-foreground: 350 20% 18%;
+    --card: 228 25% 88%;
+    --card-foreground: 228 20% 25%;
 
-    --popover: 40 22% 95%;
-    --popover-foreground: 350 20% 18%;
+    --popover: 228 25% 91%;
+    --popover-foreground: 228 20% 25%;
 
     /* Bordo primary */
-    --primary: 350 65% 35%;
-    --primary-foreground: 40 20% 95%;
+    --primary: 350 65% 38%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 40 15% 86%;
-    --secondary-foreground: 350 20% 22%;
+    --secondary: 228 18% 84%;
+    --secondary-foreground: 228 20% 28%;
 
-    --muted: 40 15% 88%;
-    --muted-foreground: 350 8% 48%;
+    --muted: 228 18% 84%;
+    --muted-foreground: 228 12% 55%;
 
-    --accent: 40 15% 86%;
-    --accent-foreground: 350 20% 18%;
+    --accent: 228 18% 84%;
+    --accent-foreground: 228 20% 25%;
 
     --destructive: 0 65% 50%;
     --destructive-foreground: 0 0% 100%;
@@ -35,58 +35,58 @@
     --success: 145 55% 38%;
     --success-foreground: 0 0% 100%;
 
-    --border: 40 12% 83%;
-    --input: 40 22% 95%;
-    --ring: 350 65% 35%;
+    --border: 228 15% 82%;
+    --input: 228 25% 88%;
+    --ring: 350 65% 38%;
 
-    --radius: 16px;
+    --radius: 20px;
 
-    /* Neumorphic shadows — Cloud Dancer tones */
-    --neu-light: 40 25% 98%;
-    --neu-dark: 40 10% 80%;
-    --neu-bg: 40 18% 90%;
+    /* Deep neumorphic shadows */
+    --neu-light: 228 30% 97%;
+    --neu-dark: 228 20% 75%;
+    --neu-bg: 228 25% 88%;
 
-    --sidebar-background: 40 20% 92%;
-    --sidebar-foreground: 350 20% 22%;
-    --sidebar-primary: 350 65% 35%;
-    --sidebar-primary-foreground: 40 20% 95%;
-    --sidebar-accent: 40 15% 88%;
-    --sidebar-accent-foreground: 350 20% 18%;
-    --sidebar-border: 40 12% 83%;
-    --sidebar-ring: 350 65% 35%;
+    --sidebar-background: 228 25% 88%;
+    --sidebar-foreground: 228 20% 28%;
+    --sidebar-primary: 350 65% 38%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 228 18% 84%;
+    --sidebar-accent-foreground: 228 20% 25%;
+    --sidebar-border: 228 15% 82%;
+    --sidebar-ring: 350 65% 38%;
   }
 
   .dark {
-    --background: 350 15% 12%;
-    --foreground: 40 15% 90%;
-    --card: 350 15% 14%;
-    --card-foreground: 40 15% 90%;
-    --popover: 350 15% 16%;
-    --popover-foreground: 40 15% 90%;
+    --background: 228 20% 14%;
+    --foreground: 228 15% 90%;
+    --card: 228 20% 14%;
+    --card-foreground: 228 15% 90%;
+    --popover: 228 20% 17%;
+    --popover-foreground: 228 15% 90%;
     --primary: 350 60% 45%;
-    --primary-foreground: 40 20% 95%;
-    --secondary: 350 10% 20%;
-    --secondary-foreground: 40 15% 85%;
-    --muted: 350 10% 18%;
-    --muted-foreground: 40 8% 55%;
-    --accent: 350 10% 20%;
-    --accent-foreground: 40 15% 90%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 228 15% 20%;
+    --secondary-foreground: 228 15% 85%;
+    --muted: 228 15% 18%;
+    --muted-foreground: 228 10% 55%;
+    --accent: 228 15% 20%;
+    --accent-foreground: 228 15% 90%;
     --destructive: 0 65% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 350 10% 20%;
-    --input: 350 15% 16%;
+    --border: 228 15% 20%;
+    --input: 228 20% 14%;
     --ring: 350 60% 45%;
-    --neu-light: 350 15% 18%;
-    --neu-dark: 350 15% 8%;
-    --neu-bg: 350 15% 14%;
-    --sidebar-background: 350 15% 12%;
-    --sidebar-foreground: 40 15% 90%;
+    --neu-light: 228 20% 20%;
+    --neu-dark: 228 20% 8%;
+    --neu-bg: 228 20% 14%;
+    --sidebar-background: 228 20% 14%;
+    --sidebar-foreground: 228 15% 90%;
     --sidebar-primary: 350 60% 45%;
-    --sidebar-primary-foreground: 40 20% 95%;
-    --sidebar-accent: 350 10% 18%;
-    --sidebar-accent-foreground: 40 15% 90%;
-    --sidebar-border: 220 15% 22%;
-    --sidebar-ring: 230 70% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 228 15% 18%;
+    --sidebar-accent-foreground: 228 15% 90%;
+    --sidebar-border: 228 15% 20%;
+    --sidebar-ring: 350 60% 45%;
   }
 }
 
@@ -102,13 +102,13 @@
   }
 }
 
-/* Neumorphic raised (convex) */
+/* Neumorphic raised (convex) — deep like reference */
 .neu-raised {
   background: hsl(var(--card));
   border-radius: var(--radius);
   box-shadow:
-    6px 6px 12px hsl(var(--neu-dark)),
-    -6px -6px 12px hsl(var(--neu-light));
+    10px 10px 20px hsl(var(--neu-dark)),
+    -10px -10px 20px hsl(var(--neu-light));
 }
 
 /* Neumorphic sunken (concave / inset) */
@@ -116,8 +116,8 @@
   background: hsl(var(--card));
   border-radius: var(--radius);
   box-shadow:
-    inset 4px 4px 8px hsl(var(--neu-dark)),
-    inset -4px -4px 8px hsl(var(--neu-light));
+    inset 6px 6px 12px hsl(var(--neu-dark)),
+    inset -6px -6px 12px hsl(var(--neu-light));
 }
 
 /* Neumorphic flat (subtle) */
@@ -125,8 +125,8 @@
   background: hsl(var(--background));
   border-radius: var(--radius);
   box-shadow:
-    3px 3px 6px hsl(var(--neu-dark)),
-    -3px -3px 6px hsl(var(--neu-light));
+    5px 5px 10px hsl(var(--neu-dark)),
+    -5px -5px 10px hsl(var(--neu-light));
 }
 
 /* Neumorphic button */
@@ -134,46 +134,47 @@
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 13px;
   font-weight: 500;
-  padding: 8px 20px;
+  padding: 10px 22px;
   background: hsl(var(--card));
   border: none;
-  border-radius: calc(var(--radius) * 0.75);
+  border-radius: 50px;
   cursor: pointer;
   color: hsl(var(--foreground));
   box-shadow:
-    4px 4px 8px hsl(var(--neu-dark)),
-    -4px -4px 8px hsl(var(--neu-light));
-  transition: all 0.15s ease;
+    6px 6px 12px hsl(var(--neu-dark)),
+    -6px -6px 12px hsl(var(--neu-light));
+  transition: all 0.2s ease;
   white-space: nowrap;
 }
 .neu-btn:hover {
   box-shadow:
-    2px 2px 4px hsl(var(--neu-dark)),
-    -2px -2px 4px hsl(var(--neu-light));
+    3px 3px 6px hsl(var(--neu-dark)),
+    -3px -3px 6px hsl(var(--neu-light));
 }
 .neu-btn:active {
   box-shadow:
-    inset 3px 3px 6px hsl(var(--neu-dark)),
-    inset -3px -3px 6px hsl(var(--neu-light));
+    inset 4px 4px 8px hsl(var(--neu-dark)),
+    inset -4px -4px 8px hsl(var(--neu-light));
 }
 
 .neu-btn-primary {
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
+  border-radius: 50px;
   box-shadow:
-    4px 4px 8px hsl(var(--neu-dark)),
-    -4px -4px 8px hsl(var(--neu-light));
+    6px 6px 12px hsl(var(--neu-dark)),
+    -6px -6px 12px hsl(var(--neu-light));
 }
 .neu-btn-primary:hover {
-  background: hsl(350 65% 30%);
+  background: hsl(350 65% 33%);
   box-shadow:
-    2px 2px 4px hsl(var(--neu-dark)),
-    -2px -2px 4px hsl(var(--neu-light));
+    3px 3px 6px hsl(var(--neu-dark)),
+    -3px -3px 6px hsl(var(--neu-light));
 }
 .neu-btn-primary:active {
   box-shadow:
-    inset 3px 3px 6px hsl(350 65% 22%),
-    inset -3px -3px 6px hsl(350 65% 45%);
+    inset 4px 4px 8px hsl(350 65% 22%),
+    inset -4px -4px 8px hsl(350 65% 48%);
 }
 
 .neu-btn-danger {
@@ -198,21 +199,21 @@
   font-size: 14px;
   background: hsl(var(--card));
   border: none;
-  border-radius: calc(var(--radius) * 0.75);
-  padding: 10px 14px;
+  border-radius: 50px;
+  padding: 12px 18px;
   color: hsl(var(--foreground));
   outline: none;
   width: 100%;
   box-shadow:
-    inset 3px 3px 6px hsl(var(--neu-dark)),
-    inset -3px -3px 6px hsl(var(--neu-light));
+    inset 4px 4px 8px hsl(var(--neu-dark)),
+    inset -4px -4px 8px hsl(var(--neu-light));
   transition: box-shadow 0.2s ease;
 }
 .neu-input:focus {
   box-shadow:
-    inset 3px 3px 6px hsl(var(--neu-dark)),
-    inset -3px -3px 6px hsl(var(--neu-light)),
-    0 0 0 2px hsl(var(--primary) / 0.3);
+    inset 4px 4px 8px hsl(var(--neu-dark)),
+    inset -4px -4px 8px hsl(var(--neu-light)),
+    0 0 0 3px hsl(var(--primary) / 0.2);
 }
 .neu-input::placeholder {
   color: hsl(var(--muted-foreground));
