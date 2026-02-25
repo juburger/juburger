@@ -31,14 +31,6 @@ const SplashScreen = () => {
           Sipariş Ver
         </button>
       </div>
-      <div className="h-px bg-border/40 my-3" />
-      <p className="text-muted-foreground text-xs">
-        Garson çağırmak için:<br/>
-        <button className="bg-transparent border-none text-sm text-primary cursor-pointer underline p-0 mt-1"
-          onClick={() => showToast('Garson çağrıldı 🔔')}>
-          → Garson Çağır
-        </button>
-      </p>
       <div className="h-px bg-border my-3" />
       <p className="text-muted-foreground text-[11px]">© 2025 BurgerQR</p>
     </WinWindow>

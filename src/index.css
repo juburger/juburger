@@ -98,7 +98,7 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   }
 }
 
@@ -131,7 +131,7 @@
 
 /* Neumorphic button */
 .neu-btn {
-  font-family: 'Inter', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
   font-size: 13px;
   font-weight: 500;
   padding: 8px 20px;
@@ -194,7 +194,7 @@
 
 /* Neumorphic input */
 .neu-input {
-  font-family: 'Inter', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
   font-size: 14px;
   background: hsl(var(--card));
   border: none;
@@ -234,7 +234,7 @@
   transform: translateX(-50%) translateY(10px);
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
-  font-family: 'Inter', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
   font-size: 13px;
   font-weight: 500;
   padding: 10px 20px;
