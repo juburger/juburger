@@ -28,27 +28,8 @@ const ReceiptPrint = forwardRef<HTMLDivElement, ReceiptProps>(
     const fontSize = paperSize === '58' ? '10px' : '12px';
 
     return (
-      <div ref={ref} className="receipt-print">
-        <style>{`
-          @media print {
-            body * { visibility: hidden !important; }
-            .receipt-print, .receipt-print * { visibility: visible !important; }
-            .receipt-print {
-              position: fixed !important;
-              left: 0 !important;
-              top: 0 !important;
-              width: ${width} !important;
-              padding: ${paperSize === '58' ? '2mm' : '4mm'} !important;
-              font-family: 'Courier New', monospace !important;
-              font-size: ${fontSize} !important;
-              color: #000 !important;
-              background: #fff !important;
-            }
-          }
-          @media screen {
-            .receipt-print { display: none; }
-          }
-        `}</style>
+      <div ref={ref} className="receipt-print" style={{ position: 'fixed', left: '-9999px', top: 0, width: width, padding: paperSize === '58' ? '2mm' : '4mm', fontFamily: "'Courier New', monospace", fontSize: fontSize, color: '#000', background: '#fff' }}>
+
 
         <div style={{ textAlign: 'center', marginBottom: 8 }}>
           <div style={{ fontSize: 18, fontWeight: 'bold' }}>JU - Sipariş Sistemi</div>
