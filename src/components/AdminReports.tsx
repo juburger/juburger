@@ -85,7 +85,7 @@ const AdminReports = () => {
       <div className="flex gap-1 mb-2.5 flex-wrap items-end">
         {(['daily', 'monthly', 'yearly'] as Period[]).map(p => (
           <button key={p}
-            className={`font-mono text-[11px] px-2.5 py-0.5 cursor-pointer border-2 ${period === p ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground win-raised'}`}
+            className={`text-[11px] px-3 py-1 cursor-pointer rounded-full transition-all ${period === p ? 'neu-sunken text-foreground font-semibold' : 'neu-flat text-muted-foreground'}`}
             onClick={() => setPeriod(p)}>
             {periodLabels[p]}
           </button>

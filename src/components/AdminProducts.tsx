@@ -238,11 +238,11 @@ const AdminProducts = () => {
       {/* Category tabs */}
       <div className="flex gap-1 flex-wrap mb-2">
         <button
-          className={`font-mono text-[11px] px-2.5 py-0.5 cursor-pointer border-2 ${selectedCat === 'all' ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground win-raised'}`}
+          className={`text-[11px] px-3 py-1 cursor-pointer rounded-full transition-all ${selectedCat === 'all' ? 'neu-sunken text-foreground font-semibold' : 'neu-flat text-muted-foreground'}`}
           onClick={() => setSelectedCat('all')}>Tümü</button>
         {categories.map(c => (
           <button key={c.id}
-            className={`font-mono text-[11px] px-2.5 py-0.5 cursor-pointer border-2 ${selectedCat === c.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground win-raised'}`}
+            className={`text-[11px] px-3 py-1 cursor-pointer rounded-full transition-all ${selectedCat === c.id ? 'neu-sunken text-foreground font-semibold' : 'neu-flat text-muted-foreground'}`}
             onClick={() => setSelectedCat(c.id)}>{c.name}</button>
         ))}
       </div>

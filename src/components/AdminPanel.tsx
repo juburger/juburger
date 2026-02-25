@@ -140,8 +140,8 @@ const AdminPanel = () => {
   const payLabels: Record<string, string> = { card: 'Kart', cash: 'Nakit', pos: 'POS' };
   const statusClass: Record<string, string> = {
     waiting: 'text-muted-foreground bg-muted/50',
-    preparing: 'text-primary bg-primary/10',
-    ready: 'text-success bg-success/10',
+    preparing: 'text-foreground bg-muted/60',
+    ready: 'text-foreground bg-muted/80 font-bold',
     paid: 'text-muted-foreground/50 bg-muted/30',
   };
 
@@ -200,7 +200,7 @@ const AdminPanel = () => {
       <div className="flex gap-1.5 mb-3 overflow-x-auto pb-1">
         {tabs.map(t => (
           <button key={t.id}
-            className={`px-3 py-1.5 text-xs font-medium cursor-pointer rounded-full whitespace-nowrap transition-all ${tab === t.id ? 'neu-btn-primary' : 'neu-btn'}`}
+            className={`px-3 py-1.5 text-xs font-medium cursor-pointer rounded-full whitespace-nowrap transition-all ${tab === t.id ? 'neu-sunken text-foreground font-semibold' : 'neu-btn'}`}
             onClick={() => setTab(t.id)}>{t.label}</button>
         ))}
       </div>
@@ -211,7 +211,7 @@ const AdminPanel = () => {
           <div className="flex gap-1.5 flex-wrap mb-3">
             {filters.map(f => (
               <button key={f.id}
-                className={`text-xs px-3 py-1.5 cursor-pointer rounded-full transition-all ${filter === f.id ? 'neu-btn-primary' : 'neu-btn'}`}
+                className={`text-xs px-3 py-1.5 cursor-pointer rounded-full transition-all ${filter === f.id ? 'neu-sunken text-foreground font-semibold' : 'neu-btn'}`}
                 onClick={() => setFilter(f.id)}>{f.label}</button>
             ))}
           </div>
@@ -219,7 +219,7 @@ const AdminPanel = () => {
             <p className="text-muted-foreground text-center py-3.5 text-xs">Sipariş bulunamadı.</p>
           ) : filteredOrders.map(o => (
             <div key={o.id} className="neu-raised mb-3 text-xs overflow-hidden">
-              <div className="bg-primary text-primary-foreground px-3 py-2 flex justify-between items-center text-xs rounded-t-[var(--radius)]">
+              <div className="bg-card text-foreground px-3 py-2 flex justify-between items-center text-xs rounded-t-[var(--radius)] neu-flat">
                 <span>#{o.id.substring(0, 6).toUpperCase()} — Masa {o.table_num} — {o.user_name}</span>
                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider ${statusClass[o.status] || ''}`}>
                   {statusLabels[o.status] || o.status}
@@ -238,10 +238,10 @@ const AdminPanel = () => {
                 <strong>₺{o.total}</strong>
                 <div className="flex gap-1.5 items-center">
                   <button className="neu-btn text-[10px] py-1 px-2.5" onClick={() => triggerPrint(o)}>🖨️</button>
-                  {o.status === 'waiting' && <button className="neu-btn neu-btn-primary text-[10px] py-1 px-2.5" onClick={() => updateOrderStatus(o.id, 'preparing')}>Kabul Et</button>}
-                  {o.status === 'preparing' && <button className="neu-btn neu-btn-success text-[10px] py-1 px-2.5" onClick={() => updateOrderStatus(o.id, 'ready')}>Hazır</button>}
+                  {o.status === 'waiting' && <button className="neu-btn text-[10px] py-1 px-2.5" onClick={() => updateOrderStatus(o.id, 'preparing')}>Kabul Et</button>}
+                  {o.status === 'preparing' && <button className="neu-btn text-[10px] py-1 px-2.5" onClick={() => updateOrderStatus(o.id, 'ready')}>Hazır</button>}
                   {o.status === 'ready' && <button className="neu-btn text-[10px] py-1 px-2.5" onClick={() => updateOrderStatus(o.id, 'paid')}>Ödendi</button>}
-                  {o.status === 'paid' && <span className="text-[10px] text-success">✓ Tamamlandı</span>}
+                  {o.status === 'paid' && <span className="text-[10px] text-muted-foreground">✓ Tamamlandı</span>}
                 </div>
               </div>
             </div>

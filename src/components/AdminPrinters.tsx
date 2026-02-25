@@ -130,7 +130,7 @@ const AdminPrinters: React.FC = () => {
           <div className="flex gap-1.5">
             {['58', '80'].map(size => (
               <button key={size}
-                className={`font-mono text-[11px] px-3 py-1 cursor-pointer border-2 ${form.paper_size === size ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground win-raised'}`}
+                className={`text-[11px] px-3 py-1 cursor-pointer rounded-full transition-all ${form.paper_size === size ? 'neu-sunken text-foreground font-semibold' : 'neu-flat text-muted-foreground'}`}
                 onClick={() => setForm({ ...form, paper_size: size })}>
                 {size}mm
               </button>
