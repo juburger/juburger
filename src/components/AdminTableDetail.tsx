@@ -189,10 +189,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
       details: `(${userName} - ${itemSummary})`,
     });
 
-    // Trigger print only on designated print server
-    if (onPrintOrder && newOrder && localStorage.getItem('ju_print_server') === '1') {
-      onPrintOrder(newOrder as unknown as Order);
-    }
+    // Print is handled automatically by AdminPanel realtime subscription — no manual print here
 
     showToast(`Sipariş onaylandı — ₺${pendingTotal} ✓`);
     setPendingItems([]);
