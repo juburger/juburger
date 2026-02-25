@@ -119,15 +119,15 @@ const MenuScreen = () => {
                       <div className="flex items-center gap-2 flex-shrink-0 pt-0.5">
                         <span className="text-sm font-bold min-w-[46px] text-right">₺{p.price}</span>
                         {qty === 0 ? (
-                          <button className="neu-btn w-8 h-8 cursor-pointer flex items-center justify-center flex-shrink-0 rounded-full"
-                            onClick={() => { addItem(item); showToast(item.name + ' eklendi'); }}><Plus size={16} strokeWidth={2.5} /></button>
+                          <button className="neu-flat w-8 h-8 cursor-pointer flex items-center justify-center flex-shrink-0 rounded-full"
+                            onClick={() => { addItem(item); showToast(item.name + ' eklendi'); }}><Plus size={16} strokeWidth={3} /></button>
                         ) : (
                           <div className="flex items-center gap-1">
-                            <button className="neu-btn w-7 h-7 p-0 flex items-center justify-center rounded-full"
-                              onClick={() => removeItem(item.id)}><Minus size={14} strokeWidth={2.5} /></button>
+                            <button className="neu-flat w-7 h-7 p-0 flex items-center justify-center rounded-full"
+                              onClick={() => removeItem(item.id)}><Minus size={14} strokeWidth={3} /></button>
                             <span className="text-sm min-w-[18px] text-center font-bold">{qty}</span>
-                            <button className="neu-btn w-7 h-7 p-0 flex items-center justify-center rounded-full"
-                              onClick={() => { addItem(item); showToast(item.name + ' eklendi'); }}><Plus size={14} strokeWidth={2.5} /></button>
+                            <button className="neu-flat w-7 h-7 p-0 flex items-center justify-center rounded-full"
+                              onClick={() => { addItem(item); showToast(item.name + ' eklendi'); }}><Plus size={14} strokeWidth={3} /></button>
                           </div>
                         )}
                       </div>
