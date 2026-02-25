@@ -89,13 +89,13 @@ const AdminTables: React.FC<Props> = ({ onPrintOrder }) => {
       {/* Area filter tabs */}
       <div className="flex gap-1 flex-wrap mb-2.5">
         <button
-          className={`font-mono text-[11px] px-2.5 py-0.5 cursor-pointer border-2 ${selectedArea === 'open' ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground win-raised'}`}
+          className={`text-[11px] px-3 py-1 cursor-pointer rounded-full transition-all ${selectedArea === 'open' ? 'neu-sunken text-foreground font-semibold' : 'neu-flat text-muted-foreground'}`}
           onClick={() => setSelectedArea('open')}>
           Açık Masalar ({openTableNums.length})
         </button>
         {areas.map(a => (
           <button key={a.id}
-            className={`font-mono text-[11px] px-2.5 py-0.5 cursor-pointer border-2 ${selectedArea === a.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground win-raised'}`}
+            className={`text-[11px] px-3 py-1 cursor-pointer rounded-full transition-all ${selectedArea === a.id ? 'neu-sunken text-foreground font-semibold' : 'neu-flat text-muted-foreground'}`}
             onClick={() => setSelectedArea(a.id)}>{a.name}</button>
         ))}
       </div>

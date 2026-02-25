@@ -175,7 +175,7 @@ const AdminQuickOrder: React.FC<Props> = ({ onPrintOrder }) => {
             <div className="flex gap-1 flex-wrap mb-1.5">
               {categories.map(c => (
                 <button key={c.id}
-                  className={`font-mono text-[9px] px-1.5 py-0.5 cursor-pointer border ${selectedCat === c.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground border-border'}`}
+                  className={`text-[9px] px-1.5 py-0.5 cursor-pointer rounded-full transition-all ${selectedCat === c.id ? 'neu-sunken text-foreground font-semibold' : 'neu-flat text-muted-foreground'}`}
                   onClick={() => setSelectedCat(c.id)}>
                   {c.name}
                 </button>

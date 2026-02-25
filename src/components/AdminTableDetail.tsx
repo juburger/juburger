@@ -575,7 +575,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
         <div className="flex gap-1 mb-2.5 flex-wrap">
           {[0, 5, 10, 15, 20].map(d => (
             <button key={d}
-              className={`font-mono text-[11px] px-2.5 py-1 cursor-pointer border-2 rounded-full ${discount === d ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground win-raised'}`}
+              className={`text-[11px] px-2.5 py-1 cursor-pointer rounded-full transition-all ${discount === d ? 'neu-sunken text-foreground font-semibold' : 'neu-flat text-muted-foreground'}`}
               onClick={() => setDiscount(d)}>
               {d === 0 ? 'Böl' : `%${d}`}
             </button>
@@ -583,16 +583,16 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
         </div>
 
         <div className="grid grid-cols-2 gap-1.5 mb-2.5">
-          <button className="win-btn text-[12px] py-2 bg-[#2ecc71] text-white border-[#27ae60] font-bold" onClick={() => handlePayment('nakit')}>
+          <button className="neu-btn text-[12px] py-2 font-bold" onClick={() => handlePayment('nakit')}>
             💵 Nakit
           </button>
-          <button className="win-btn text-[12px] py-2 bg-[#e74c3c] text-white border-[#c0392b] font-bold" onClick={() => handlePayment('kredi kartı')}>
+          <button className="neu-btn text-[12px] py-2 font-bold" onClick={() => handlePayment('kredi kartı')}>
             💳 Kredi Kartı
           </button>
-          <button className="win-btn text-[12px] py-2 bg-[#3498db] text-white border-[#2980b9] font-bold" onClick={() => handlePayment('havale')}>
+          <button className="neu-btn text-[12px] py-2 font-bold" onClick={() => handlePayment('havale')}>
             🏦 Havale
           </button>
-          <button className="win-btn text-[12px] py-2 bg-[#8b4513] text-white border-[#5a2d0c] font-bold" onClick={() => setDiscount(prev => prev > 0 ? prev : 10)}>
+          <button className="neu-btn text-[12px] py-2 font-bold" onClick={() => setDiscount(prev => prev > 0 ? prev : 10)}>
             🏷️ İndirim
           </button>
         </div>
@@ -605,7 +605,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
   return (
     <div className="flex flex-col h-full w-full max-w-full overflow-hidden" style={{ minHeight: '70vh' }}>
       {/* Header */}
-      <div className="bg-primary text-primary-foreground px-2.5 py-1.5 flex justify-between items-center">
+      <div className="bg-card text-foreground px-2.5 py-1.5 flex justify-between items-center neu-raised rounded-t-[var(--radius)]">
         <span className="text-[12px] font-bold">Masa {tableNum} — {userName}</span>
         <button className="text-[10px] opacity-80 hover:opacity-100" onClick={onClose}>✕</button>
       </div>
@@ -625,7 +625,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
             <div className="flex gap-1 flex-wrap mb-1.5">
               {categories.map(c => (
                 <button key={c.id}
-                  className={`font-mono text-[9px] px-1.5 py-0.5 cursor-pointer border ${selectedCat === c.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground border-border'}`}
+                  className={`text-[9px] px-1.5 py-0.5 cursor-pointer rounded-full transition-all ${selectedCat === c.id ? 'neu-sunken text-foreground font-semibold' : 'neu-flat text-muted-foreground'}`}
                   onClick={() => setSelectedCat(c.id)}>
                   {c.name}
                 </button>

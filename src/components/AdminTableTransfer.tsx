@@ -163,11 +163,11 @@ const AdminTableTransfer = () => {
     <>
       {/* Mode selector */}
       <div className="flex gap-1 mb-2.5">
-        <button className={`font-mono text-[11px] px-2.5 py-0.5 cursor-pointer border-2 ${mode === 'full' ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground win-raised'}`}
+        <button className={`text-[11px] px-3 py-1 cursor-pointer rounded-full transition-all ${mode === 'full' ? 'neu-sunken text-foreground font-semibold' : 'neu-flat text-muted-foreground'}`}
           onClick={() => { setMode('full'); setSelectedItems(new Set()); }}>
           🪑 Masa Taşıma
         </button>
-        <button className={`font-mono text-[11px] px-2.5 py-0.5 cursor-pointer border-2 ${mode === 'items' ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground win-raised'}`}
+        <button className={`text-[11px] px-3 py-1 cursor-pointer rounded-full transition-all ${mode === 'items' ? 'neu-sunken text-foreground font-semibold' : 'neu-flat text-muted-foreground'}`}
           onClick={() => setMode('items')}>
           📦 Ürün Taşıma
         </button>
