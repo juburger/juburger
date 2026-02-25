@@ -19,7 +19,7 @@ import AdminQRCodes from '@/components/AdminQRCodes';
 import AdminClosedTables from '@/components/AdminClosedTables';
 
 type TabType = 'orders' | 'tables' | 'closed' | 'transfer' | 'accounts' | 'quick' | 'stats' | 'reports' | 'products' | 'settings' | 'qr' | 'logs';
-type FilterType = 'all' | 'waiting' | 'preparing' | 'ready' | 'paid';
+type FilterType = 'all' | 'waiting' | 'preparing' | 'ready' | 'paid' | 'cancelled';
 
 const AdminPanel = () => {
   const navigate = useNavigate();
@@ -127,6 +127,12 @@ const AdminPanel = () => {
     else showToast('Sipariş güncellendi ✓');
   };
 
+  const cancelOrder = async (orderId: string) => {
+    const { error } = await supabase.from('orders').update({ status: 'paid', payment_status: 'cancelled' }).eq('id', orderId);
+    if (error) showToast('İptal hatası', false);
+    else showToast('Sipariş iptal edildi ✓');
+  };
+
   const saveSettings = async (key: string, val: boolean | string) => {
     const updated = { ...settings, [key]: val };
     setSettings(updated);
@@ -134,7 +140,7 @@ const AdminPanel = () => {
     showToast('Ayarlar kaydedildi ✓');
   };
 
-  const filteredOrders = filter === 'all' ? orders : orders.filter(o => o.status === filter);
+  const filteredOrders = filter === 'all' ? orders : filter === 'cancelled' ? orders.filter(o => o.payment_status === 'cancelled') : orders.filter(o => o.status === filter);
   const waitingCount = orders.filter(o => o.status === 'waiting').length;
 
   const statusLabels: Record<string, string> = { waiting: 'Bekliyor', preparing: 'Hazırlanıyor', ready: 'Hazır', paid: 'Tamamlandı' };
@@ -145,6 +151,7 @@ const AdminPanel = () => {
     ready: 'text-foreground bg-muted/80 font-bold',
     paid: 'text-muted-foreground/50 bg-muted/30',
   };
+  const cancelledCount = orders.filter(o => o.payment_status === 'cancelled').length;
 
   const totalRevenue = orders.reduce((s, o) => s + Number(o.total), 0);
   const doneCount = orders.filter(o => o.status === 'paid').length;
@@ -184,6 +191,7 @@ const AdminPanel = () => {
     { id: 'preparing', label: 'Hazırlanıyor' },
     { id: 'ready', label: 'Hazır' },
     { id: 'paid', label: 'Tamamlanan' },
+    { id: 'cancelled', label: `İptal (${cancelledCount})` },
   ];
 
   return (
@@ -238,12 +246,21 @@ const AdminPanel = () => {
               </div>
               <div className="bg-muted/30 px-3 py-2 flex justify-between items-center border-t border-border/30 gap-2">
                 <strong>₺{o.total}</strong>
-                <div className="flex gap-1.5 items-center">
+                <div className="flex gap-1.5 items-center flex-wrap">
                   <button className="neu-btn text-[10px] py-1 px-2.5" onClick={() => triggerPrint(o)}>🖨️</button>
-                  {o.status === 'waiting' && <button className="neu-btn text-[10px] py-1 px-2.5" onClick={() => updateOrderStatus(o.id, 'preparing')}>Kabul Et</button>}
-                  {o.status === 'preparing' && <button className="neu-btn text-[10px] py-1 px-2.5" onClick={() => updateOrderStatus(o.id, 'ready')}>Hazır</button>}
-                  {o.status === 'ready' && <button className="neu-btn text-[10px] py-1 px-2.5" onClick={() => updateOrderStatus(o.id, 'paid')}>Ödendi</button>}
-                  {o.status === 'paid' && <span className="text-[10px] text-muted-foreground">✓ Tamamlandı</span>}
+                  {o.payment_status === 'cancelled' ? (
+                    <span className="text-[10px] text-destructive font-bold">❌ İptal Edildi</span>
+                  ) : (
+                    <>
+                      {o.status === 'waiting' && <button className="neu-btn text-[10px] py-1 px-2.5" onClick={() => updateOrderStatus(o.id, 'preparing')}>Kabul Et</button>}
+                      {o.status === 'preparing' && <button className="neu-btn text-[10px] py-1 px-2.5" onClick={() => updateOrderStatus(o.id, 'ready')}>Hazır</button>}
+                      {o.status === 'ready' && <button className="neu-btn text-[10px] py-1 px-2.5" onClick={() => updateOrderStatus(o.id, 'paid')}>Ödendi</button>}
+                      {o.status === 'paid' && <span className="text-[10px] text-muted-foreground">✓ Tamamlandı</span>}
+                      {['waiting', 'preparing', 'ready'].includes(o.status) && (
+                        <button className="neu-btn text-[10px] py-1 px-2.5 text-destructive" onClick={() => cancelOrder(o.id)}>İptal</button>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
             </div>
