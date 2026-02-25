@@ -12,6 +12,7 @@ import Checkout from "./pages/Checkout";
 import Success from "./pages/Success";
 import AdminLogin from "./pages/AdminLogin";
 import Admin from "./pages/Admin";
+import MemberSignup from "./pages/MemberSignup";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
                   <Route path="/checkout" element={<div className="max-w-[480px] mx-auto"><Checkout /></div>} />
                   <Route path="/success" element={<div className="max-w-[480px] mx-auto"><Success /></div>} />
                   <Route path="/admin-login" element={<div className="max-w-[480px] mx-auto"><AdminLogin /></div>} />
+                  <Route path="/member-signup" element={<div className="max-w-[480px] mx-auto"><MemberSignup /></div>} />
                   <Route path="/admin" element={<Admin />} />
                   <Route path="*" element={<div className="max-w-[480px] mx-auto"><NotFound /></div>} />
                 </Routes>
