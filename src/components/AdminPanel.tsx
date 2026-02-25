@@ -17,8 +17,9 @@ import AdminTableTransfer from '@/components/AdminTableTransfer';
 import AdminAccounts from '@/components/AdminAccounts';
 import AdminQRCodes from '@/components/AdminQRCodes';
 import AdminClosedTables from '@/components/AdminClosedTables';
+import AdminMembers from '@/components/AdminMembers';
 
-type TabType = 'orders' | 'tables' | 'closed' | 'transfer' | 'accounts' | 'quick' | 'stats' | 'reports' | 'products' | 'settings' | 'qr' | 'logs';
+type TabType = 'orders' | 'tables' | 'closed' | 'transfer' | 'accounts' | 'members' | 'quick' | 'stats' | 'reports' | 'products' | 'settings' | 'qr' | 'logs';
 type FilterType = 'all' | 'waiting' | 'preparing' | 'ready' | 'paid' | 'cancelled';
 
 const AdminPanel = () => {
@@ -187,6 +188,7 @@ const AdminPanel = () => {
     { id: 'closed', label: 'Kapanan Masalar' },
     { id: 'transfer', label: 'Masa Taşıma' },
     { id: 'accounts', label: 'Cari Hesaplar' },
+    { id: 'members', label: 'Üyeler' },
     { id: 'quick', label: 'Hızlı Sipariş' },
     { id: 'stats', label: 'İstatistik' },
     { id: 'reports', label: 'Raporlar' },
@@ -312,6 +314,9 @@ const AdminPanel = () => {
 
       {/* ACCOUNTS TAB */}
       {tab === 'accounts' && <AdminAccounts />}
+
+      {/* MEMBERS TAB */}
+      {tab === 'members' && <AdminMembers />}
 
       {/* QUICK ORDER TAB */}
       {tab === 'quick' && <AdminQuickOrder onPrintOrder={triggerPrint} />}

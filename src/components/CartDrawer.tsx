@@ -7,9 +7,10 @@ interface CartDrawerProps {
   onClose: () => void;
   tableNum: string;
   userName: string;
+  memberId?: string;
 }
 
-const CartDrawer = ({ open, onClose, tableNum, userName }: CartDrawerProps) => {
+const CartDrawer = ({ open, onClose, tableNum, userName, memberId }: CartDrawerProps) => {
   const navigate = useNavigate();
   const { cart, addItem, removeItem, clearCart, cartTotal } = useCart();
   const total = cartTotal();
@@ -18,7 +19,7 @@ const CartDrawer = ({ open, onClose, tableNum, userName }: CartDrawerProps) => {
   const goCheckout = () => {
     if (!cart.length) return;
     onClose();
-    navigate(`/checkout?table=${tableNum}&name=${encodeURIComponent(userName)}`);
+    navigate(`/checkout?table=${tableNum}&name=${encodeURIComponent(userName)}${memberId ? `&member=${memberId}` : ''}`);
   };
 
   return (

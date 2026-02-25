@@ -16,6 +16,7 @@ const MenuScreen = () => {
   const [searchParams] = useSearchParams();
   const tableNum = searchParams.get('table') || '3';
   const userName = decodeURIComponent(searchParams.get('name') || 'Misafir');
+  const memberId = searchParams.get('member') || '';
   const { cart, addItem, removeItem, cartCount, cartTotal } = useCart();
   const { showToast } = useToast95Context();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -150,7 +151,7 @@ const MenuScreen = () => {
         <button className="neu-flat px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1.5 cursor-pointer">₺{total} <ArrowRight size={14} /> Sepet</button>
       </div>
 
-      <CartDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} tableNum={tableNum} userName={userName} />
+      <CartDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} tableNum={tableNum} userName={userName} memberId={memberId} />
     </>
   );
 };
