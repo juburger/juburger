@@ -217,7 +217,6 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
     items.splice(itemIndex, 1);
 
     if (items.length === 0) {
-      // No items left, cancel whole order
       await supabase.from('orders').update({ status: 'paid', payment_status: 'cancelled' }).eq('id', orderId);
     } else {
       const newTotal = items.reduce((s: number, i: any) => s + i.price * i.qty, 0);
@@ -230,6 +229,18 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
       action: 'Ürün iptal edildi',
       details: `(${userName} - ${itemQty}x ${itemName} ₺${removedTotal})`,
     });
+
+    // Print cancellation receipt
+    if (onPrintOrder) {
+      const cancelReceipt = {
+        id: crypto.randomUUID(), user_id: '', user_name: userName, table_num: tableNum,
+        items: [{ id: '', name: `İPTAL: ${itemName}`, price: removedItem.price, qty: itemQty, note: '', options: [] }],
+        total: removedTotal, status: 'preparing', payment_type: 'cash', payment_status: 'pending',
+        note: `İPTAL FİŞİ: ${itemQty}x ${itemName}`, created_at: new Date().toISOString(),
+      } as unknown as Order;
+      onPrintOrder(cancelReceipt);
+    }
+
     showToast(`${itemName} iptal edildi`);
     fetchData();
   };
@@ -283,7 +294,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
         table_num: tableNum, user_name: 'Administrator', action: 'Ürün eklendi',
         details: `(${userName} - +${diff}x ${editItem.name})`,
       });
-      if (onPrintOrder && userData?.user && localStorage.getItem('ju_print_server') === '1') {
+      if (onPrintOrder && userData?.user) {
         const fakeOrder = {
           id: crypto.randomUUID(), user_id: userData.user.id, user_name: userName, table_num: tableNum,
           items: [{ id: '', name: editItem.name, price: editItem.price, qty: diff, note: editNote, options: editItem.options || [] }],
@@ -299,7 +310,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
         table_num: tableNum, user_name: 'Administrator', action: 'Ürün azaltıldı',
         details: `(${userName} - -${cancelledCount}x ${editItem.name})`,
       });
-      if (onPrintOrder && userData?.user && localStorage.getItem('ju_print_server') === '1') {
+      if (onPrintOrder && userData?.user) {
         const fakeOrder = {
           id: crypto.randomUUID(), user_id: userData.user.id, user_name: userName, table_num: tableNum,
           items: [{ id: '', name: `İPTAL: ${editItem.name}`, price: editItem.price, qty: cancelledCount, note: '', options: [] }],
@@ -350,6 +361,19 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
       action: 'Siparişler iptal edildi!',
       details: `(${userName} ${itemList})`,
     });
+
+    // Print cancellation receipt for all items
+    if (onPrintOrder) {
+      const cancelItems = allItems.map(i => ({ id: '', name: `İPTAL: ${i.name}`, price: i.price / i.qty, qty: i.qty, note: '', options: [] }));
+      const cancelReceipt = {
+        id: crypto.randomUUID(), user_id: '', user_name: userName, table_num: tableNum,
+        items: cancelItems, total: allItems.reduce((s, i) => s + i.price, 0),
+        status: 'preparing', payment_type: 'cash', payment_status: 'pending',
+        note: `İPTAL FİŞİ — Tüm Sipariş`, created_at: new Date().toISOString(),
+      } as unknown as Order;
+      onPrintOrder(cancelReceipt);
+    }
+
     showToast('Siparişler iptal edildi');
     onClose();
   };
@@ -388,6 +412,19 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
       action: 'Seçili ürünler iptal edildi',
       details: `(${userName} - ${names})`,
     });
+
+    // Print cancellation receipt for selected items
+    if (onPrintOrder) {
+      const cancelItems = selected.map(s => ({ id: '', name: `İPTAL: ${s.name}`, price: s.price / s.qty, qty: s.qty, note: '', options: [] }));
+      const cancelReceipt = {
+        id: crypto.randomUUID(), user_id: '', user_name: userName, table_num: tableNum,
+        items: cancelItems, total: checkedTotal,
+        status: 'preparing', payment_type: 'cash', payment_status: 'pending',
+        note: `İPTAL FİŞİ — Seçili Ürünler`, created_at: new Date().toISOString(),
+      } as unknown as Order;
+      onPrintOrder(cancelReceipt);
+    }
+
     showToast(`${selected.length} ürün iptal edildi`);
     setCheckedItems(new Set());
     fetchData();
