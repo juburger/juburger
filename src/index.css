@@ -16,8 +16,8 @@
     --popover: 228 25% 91%;
     --popover-foreground: 228 20% 25%;
 
-    /* Bordo primary */
-    --primary: 350 65% 38%;
+    /* Blue-purple accent (matching reference) */
+    --primary: 235 55% 58%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 228 18% 84%;
@@ -37,7 +37,7 @@
 
     --border: 228 15% 82%;
     --input: 228 25% 88%;
-    --ring: 350 65% 38%;
+    --ring: 235 55% 58%;
 
     --radius: 20px;
 
@@ -48,12 +48,12 @@
 
     --sidebar-background: 228 25% 88%;
     --sidebar-foreground: 228 20% 28%;
-    --sidebar-primary: 350 65% 38%;
+    --sidebar-primary: 235 55% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 228 18% 84%;
     --sidebar-accent-foreground: 228 20% 25%;
     --sidebar-border: 228 15% 82%;
-    --sidebar-ring: 350 65% 38%;
+    --sidebar-ring: 235 55% 58%;
   }
 
   .dark {
@@ -63,7 +63,7 @@
     --card-foreground: 228 15% 90%;
     --popover: 228 20% 17%;
     --popover-foreground: 228 15% 90%;
-    --primary: 350 60% 45%;
+    --primary: 235 55% 62%;
     --primary-foreground: 0 0% 100%;
     --secondary: 228 15% 20%;
     --secondary-foreground: 228 15% 85%;
@@ -75,18 +75,18 @@
     --destructive-foreground: 0 0% 100%;
     --border: 228 15% 20%;
     --input: 228 20% 14%;
-    --ring: 350 60% 45%;
+    --ring: 235 55% 62%;
     --neu-light: 228 20% 20%;
     --neu-dark: 228 20% 8%;
     --neu-bg: 228 20% 14%;
     --sidebar-background: 228 20% 14%;
     --sidebar-foreground: 228 15% 90%;
-    --sidebar-primary: 350 60% 45%;
+    --sidebar-primary: 235 55% 62%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 228 15% 18%;
     --sidebar-accent-foreground: 228 15% 90%;
     --sidebar-border: 228 15% 20%;
-    --sidebar-ring: 350 60% 45%;
+    --sidebar-ring: 235 55% 62%;
   }
 }
 
@@ -166,15 +166,15 @@
     -6px -6px 12px hsl(var(--neu-light));
 }
 .neu-btn-primary:hover {
-  background: hsl(350 65% 33%);
+  background: hsl(235 55% 52%);
   box-shadow:
     3px 3px 6px hsl(var(--neu-dark)),
     -3px -3px 6px hsl(var(--neu-light));
 }
 .neu-btn-primary:active {
   box-shadow:
-    inset 4px 4px 8px hsl(350 65% 22%),
-    inset -4px -4px 8px hsl(350 65% 48%);
+    inset 4px 4px 8px hsl(235 55% 38%),
+    inset -4px -4px 8px hsl(235 55% 68%);
 }
 
 .neu-btn-danger {
