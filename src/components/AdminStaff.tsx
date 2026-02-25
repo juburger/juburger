@@ -7,7 +7,7 @@ interface Staff {
   user_id: string | null;
   name: string;
   username: string;
-  pin: string;
+  pin: string; // hashed - never displayed
   work_days: string[];
   shift_start: string;
   shift_end: string;
@@ -100,7 +100,7 @@ const AdminStaff = () => {
   const startEdit = (s: Staff) => {
     setEditingStaff(s);
     setForm({
-      name: s.name, username: s.username, password: '', pin: s.pin,
+      name: s.name, username: s.username, password: '', pin: '',
       work_days: s.work_days, shift_start: s.shift_start, shift_end: s.shift_end,
     });
     fetchPermissions(s.id);
@@ -110,7 +110,8 @@ const AdminStaff = () => {
     if (!editingStaff) return;
     setLoading(true);
     try {
-      const body: any = { action: 'update', staff_id: editingStaff.id, name: form.name, pin: form.pin, work_days: form.work_days, shift_start: form.shift_start, shift_end: form.shift_end, permissions };
+      const body: any = { action: 'update', staff_id: editingStaff.id, name: form.name, work_days: form.work_days, shift_start: form.shift_start, shift_end: form.shift_end, permissions };
+      if (form.pin) body.pin = form.pin;
       if (form.password) body.password = form.password;
       const { data, error } = await supabase.functions.invoke('manage-staff', { body });
       if (error) throw error;
@@ -193,8 +194,8 @@ const AdminStaff = () => {
         </div>
 
         <div className="mb-2">
-          <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">Pin Kodu</div>
-          <input className="win-input" value={form.pin} onChange={e => setForm({ ...form, pin: e.target.value })} />
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">Yeni Pin Kodu (boş bırakırsan değişmez)</div>
+          <input className="win-input" value={form.pin} onChange={e => setForm({ ...form, pin: e.target.value })} placeholder="4-6 haneli rakam" maxLength={6} />
         </div>
 
         <div className="mb-2">
@@ -273,8 +274,8 @@ const AdminStaff = () => {
         </div>
 
         <div className="mb-2">
-          <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">Pin Kodu (ortak cihazlar için)</div>
-          <input className="win-input" value={form.pin} onChange={e => setForm({ ...form, pin: e.target.value })} placeholder="ör: 1234" />
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">Pin Kodu (ortak cihazlar için, 4-6 haneli rakam)</div>
+          <input className="win-input" value={form.pin} onChange={e => setForm({ ...form, pin: e.target.value })} placeholder="ör: 1234" maxLength={6} />
         </div>
 
         <div className="mb-2">
