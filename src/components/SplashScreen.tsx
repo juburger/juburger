@@ -14,7 +14,6 @@ const SplashScreen = () => {
       icon="🍔"
       title={`Masa ${tableNum}`}
       controls={[
-        { label: '←', onClick: () => {} },
         { label: '☰', onClick: () => navigate('/admin-login') },
       ]}
       statusItems={['Hazır']}
