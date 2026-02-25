@@ -147,7 +147,7 @@ const MenuScreen = () => {
           <span className="neu-sunken text-foreground px-2 py-0.5 rounded-full font-bold mr-2 text-xs">{count}</span>
           ürün sepette
         </div>
-        <div className="flex items-center gap-1"><strong>₺{total}</strong> <ArrowRight size={14} /> Sepet</div>
+        <button className="neu-flat px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1.5 cursor-pointer">₺{total} <ArrowRight size={14} /> Sepet</button>
       </div>
 
       <CartDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} tableNum={tableNum} userName={userName} />
