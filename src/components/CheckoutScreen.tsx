@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ChevronLeft, X } from 'lucide-react';
 import WinWindow from '@/components/WinWindow';
 import { useCart } from '@/contexts/CartContext';
 import { useToast95Context } from '@/contexts/Toast95Context';
@@ -61,8 +62,10 @@ const CheckoutScreen = () => {
     <WinWindow
       icon="💳"
       title="Ödeme — BurgerQR"
-      menuItems={[{ label: '← Menüye Dön', onClick: () => navigate(`/menu?table=${tableNum}&name=${encodeURIComponent(userName)}`) }]}
-      controls={[{ label: '×', onClick: () => navigate(`/menu?table=${tableNum}&name=${encodeURIComponent(userName)}`) }]}
+      controls={[
+        { label: <ChevronLeft size={14} />, onClick: () => navigate(`/menu?table=${tableNum}&name=${encodeURIComponent(userName)}`) },
+        { label: <X size={14} />, onClick: () => navigate(`/menu?table=${tableNum}&name=${encodeURIComponent(userName)}`) },
+      ]}
       statusItems={['Ödeme bekleniyor']}
     >
       <h1 className="text-base font-bold mb-1">Sipariş Özeti</h1>
@@ -85,12 +88,12 @@ const CheckoutScreen = () => {
       <div className="flex flex-col gap-2">
         {payOpts.map(o => (
           <div key={o.id}
-            className={`flex items-start gap-3 px-3 py-2.5 cursor-pointer rounded-xl transition-all ${selPay === o.id ? 'neu-btn-primary' : 'neu-flat'}`}
+            className={`flex items-start gap-3 px-3 py-2.5 cursor-pointer rounded-xl transition-all ${selPay === o.id ? 'neu-sunken' : 'neu-flat'}`}
             onClick={() => setSelPay(o.id)}>
             <input type="radio" name="pay" checked={selPay === o.id} onChange={() => setSelPay(o.id)} className="mt-0.5" />
             <div>
               <div className="text-sm">{o.icon} {o.title}</div>
-              <div className={`text-xs ${selPay === o.id ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>{o.desc}</div>
+              <div className="text-xs text-muted-foreground">{o.desc}</div>
             </div>
           </div>
         ))}
@@ -107,7 +110,7 @@ const CheckoutScreen = () => {
         <strong className="text-sm">TOPLAM</strong>
         <strong className="text-xl">₺{grand}</strong>
       </div>
-      <button className="neu-btn neu-btn-primary w-full text-center text-sm py-3" onClick={placeOrder} disabled={loading}>
+      <button className="neu-btn w-full text-center text-sm py-3" onClick={placeOrder} disabled={loading}>
         {loading ? 'Sipariş veriliyor...' : 'SİPARİŞ VER →'}
       </button>
     </WinWindow>
