@@ -14,8 +14,10 @@ const AdminTableTransfer = () => {
   const [sourceTable, setSourceTable] = useState<number | null>(null);
   const [targetTable, setTargetTable] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<'full' | 'items'>('full'); // full table move or item-by-item
+  const [mode, setMode] = useState<'full' | 'items'>('full');
   const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
+  const [sourceArea, setSourceArea] = useState<string>('open');
+  const [targetArea, setTargetArea] = useState<string | null>(null);
 
   const fetchData = async () => {
     const [{ data: a }, { data: t }, { data: o }] = await Promise.all([
@@ -37,8 +39,33 @@ const AdminTableTransfer = () => {
   });
 
   const openTableNums = Object.keys(ordersByTable).map(Number);
-  const sourceOrders = sourceTable !== null ? (ordersByTable[sourceTable] || []) : [];
 
+  const getTableDisplayName = (t: TableConfig) => {
+    const area = areas.find(a => a.id === t.area_id);
+    if (!area) return `Masa ${t.table_num}`;
+    const areaTablesAll = tables.filter(tb => tb.area_id === area.id).sort((a, b) => a.table_num - b.table_num);
+    const localIdx = areaTablesAll.findIndex(tb => tb.id === t.id) + 1;
+    return `${area.name} ${localIdx}`;
+  };
+
+  const getDisplayNameByNum = (num: number) => {
+    const t = tables.find(tb => tb.table_num === num);
+    return t ? getTableDisplayName(t) : `Masa ${num}`;
+  };
+
+  const getSourceTables = () => {
+    if (sourceArea === 'open') {
+      return tables.filter(t => openTableNums.includes(t.table_num));
+    }
+    return tables.filter(t => t.area_id === sourceArea && openTableNums.includes(t.table_num));
+  };
+
+  const getTargetTables = () => {
+    if (!targetArea) return [];
+    return tables.filter(t => t.area_id === targetArea && t.table_num !== sourceTable);
+  };
+
+  const sourceOrders = sourceTable !== null ? (ordersByTable[sourceTable] || []) : [];
   const allSourceItems: { name: string; qty: number; price: number; idx: number; orderId: string }[] = [];
   sourceOrders.forEach(o => {
     const items = Array.isArray(o.items) ? o.items : [];
@@ -177,18 +204,38 @@ const AdminTableTransfer = () => {
         {/* Source table selection */}
         <div>
           <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 font-bold">Kaynak Masa</div>
-          {openTableNums.length === 0 ? (
+          {/* Source area tabs */}
+          <div className="flex gap-1 flex-wrap mb-1.5">
+            <button
+              className={`text-[10px] px-2 py-0.5 cursor-pointer rounded-full transition-all ${sourceArea === 'open' ? 'neu-sunken text-foreground font-semibold' : 'neu-flat text-muted-foreground'}`}
+              onClick={() => { setSourceArea('open'); setSourceTable(null); setSelectedItems(new Set()); }}>
+              Açık ({openTableNums.length})
+            </button>
+            {areas.map(a => {
+              const areaOpenCount = tables.filter(t => t.area_id === a.id && openTableNums.includes(t.table_num)).length;
+              if (areaOpenCount === 0) return null;
+              return (
+                <button key={a.id}
+                  className={`text-[10px] px-2 py-0.5 cursor-pointer rounded-full transition-all ${sourceArea === a.id ? 'neu-sunken text-foreground font-semibold' : 'neu-flat text-muted-foreground'}`}
+                  onClick={() => { setSourceArea(a.id); setSourceTable(null); setSelectedItems(new Set()); }}>
+                  {a.name}
+                </button>
+              );
+            })}
+          </div>
+
+          {getSourceTables().length === 0 ? (
             <p className="text-muted-foreground text-center py-3 text-[10px]">Açık masa yok</p>
           ) : (
             <div className="grid grid-cols-3 gap-1">
-              {openTableNums.sort((a, b) => a - b).map(num => {
-                const tableOrders = ordersByTable[num] || [];
+              {getSourceTables().sort((a, b) => a.table_num - b.table_num).map(t => {
+                const tableOrders = ordersByTable[t.table_num] || [];
                 const total = tableOrders.reduce((s, o) => s + Number(o.total), 0);
                 return (
-                  <button key={num}
-                    className={`border p-1.5 text-center cursor-pointer text-[10px] ${sourceTable === num ? 'bg-primary text-primary-foreground border-primary' : 'border-foreground/30 hover:bg-muted/50'}`}
-                    onClick={() => { setSourceTable(num); setSelectedItems(new Set()); }}>
-                    <div className="font-bold">Masa {num}</div>
+                  <button key={t.id}
+                    className={`border rounded-lg p-1.5 text-center cursor-pointer text-[10px] ${sourceTable === t.table_num ? 'bg-primary text-primary-foreground border-primary' : 'border-foreground/30 hover:bg-muted/50'}`}
+                    onClick={() => { setSourceTable(t.table_num); setSelectedItems(new Set()); }}>
+                    <div className="font-bold truncate">{getTableDisplayName(t)}</div>
                     <div className="text-[9px] opacity-70">₺{total}</div>
                   </button>
                 );
@@ -198,9 +245,9 @@ const AdminTableTransfer = () => {
 
           {/* Show source items when selected */}
           {sourceTable !== null && allSourceItems.length > 0 && (
-            <div className="mt-2 border border-foreground">
-              <div className="bg-muted px-2 py-1 text-[10px] font-bold uppercase tracking-widest border-b border-foreground">
-                Masa {sourceTable} — ₺{sourceTotal}
+            <div className="mt-2 border border-foreground/30 rounded-lg overflow-hidden">
+              <div className="bg-muted px-2 py-1 text-[10px] font-bold uppercase tracking-widest border-b border-foreground/30">
+                {getDisplayNameByNum(sourceTable)} — ₺{sourceTotal}
               </div>
               {allSourceItems.map((item, idx) => (
                 <div key={idx} className={`flex items-center justify-between px-2 py-1 text-[11px] border-b border-dashed border-muted-foreground/20 last:border-b-0 ${mode === 'items' ? 'cursor-pointer hover:bg-muted/30' : ''} ${selectedItems.has(idx) ? 'bg-primary/10' : ''}`}
@@ -221,27 +268,44 @@ const AdminTableTransfer = () => {
         {/* Target table selection */}
         <div>
           <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 font-bold">Hedef Masa</div>
-          <div className="grid grid-cols-3 gap-1 max-h-[50vh] overflow-y-auto">
-            {tables.filter(t => t.table_num !== sourceTable).map(t => {
-              const hasOrders = openTableNums.includes(t.table_num);
-              return (
-                <button key={t.id}
-                  className={`border p-1.5 text-center cursor-pointer text-[10px] ${targetTable === t.table_num ? 'bg-primary text-primary-foreground border-primary' : hasOrders ? 'border-foreground/30 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/40' : 'border-foreground/30 hover:bg-muted/50'}`}
-                  onClick={() => setTargetTable(t.table_num)}>
-                  <div className="font-bold">Masa {t.table_num}</div>
-                  <div className="text-[9px] opacity-70">{hasOrders ? 'Dolu' : 'Boş'}</div>
-                </button>
-              );
-            })}
+          {/* Target area tabs */}
+          <div className="flex gap-1 flex-wrap mb-1.5">
+            {areas.map(a => (
+              <button key={a.id}
+                className={`text-[10px] px-2 py-0.5 cursor-pointer rounded-full transition-all ${targetArea === a.id ? 'neu-sunken text-foreground font-semibold' : 'neu-flat text-muted-foreground'}`}
+                onClick={() => { setTargetArea(a.id); setTargetTable(null); }}>
+                {a.name}
+              </button>
+            ))}
           </div>
+
+          {!targetArea ? (
+            <p className="text-muted-foreground text-center py-3 text-[10px]">Önce alan seçin</p>
+          ) : getTargetTables().length === 0 ? (
+            <p className="text-muted-foreground text-center py-3 text-[10px]">Bu alanda masa yok</p>
+          ) : (
+            <div className="grid grid-cols-3 gap-1 max-h-[50vh] overflow-y-auto">
+              {getTargetTables().map(t => {
+                const hasOrders = openTableNums.includes(t.table_num);
+                return (
+                  <button key={t.id}
+                    className={`border rounded-lg p-1.5 text-center cursor-pointer text-[10px] ${targetTable === t.table_num ? 'bg-primary text-primary-foreground border-primary' : hasOrders ? 'border-foreground/30 bg-amber-900/20 hover:bg-amber-900/40' : 'border-foreground/30 hover:bg-muted/50'}`}
+                    onClick={() => setTargetTable(t.table_num)}>
+                    <div className="font-bold truncate">{getTableDisplayName(t)}</div>
+                    <div className="text-[9px] opacity-70">{hasOrders ? 'Dolu' : 'Boş'}</div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Action */}
       {sourceTable !== null && targetTable !== null && (
-        <div className="mt-3 border-t border-foreground pt-2">
+        <div className="mt-3 border-t border-foreground/30 pt-2">
           <div className="text-center text-[12px] font-bold mb-2">
-            Masa {sourceTable} → Masa {targetTable}
+            {getDisplayNameByNum(sourceTable)} → {getDisplayNameByNum(targetTable)}
             {mode === 'items' && selectedItems.size > 0 && ` (${selectedItems.size} ürün)`}
           </div>
           <button
