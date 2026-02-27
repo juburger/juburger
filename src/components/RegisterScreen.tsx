@@ -62,7 +62,7 @@ const RegisterScreen = () => {
   return (
     <WinWindow
       icon="📝"
-      title="Kayıt — BurgerQR"
+      title="Kayıt"
       controls={[
         { label: <ChevronLeft size={14} />, onClick: () => navigate('/') },
         { label: <X size={14} />, onClick: () => navigate('/') },
