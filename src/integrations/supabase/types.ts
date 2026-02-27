@@ -566,6 +566,7 @@ export type Database = {
           capacity: number
           id: string
           is_active: boolean
+          name: string
           table_num: number
         }
         Insert: {
@@ -573,6 +574,7 @@ export type Database = {
           capacity?: number
           id?: string
           is_active?: boolean
+          name?: string
           table_num: number
         }
         Update: {
@@ -580,6 +582,7 @@ export type Database = {
           capacity?: number
           id?: string
           is_active?: boolean
+          name?: string
           table_num?: number
         }
         Relationships: [
