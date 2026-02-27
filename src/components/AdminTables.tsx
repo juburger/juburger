@@ -122,7 +122,7 @@ const AdminTables: React.FC<Props> = ({ onPrintOrder }) => {
           {selectedArea === 'open' ? 'Açık masa yok.' : 'Bu alanda masa yok.'}
         </p>
       ) : (
-        <div className={`grid gap-2`} style={{ gridTemplateColumns: `repeat(${getGridCols()}, 1fr)` }}>
+        <div className={`grid gap-1.5`} style={{ gridTemplateColumns: `repeat(${getGridCols()}, 1fr)` }}>
           {visibleTables.map(t => {
             const tableOrders = ordersByTable[t.table_num] || [];
             const hasOrders = tableOrders.length > 0;
@@ -137,7 +137,7 @@ const AdminTables: React.FC<Props> = ({ onPrintOrder }) => {
 
             return (
               <div key={t.id}
-                className={`border border-foreground/20 rounded-lg ${bgColor} ${textColor} cursor-pointer hover:opacity-90 active:opacity-75 transition-opacity aspect-[4/3] flex flex-col justify-between`}
+                className={`border border-foreground/20 rounded-lg ${bgColor} ${textColor} cursor-pointer hover:opacity-90 active:opacity-75 transition-opacity aspect-[5/3] flex flex-col justify-between`}
                 onClick={() => {
                   setSelectedTable({ tableNum: t.table_num, userName: hasOrders ? latestOrder.user_name : 'Admin' });
                 }}>
