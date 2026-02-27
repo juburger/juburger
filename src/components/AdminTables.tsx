@@ -64,6 +64,23 @@ const AdminTables: React.FC<Props> = ({ onPrintOrder }) => {
 
   const visibleTables = getVisibleTables();
 
+  // Build display name: "AreaName LocalIndex" (e.g. "Kaldırım Masa 3")
+  const getTableDisplayName = (t: TableConfig) => {
+    const area = areas.find(a => a.id === t.area_id);
+    if (!area) return `Masa ${t.table_num}`;
+    const areaTablesAll = tables.filter(tb => tb.area_id === area.id).sort((a, b) => a.table_num - b.table_num);
+    const localIdx = areaTablesAll.findIndex(tb => tb.id === t.id) + 1;
+    return `${area.name} ${localIdx}`;
+  };
+
+  // Determine grid columns based on area's table count
+  const getGridCols = () => {
+    if (selectedArea === 'open') return 2;
+    const count = visibleTables.length;
+    if (count <= 6) return 3;
+    return 4;
+  };
+
   const timeAgo = (dateStr: string) => {
     const diff = Date.now() - new Date(dateStr).getTime();
     const mins = Math.floor(diff / 60000);
@@ -106,7 +123,7 @@ const AdminTables: React.FC<Props> = ({ onPrintOrder }) => {
           {selectedArea === 'open' ? 'Açık masa yok.' : 'Bu alanda masa yok.'}
         </p>
       ) : (
-        <div className="grid grid-cols-2 gap-2">
+        <div className={`grid gap-2`} style={{ gridTemplateColumns: `repeat(${getGridCols()}, 1fr)` }}>
           {visibleTables.map(t => {
             const tableOrders = ordersByTable[t.table_num] || [];
             const hasOrders = tableOrders.length > 0;
@@ -117,38 +134,23 @@ const AdminTables: React.FC<Props> = ({ onPrintOrder }) => {
             const hasPreparing = tableOrders.some(o => o.status === 'preparing');
             const bgColor = hasWaiting ? statusColors.waiting : hasPreparing ? statusColors.preparing : hasOrders ? statusColors.ready : 'bg-card';
             const textColor = hasOrders ? 'text-white' : 'text-foreground';
+            const displayName = getTableDisplayName(t);
 
             return (
               <div key={t.id}
-                className={`border border-foreground ${bgColor} ${textColor} cursor-pointer hover:opacity-90 active:opacity-75 transition-opacity`}
+                className={`border border-foreground/20 rounded-lg ${bgColor} ${textColor} cursor-pointer hover:opacity-90 active:opacity-75 transition-opacity aspect-[4/3] flex flex-col justify-between`}
                 onClick={() => {
                   setSelectedTable({ tableNum: t.table_num, userName: hasOrders ? latestOrder.user_name : 'Admin' });
                 }}>
-                <div className="p-2.5">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="text-[13px] font-bold">Masa {t.table_num}</div>
-                      {hasOrders && (
-                        <div className="text-[10px] opacity-80">{timeAgo(latestOrder.created_at)}</div>
-                      )}
-                    </div>
-                    {hasOrders && (
-                      <div className="text-[10px] opacity-70">{tableOrders.length} sipariş</div>
-                    )}
-                  </div>
-
-                  {hasOrders ? (
+                <div className="p-3">
+                  <div className="text-[13px] font-bold">{displayName}</div>
+                  {hasOrders && (
                     <>
-                      <div className="mt-1.5 text-[10px] opacity-80">{latestOrder.user_name}</div>
+                      <div className="text-[10px] opacity-70 mt-1">{latestOrder.user_name} · {timeAgo(latestOrder.created_at)}</div>
+                      <div className="text-[10px] opacity-70">{tableOrders.length} sipariş</div>
                       <div className="text-[15px] font-bold mt-1">₺{tableTotal.toLocaleString('tr')}</div>
                     </>
-                  ) : (
-                    <div className="mt-2 text-[11px] text-muted-foreground">Boş</div>
                   )}
-                </div>
-
-                <div className={`px-2.5 py-1 text-[9px] uppercase tracking-widest border-t ${hasOrders ? 'border-white/20 opacity-70' : 'border-foreground/20 text-muted-foreground'}`}>
-                  {getAreaName(t.area_id)}
                 </div>
               </div>
             );
