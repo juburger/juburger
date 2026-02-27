@@ -28,14 +28,14 @@ const App = () => (
             <div className="flex justify-center min-h-screen">
                 <Routes>
                   <Route path="/" element={<div className="max-w-[500px] w-full mx-auto"><Index /></div>} />
-                  <Route path="/register" element={<div className="max-w-[480px] mx-auto"><Register /></div>} />
-                  <Route path="/menu" element={<div className="max-w-[480px] mx-auto"><MenuPage /></div>} />
-                  <Route path="/checkout" element={<div className="max-w-[480px] mx-auto"><Checkout /></div>} />
-                  <Route path="/success" element={<div className="max-w-[480px] mx-auto"><Success /></div>} />
-                  <Route path="/admin-login" element={<div className="max-w-[480px] mx-auto"><AdminLogin /></div>} />
-                  <Route path="/member-signup" element={<div className="max-w-[480px] mx-auto"><MemberSignup /></div>} />
+                  <Route path="/register" element={<div className="max-w-[500px] w-full mx-auto"><Register /></div>} />
+                  <Route path="/menu" element={<div className="max-w-[500px] w-full mx-auto"><MenuPage /></div>} />
+                  <Route path="/checkout" element={<div className="max-w-[500px] w-full mx-auto"><Checkout /></div>} />
+                  <Route path="/success" element={<div className="max-w-[500px] w-full mx-auto"><Success /></div>} />
+                  <Route path="/admin-login" element={<div className="max-w-[500px] w-full mx-auto"><AdminLogin /></div>} />
+                  <Route path="/member-signup" element={<div className="max-w-[500px] w-full mx-auto"><MemberSignup /></div>} />
                   <Route path="/admin" element={<Admin />} />
-                  <Route path="*" element={<div className="max-w-[480px] mx-auto"><NotFound /></div>} />
+                  <Route path="*" element={<div className="max-w-[500px] w-full mx-auto"><NotFound /></div>} />
                 </Routes>
             </div>
           </Toast95Provider>
