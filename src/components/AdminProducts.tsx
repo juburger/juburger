@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -147,7 +148,34 @@ const AdminProducts = () => {
 
   const getCatName = (catId: string | null) => categories.find(c => c.id === catId)?.name || '—';
 
-  // Product form modal
+  const moveProduct = async (product: Product, direction: 'up' | 'down') => {
+    // Get products in same category, sorted by sort_order
+    const sameCat = products
+      .filter(p => p.category_id === product.category_id)
+      .sort((a, b) => a.sort_order - b.sort_order);
+    const idx = sameCat.findIndex(p => p.id === product.id);
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= sameCat.length) return;
+    const other = sameCat[swapIdx];
+    await Promise.all([
+      supabase.from('products').update({ sort_order: other.sort_order }).eq('id', product.id),
+      supabase.from('products').update({ sort_order: product.sort_order }).eq('id', other.id),
+    ]);
+    fetchData();
+  };
+
+  const moveCategory = async (cat: Category, direction: 'up' | 'down') => {
+    const sorted = [...categories].sort((a, b) => a.sort_order - b.sort_order);
+    const idx = sorted.findIndex(c => c.id === cat.id);
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= sorted.length) return;
+    const other = sorted[swapIdx];
+    await Promise.all([
+      supabase.from('categories').update({ sort_order: other.sort_order }).eq('id', cat.id),
+      supabase.from('categories').update({ sort_order: cat.sort_order }).eq('id', other.id),
+    ]);
+    fetchData();
+  };
   if (showForm) {
     return (
       <div>
@@ -267,10 +295,14 @@ const AdminProducts = () => {
           {categories.length > 0 && (
             <div className="mt-2 border-t border-dashed border-muted-foreground/40 pt-1.5">
               <div className="text-[10px] text-muted-foreground mb-1">Mevcut kategoriler:</div>
-              {categories.map(c => (
+              {categories.map((c, i) => (
                 <div key={c.id} className="flex justify-between items-center text-[11px] py-0.5">
                   <span>{c.name}</span>
-                  <button className="text-[10px] text-destructive cursor-pointer bg-transparent border-none" onClick={() => deleteCategory(c.id)}>Sil</button>
+                  <div className="flex items-center gap-1">
+                    <button className="bg-transparent border-none cursor-pointer p-0 text-muted-foreground hover:text-foreground disabled:opacity-30" disabled={i === 0} onClick={() => moveCategory(c, 'up')}><ChevronUp size={14} /></button>
+                    <button className="bg-transparent border-none cursor-pointer p-0 text-muted-foreground hover:text-foreground disabled:opacity-30" disabled={i === categories.length - 1} onClick={() => moveCategory(c, 'down')}><ChevronDown size={14} /></button>
+                    <button className="text-[10px] text-destructive cursor-pointer bg-transparent border-none" onClick={() => deleteCategory(c.id)}>Sil</button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -283,10 +315,19 @@ const AdminProducts = () => {
         <p className="text-muted-foreground text-center py-3.5 text-xs">Ürün bulunamadı.</p>
       ) : (
         <div className="grid grid-cols-2 gap-2">
-          {filtered.map(p => (
+          {filtered.sort((a, b) => a.sort_order - b.sort_order).map((p, i) => {
+            const sameCat = filtered.filter(x => x.category_id === p.category_id).sort((a, b) => a.sort_order - b.sort_order);
+            const posInCat = sameCat.findIndex(x => x.id === p.id);
+            return (
             <div key={p.id} className={`border border-foreground ${!p.is_available ? 'opacity-50' : ''}`}>
               <div className="p-2">
                 <div className="flex justify-between items-start gap-1">
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <div className="flex flex-col">
+                      <button className="bg-transparent border-none cursor-pointer p-0 text-muted-foreground hover:text-foreground disabled:opacity-30" disabled={posInCat === 0} onClick={() => moveProduct(p, 'up')}><ChevronUp size={12} /></button>
+                      <button className="bg-transparent border-none cursor-pointer p-0 text-muted-foreground hover:text-foreground disabled:opacity-30" disabled={posInCat === sameCat.length - 1} onClick={() => moveProduct(p, 'down')}><ChevronDown size={12} /></button>
+                    </div>
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-[11px] font-bold truncate">{p.name}</div>
                     <div className="text-[10px] text-muted-foreground truncate">{p.description}</div>
@@ -305,7 +346,8 @@ const AdminProducts = () => {
                 <button className="flex-1 py-1 cursor-pointer bg-transparent border-none hover:bg-destructive/10 text-destructive" onClick={() => deleteProduct(p.id)}>Sil</button>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </>
