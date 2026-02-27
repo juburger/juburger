@@ -28,7 +28,7 @@ const SplashScreen = () => {
         </button>
       </div>
       <div className="h-px bg-border my-3" />
-      <p className="text-muted-foreground text-[11px]">© 2025 BurgerQR</p>
+      <p className="text-muted-foreground text-[11px]">© 2025 siparis.co</p>
     </WinWindow>
   );
 };
