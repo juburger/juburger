@@ -17,7 +17,6 @@ const SplashScreen = () => {
       controls={[
         { label: <Menu size={14} />, onClick: () => navigate('/admin-login') },
       ]}
-      statusItems={['Hazır']}
     >
       <div className="flex flex-col items-center justify-center py-8 gap-3">
         <button className="neu-btn text-sm font-medium" onClick={() => navigate(`/register?table=${tableNum}`)}>
@@ -27,8 +26,7 @@ const SplashScreen = () => {
           ⭐ Üye Ol
         </button>
       </div>
-      <div className="h-px bg-border my-3" />
-      <p className="text-muted-foreground text-[11px]">© 2025 siparis.co</p>
+      <p className="text-muted-foreground text-[11px] mt-4">© 2025 siparis.co</p>
     </WinWindow>
   );
 };
