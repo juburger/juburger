@@ -75,7 +75,6 @@ const AdminTables: React.FC<Props> = ({ onPrintOrder }) => {
 
   // Determine grid columns based on area's table count
   const getGridCols = () => {
-    if (selectedArea === 'open') return 2;
     const count = visibleTables.length;
     if (count <= 6) return 3;
     return 4;
