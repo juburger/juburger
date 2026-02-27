@@ -27,7 +27,7 @@ const App = () => (
           <Toast95Provider>
             <div className="flex justify-center min-h-screen">
                 <Routes>
-                  <Route path="/" element={<div className="max-w-[480px] mx-auto"><Index /></div>} />
+                  <Route path="/" element={<div className="max-w-[500px] w-full mx-auto"><Index /></div>} />
                   <Route path="/register" element={<div className="max-w-[480px] mx-auto"><Register /></div>} />
                   <Route path="/menu" element={<div className="max-w-[480px] mx-auto"><MenuPage /></div>} />
                   <Route path="/checkout" element={<div className="max-w-[480px] mx-auto"><Checkout /></div>} />
