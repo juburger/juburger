@@ -104,9 +104,9 @@ const AdminTableManagement = () => {
 
         {/* Table list */}
         {areaTables.length > 0 && (
-          <div className="grid grid-cols-3 gap-1.5 mb-2.5">
+          <div className="grid grid-cols-4 gap-1 mb-2.5">
             {areaTables.map(t => (
-              <div key={t.id} className="border border-foreground bg-muted aspect-[5/3] flex items-center justify-center text-[11px] font-bold text-center p-0.5">
+              <div key={t.id} className="border border-foreground bg-muted py-1.5 px-1 flex items-center justify-center text-[10px] font-bold text-center rounded">
                 {t.name || t.table_num}
               </div>
             ))}
