@@ -1,0 +1,1 @@
+ALTER TABLE public.tables ADD COLUMN name text NOT NULL DEFAULT '';

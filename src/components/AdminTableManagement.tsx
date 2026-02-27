@@ -3,7 +3,7 @@ import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
 
 interface TableArea { id: string; name: string; sort_order: number; }
-interface TableConfig { id: string; table_num: number; area_id: string | null; capacity: number; is_active: boolean; }
+interface TableConfig { id: string; table_num: number; area_id: string | null; capacity: number; is_active: boolean; name: string; }
 
 const AdminTableManagement = () => {
   const { showToast } = useToast95Context();
@@ -14,6 +14,7 @@ const AdminTableManagement = () => {
   const [editCapacity, setEditCapacity] = useState(4);
   const [editCols, setEditCols] = useState(6);
   const [editRows, setEditRows] = useState(4);
+  const [customTableName, setCustomTableName] = useState('');
 
   const fetchAll = async () => {
     const [{ data: a }, { data: t }] = await Promise.all([
@@ -82,6 +83,26 @@ const AdminTableManagement = () => {
     fetchAll();
   };
 
+  // Add single custom-named table
+  const addCustomTable = async () => {
+    if (!selectedArea) return;
+    const name = customTableName.trim();
+    if (!name) { showToast('Masa adı girin', false); return; }
+    // Use next available table_num
+    const maxNum = tables.length > 0 ? Math.max(...tables.map(t => t.table_num)) : 0;
+    const { error } = await supabase.from('tables').insert({
+      table_num: maxNum + 1,
+      area_id: selectedArea.id,
+      capacity: editCapacity,
+      is_active: true,
+      name,
+    });
+    if (error) { showToast('Masa eklenemedi', false); return; }
+    setCustomTableName('');
+    showToast(`Masa eklendi ✓`);
+    fetchAll();
+  };
+
   const areaTables = selectedArea ? tables.filter(t => t.area_id === selectedArea.id) : [];
 
   // Back to area list
@@ -110,6 +131,16 @@ const AdminTableManagement = () => {
             onChange={e => setEditRows(Number(e.target.value))} />
         </div>
 
+        <div className="mb-2.5">
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">Tek Masa Ekle (Özel İsim)</div>
+          <div className="flex gap-1.5">
+            <input className="win-input flex-1" type="text" placeholder="Masa adı (ör: VIP 1)"
+              value={customTableName} onChange={e => setCustomTableName(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && addCustomTable()} />
+            <button className="win-btn win-btn-primary text-[11px] py-1 px-3" onClick={addCustomTable}>+ Ekle</button>
+          </div>
+        </div>
+
         <button className="win-btn win-btn-primary text-[11px] py-1 px-3 w-full mb-2.5" onClick={generateTables}>
           📋 Masaları Otomatik İsimlendir
         </button>
@@ -118,8 +149,8 @@ const AdminTableManagement = () => {
         {areaTables.length > 0 && (
           <div className="grid gap-1.5 mb-2.5" style={{ gridTemplateColumns: `repeat(${editCols}, 1fr)` }}>
             {areaTables.map(t => (
-              <div key={t.id} className="border border-foreground bg-muted aspect-[4/3] flex items-center justify-center text-[11px] font-bold">
-                {t.table_num}
+              <div key={t.id} className="border border-foreground bg-muted aspect-[4/3] flex items-center justify-center text-[11px] font-bold text-center p-0.5">
+                {t.name || t.table_num}
               </div>
             ))}
           </div>
