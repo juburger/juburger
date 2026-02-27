@@ -12,7 +12,7 @@ interface WinWindowProps {
 
 const WinWindow = ({ icon, title, menuItems, controls, statusItems, children, bodyClass }: WinWindowProps) => {
   return (
-    <div className="min-h-screen p-4 bg-background overflow-x-hidden">
+    <div className="min-h-screen p-2 bg-background overflow-x-hidden">
       <div className="neu-raised max-w-full overflow-hidden p-1">
         {/* Title bar */}
         <div className="bg-card text-foreground px-3 py-2 flex items-center justify-between text-xs font-medium select-none" style={{ borderRadius: 'calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0 0' }}>
