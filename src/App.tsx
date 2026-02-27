@@ -14,6 +14,7 @@ import AdminLogin from "./pages/AdminLogin";
 import Admin from "./pages/Admin";
 import MemberSignup from "./pages/MemberSignup";
 import NotFound from "./pages/NotFound";
+import Install from "./pages/Install";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
                   <Route path="/admin-login" element={<div className="max-w-[500px] w-full mx-auto"><AdminLogin /></div>} />
                   <Route path="/member-signup" element={<div className="max-w-[500px] w-full mx-auto"><MemberSignup /></div>} />
                   <Route path="/admin" element={<Admin />} />
+                  <Route path="/install" element={<div className="max-w-[500px] w-full mx-auto"><Install /></div>} />
                   <Route path="*" element={<div className="max-w-[500px] w-full mx-auto"><NotFound /></div>} />
                 </Routes>
             </div>
