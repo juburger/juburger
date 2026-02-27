@@ -12,8 +12,6 @@ const AdminTableManagement = () => {
   const [selectedArea, setSelectedArea] = useState<TableArea | null>(null);
   const [newAreaName, setNewAreaName] = useState('');
   const [editCapacity, setEditCapacity] = useState(4);
-  const [editCols, setEditCols] = useState(6);
-  const [editRows, setEditRows] = useState(4);
   const [customTableName, setCustomTableName] = useState('');
 
   const fetchAll = async () => {
@@ -59,36 +57,11 @@ const AdminTableManagement = () => {
     }
   };
 
-  // Auto-generate tables for selected area
-  const generateTables = async () => {
-    if (!selectedArea) return;
-    const count = editCols * editRows;
-    // Delete existing tables for this area
-    await supabase.from('tables').delete().eq('area_id', selectedArea.id);
-
-    // Find max table_num across all areas to avoid conflicts
-    const otherTables = tables.filter(t => t.area_id !== selectedArea.id);
-    const maxNum = otherTables.length > 0 ? Math.max(...otherTables.map(t => t.table_num)) : 0;
-
-    const newTables = Array.from({ length: count }, (_, i) => ({
-      table_num: maxNum + i + 1,
-      area_id: selectedArea.id,
-      capacity: editCapacity,
-      is_active: true,
-    }));
-
-    const { error } = await supabase.from('tables').insert(newTables);
-    if (error) { showToast('Masalar oluşturulamadı', false); return; }
-    showToast(`${count} masa oluşturuldu ✓`);
-    fetchAll();
-  };
-
   // Add single custom-named table
   const addCustomTable = async () => {
     if (!selectedArea) return;
     const name = customTableName.trim();
     if (!name) { showToast('Masa adı girin', false); return; }
-    // Use next available table_num
     const maxNum = tables.length > 0 ? Math.max(...tables.map(t => t.table_num)) : 0;
     const { error } = await supabase.from('tables').insert({
       table_num: maxNum + 1,
@@ -105,7 +78,7 @@ const AdminTableManagement = () => {
 
   const areaTables = selectedArea ? tables.filter(t => t.area_id === selectedArea.id) : [];
 
-  // Back to area list
+  // Area detail view
   if (selectedArea) {
     return (
       <div>
@@ -120,19 +93,7 @@ const AdminTableManagement = () => {
         </div>
 
         <div className="mb-2.5">
-          <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">Yan Yana Masa Sayısı</div>
-          <input className="win-input" type="number" min={1} max={10} value={editCols}
-            onChange={e => setEditCols(Number(e.target.value))} />
-        </div>
-
-        <div className="mb-2.5">
-          <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">Alt Alta Masa Sayısı</div>
-          <input className="win-input" type="number" min={1} max={10} value={editRows}
-            onChange={e => setEditRows(Number(e.target.value))} />
-        </div>
-
-        <div className="mb-2.5">
-          <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">Tek Masa Ekle (Özel İsim)</div>
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">Masa Oluştur</div>
           <div className="flex gap-1.5">
             <input className="win-input flex-1" type="text" placeholder="Masa adı (ör: VIP 1)"
               value={customTableName} onChange={e => setCustomTableName(e.target.value)}
@@ -141,15 +102,11 @@ const AdminTableManagement = () => {
           </div>
         </div>
 
-        <button className="win-btn win-btn-primary text-[11px] py-1 px-3 w-full mb-2.5" onClick={generateTables}>
-          📋 Masaları Otomatik İsimlendir
-        </button>
-
-        {/* Table grid preview */}
+        {/* Table list */}
         {areaTables.length > 0 && (
-          <div className="grid gap-1.5 mb-2.5" style={{ gridTemplateColumns: `repeat(${editCols}, 1fr)` }}>
+          <div className="grid grid-cols-3 gap-1.5 mb-2.5">
             {areaTables.map(t => (
-              <div key={t.id} className="border border-foreground bg-muted aspect-[4/3] flex items-center justify-center text-[11px] font-bold text-center p-0.5">
+              <div key={t.id} className="border border-foreground bg-muted aspect-[5/3] flex items-center justify-center text-[11px] font-bold text-center p-0.5">
                 {t.name || t.table_num}
               </div>
             ))}
