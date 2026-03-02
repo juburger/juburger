@@ -203,14 +203,7 @@ const AdminPanel = () => {
     { id: 'closed', label: 'Kapanan Masalar' },
     { id: 'transfer', label: 'Masa Taşıma' },
     { id: 'accounts', label: 'Cari Hesaplar' },
-    { id: 'members', label: 'Üyeler' },
     { id: 'quick', label: 'Hızlı Sipariş' },
-    { id: 'stats', label: 'İstatistik' },
-    { id: 'reports', label: 'Raporlar' },
-    { id: 'products', label: 'Ürünler' },
-    { id: 'settings', label: 'Ayarlar' },
-    { id: 'qr', label: 'QR Kodlar' },
-    { id: 'logs', label: 'Logs' },
   ];
 
   const filters: { id: FilterType; label: string }[] = [
