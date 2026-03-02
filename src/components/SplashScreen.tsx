@@ -18,6 +18,7 @@ const SplashScreen = () => {
   const [categories, setCategories] = useState<DbCategory[]>([]);
   const [products, setProducts] = useState<DbProduct[]>([]);
   const [activeCat, setActiveCat] = useState<string | null>(null);
+  const [menuExpanded, setMenuExpanded] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -74,11 +75,11 @@ const SplashScreen = () => {
             {categories.map(c => (
               <button key={c.id}
                 className={`text-xs px-3 py-1.5 cursor-pointer rounded-full transition-all ${activeCat === c.id ? 'neu-sunken' : 'neu-flat'}`}
-                onClick={() => setActiveCat(c.id)}>{c.name}</button>
+                onClick={() => { setActiveCat(activeCat === c.id ? null : c.id); setMenuExpanded(true); }}>{c.name}</button>
             ))}
           </div>
 
-          {grouped.filter(g => !activeCat || g.catId === activeCat).map(group => (
+          {menuExpanded && grouped.filter(g => !activeCat || g.catId === activeCat).map(group => (
             <div key={group.catId}>
               <div className="text-xs font-bold mt-3 mb-1.5 pb-1 uppercase tracking-widest text-muted-foreground border-b border-border/50">
                 {group.cat}
