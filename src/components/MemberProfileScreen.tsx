@@ -4,6 +4,7 @@ import { ChevronLeft } from 'lucide-react';
 import WinWindow from '@/components/WinWindow';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { useTenantId } from '@/hooks/useTenantQuery';
 
 interface MemberInfo {
   id: string;
@@ -35,6 +36,7 @@ const MemberProfileScreen = () => {
   const [member, setMember] = useState<MemberInfo | null>(null);
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const tenantId = useTenantId();
 
   useEffect(() => {
     if (!memberId) {
@@ -45,15 +47,15 @@ const MemberProfileScreen = () => {
     }
     const fetchData = async () => {
       const [{ data: m }, { data: o }] = await Promise.all([
-        supabase.from('members').select('*').eq('id', memberId).single(),
-        supabase.from('orders').select('*').eq('member_id', memberId).order('created_at', { ascending: false }).limit(50),
+        supabase.from('members').select('*').eq('id', memberId).eq('tenant_id', tenantId).single(),
+        supabase.from('orders').select('*').eq('member_id', memberId).eq('tenant_id', tenantId).order('created_at', { ascending: false }).limit(50),
       ]);
       if (m) setMember(m as any);
       if (o) setOrders(o as any);
       setLoading(false);
     };
     fetchData();
-  }, [memberId]);
+  }, [memberId, tenantId]);
 
   const availablePoints = member ? member.total_points - member.used_points : 0;
 

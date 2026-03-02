@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
 import type { Order } from '@/data/menu';
+import { useTenantId } from '@/hooks/useTenantQuery';
 
 const payLabels: Record<string, string> = { nakit: 'Nakit', 'kredi kartı': 'Kredi Kartı', havale: 'Havale', cash: 'Nakit', card: 'Kart', pos: 'POS', cari: 'Cari' };
 
@@ -11,17 +12,19 @@ interface Props {
 
 const AdminClosedTables: React.FC<Props> = ({ onPrintOrder }) => {
   const { showToast } = useToast95Context();
+  const tenantId = useTenantId();
   const [closedOrders, setClosedOrders] = useState<Order[]>([]);
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
   const [reopening, setReopening] = useState<string | null>(null);
 
   const fetchClosed = async () => {
-    // Get today's paid orders
+    if (!tenantId) return;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const { data } = await supabase
       .from('orders')
       .select('*')
+      .eq('tenant_id', tenantId)
       .eq('status', 'paid')
       .gte('created_at', today.toISOString())
       .order('updated_at', { ascending: false })
@@ -35,7 +38,7 @@ const AdminClosedTables: React.FC<Props> = ({ onPrintOrder }) => {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => fetchClosed())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, []);
+  }, [tenantId]);
 
   // Group by table_num
   const byTable: Record<number, Order[]> = {};
@@ -66,6 +69,7 @@ const AdminClosedTables: React.FC<Props> = ({ onPrintOrder }) => {
       user_name: 'Administrator',
       action: 'Masa tekrar açıldı',
       details: `(Ödeme iptal edildi — ₺${tableOrders.reduce((s, o) => s + Number(o.total), 0)})`,
+      tenant_id: tenantId,
     });
 
     showToast(`Masa ${tableNum} tekrar açıldı ✓`);
@@ -87,6 +91,7 @@ const AdminClosedTables: React.FC<Props> = ({ onPrintOrder }) => {
       user_name: 'Administrator',
       action: 'Ödeme türü değiştirildi',
       details: `(Masa ${tableNum} → ${payLabels[newPaymentType] || newPaymentType})`,
+      tenant_id: tenantId,
     });
 
     showToast(`Ödeme türü güncellendi: ${payLabels[newPaymentType] || newPaymentType} ✓`);

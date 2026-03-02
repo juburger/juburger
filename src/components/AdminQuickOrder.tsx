@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
 import type { Order } from '@/data/menu';
+import { useTenantId } from '@/hooks/useTenantQuery';
 
 interface Product {
   id: string;
@@ -48,6 +49,7 @@ interface Props {
 
 const AdminQuickOrder: React.FC<Props> = ({ onPrintOrder }) => {
   const { showToast } = useToast95Context();
+  const tenantId = useTenantId();
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [productOptions, setProductOptions] = useState<ProductOption[]>([]);
@@ -60,17 +62,18 @@ const AdminQuickOrder: React.FC<Props> = ({ onPrintOrder }) => {
 
   useEffect(() => {
     const fetch = async () => {
+      if (!tenantId) return;
       const [{ data: cats }, { data: prods }, { data: opts }] = await Promise.all([
-        supabase.from('categories').select('*').order('sort_order'),
-        supabase.from('products').select('*').eq('is_available', true).order('sort_order'),
-        supabase.from('product_options').select('*').order('sort_order'),
+        supabase.from('categories').select('*').eq('tenant_id', tenantId).order('sort_order'),
+        supabase.from('products').select('*').eq('tenant_id', tenantId).eq('is_available', true).order('sort_order'),
+        supabase.from('product_options').select('*').eq('tenant_id', tenantId).order('sort_order'),
       ]);
       if (cats) { setCategories(cats); if (cats.length > 0) setSelectedCat(cats[0].id); }
       if (prods) setProducts(prods);
       if (opts) setProductOptions(opts as ProductOption[]);
     };
     fetch();
-  }, []);
+  }, [tenantId]);
 
   const filteredProducts = searchQuery.trim()
     ? products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -136,6 +139,7 @@ const AdminQuickOrder: React.FC<Props> = ({ onPrintOrder }) => {
       total,
       status: 'preparing',
       payment_type: 'cash',
+      tenant_id: tenantId,
     }).select().single();
 
     if (error) { showToast('Sipariş oluşturulamadı', false); return; }
@@ -146,6 +150,7 @@ const AdminQuickOrder: React.FC<Props> = ({ onPrintOrder }) => {
       action: 'Hızlı sipariş eklendi!',
       details: `(${trimmed} - ${items.map(i => `${i.qty}x ${i.name}`).join(', ')})`,
       amount: total,
+      tenant_id: tenantId,
     });
 
     if (onPrintOrder && newOrder && localStorage.getItem('ju_print_server') === '1') {

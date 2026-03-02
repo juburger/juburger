@@ -4,6 +4,7 @@ import { ChevronLeft, X } from 'lucide-react';
 import WinWindow from '@/components/WinWindow';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
+import { useTenantId } from '@/hooks/useTenantQuery';
 
 const RegisterScreen = () => {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ const RegisterScreen = () => {
   const [memberMode, setMemberMode] = useState(!!existingMemberId);
   const [memberFound, setMemberFound] = useState<{ id: string; name: string; points: number } | null>(null);
   const { showToast } = useToast95Context();
+  const tenantId = useTenantId();
 
   // Auto-load member if returning with member param
   useEffect(() => {
@@ -39,7 +41,7 @@ const RegisterScreen = () => {
     const cleanPhone = phone.replace(/\s/g, '');
     if (cleanPhone.length < 10) { showToast('Geçerli telefon numarası girin', false); return; }
     setLoading(true);
-    const { data } = await supabase.from('members').select('id, name, total_points, used_points').eq('phone', cleanPhone).maybeSingle();
+    const { data } = await supabase.from('members').select('id, name, total_points, used_points').eq('phone', cleanPhone).eq('tenant_id', tenantId).maybeSingle();
     if (data) {
       const m = data as any;
       setMemberFound({ id: m.id, name: m.name, points: m.total_points - m.used_points });
@@ -65,6 +67,7 @@ const RegisterScreen = () => {
         await supabase.from('profiles').insert({
           user_id: data.user.id,
           display_name: name.trim(),
+          tenant_id: tenantId,
         });
       }
 

@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
 import type { Order } from '@/data/menu';
+import { useTenantId } from '@/hooks/useTenantQuery';
 
 interface TableArea { id: string; name: string; sort_order: number; }
 interface TableConfig { id: string; table_num: number; area_id: string | null; capacity: number; is_active: boolean; }
 
 const AdminTableTransfer = () => {
   const { showToast } = useToast95Context();
+  const tenantId = useTenantId();
   const [areas, setAreas] = useState<TableArea[]>([]);
   const [tables, setTables] = useState<TableConfig[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -20,17 +22,18 @@ const AdminTableTransfer = () => {
   const [targetArea, setTargetArea] = useState<string | null>(null);
 
   const fetchData = async () => {
+    if (!tenantId) return;
     const [{ data: a }, { data: t }, { data: o }] = await Promise.all([
-      supabase.from('table_areas').select('*').order('sort_order'),
-      supabase.from('tables').select('*').order('table_num'),
-      supabase.from('orders').select('*').in('status', ['waiting', 'preparing', 'ready']).order('created_at', { ascending: false }),
+      supabase.from('table_areas').select('*').eq('tenant_id', tenantId).order('sort_order'),
+      supabase.from('tables').select('*').eq('tenant_id', tenantId).order('table_num'),
+      supabase.from('orders').select('*').eq('tenant_id', tenantId).in('status', ['waiting', 'preparing', 'ready']).order('created_at', { ascending: false }),
     ]);
     if (a) setAreas(a);
     if (t) setTables(t);
     if (o) setOrders(o as unknown as Order[]);
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [tenantId]);
 
   const ordersByTable: Record<number, Order[]> = {};
   orders.forEach(o => {
@@ -89,6 +92,7 @@ const AdminTableTransfer = () => {
         action: 'Masa taşındı',
         details: `Masa ${sourceTable} → Masa ${targetTable} (₺${sourceTotal})`,
         amount: sourceTotal,
+        tenant_id: tenantId,
       });
       showToast(`Masa ${sourceTable} → Masa ${targetTable} taşındı ✓`);
       setSourceTable(null);
@@ -148,6 +152,7 @@ const AdminTableTransfer = () => {
           total: movedTotal,
           status: order.status as any,
           payment_type: order.payment_type,
+          tenant_id: tenantId,
         } as any);
 
         if (remainingItems.length > 0) {
@@ -164,6 +169,7 @@ const AdminTableTransfer = () => {
         user_name: 'Administrator',
         action: 'Ürün taşındı',
         details: `Masa ${sourceTable} → Masa ${targetTable} (${movedNames})`,
+        tenant_id: tenantId,
       });
 
       showToast(`Ürünler Masa ${targetTable}'e taşındı ✓`);
