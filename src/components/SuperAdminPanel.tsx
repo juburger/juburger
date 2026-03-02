@@ -54,33 +54,55 @@ const SuperAdminPanel: React.FC = () => {
   // Check if user is authenticated and has admin role
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const { data: role } = await supabase
+      try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) throw sessionError;
+
+        if (session?.user) {
+          const { data: role, error: roleError } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', session.user.id)
+            .eq('role', 'admin')
+            .maybeSingle();
+
+          if (roleError) throw roleError;
+          setAuthed(!!role);
+          if (!role) showToast('Süper admin yetkisi yok', false);
+        } else {
+          setAuthed(false);
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        setAuthed(false);
+        showToast('Oturum kontrolünde hata oluştu', false);
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      try {
+        if (!session) {
+          setAuthed(false);
+          return;
+        }
+
+        const { data: role, error: roleError } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', session.user.id)
           .eq('role', 'admin')
           .maybeSingle();
-        setAuthed(!!role);
-        if (!role) showToast('Süper admin yetkisi yok', false);
-      }
-      setAuthLoading(false);
-    };
-    checkAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!session) {
+        if (roleError) throw roleError;
+        setAuthed(!!role);
+      } catch (error) {
+        console.error('Auth state change error:', error);
         setAuthed(false);
-        return;
       }
-      const { data: role } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', session.user.id)
-        .eq('role', 'admin')
-        .maybeSingle();
-      setAuthed(!!role);
     });
 
     return () => subscription.unsubscribe();
