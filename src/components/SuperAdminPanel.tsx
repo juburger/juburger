@@ -31,11 +31,69 @@ const SuperAdminPanel: React.FC = () => {
   });
   const [saving, setSaving] = useState(false);
 
+  // Auth state
+  const [authed, setAuthed] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginLoading, setLoginLoading] = useState(false);
+
   // Admin creation state
   const [showAdminForm, setShowAdminForm] = useState(false);
   const [adminTenant, setAdminTenant] = useState<Tenant | null>(null);
   const [adminForm, setAdminForm] = useState({ email: '', password: '' });
   const [creatingAdmin, setCreatingAdmin] = useState(false);
+
+  // Check if user is authenticated and has admin role
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const { data: role } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .eq('role', 'admin')
+          .maybeSingle();
+        setAuthed(!!role);
+        if (!role) showToast('Süper admin yetkisi yok', false);
+      }
+      setAuthLoading(false);
+    };
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!session) {
+        setAuthed(false);
+        return;
+      }
+      const { data: role } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+      setAuthed(!!role);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogin = async () => {
+    if (!loginEmail || !loginPassword) {
+      showToast('E-posta ve şifre gerekli', false);
+      return;
+    }
+    setLoginLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: loginEmail,
+      password: loginPassword,
+    });
+    if (error) {
+      showToast('Giriş hatası: ' + error.message, false);
+    }
+    setLoginLoading(false);
+  };
 
   const fetchTenants = async () => {
     const { data, error } = await supabase
@@ -50,7 +108,7 @@ const SuperAdminPanel: React.FC = () => {
     setLoading(false);
   };
 
-  useEffect(() => { fetchTenants(); }, []);
+  useEffect(() => { if (authed) fetchTenants(); }, [authed]);
 
   const openAdd = () => {
     setEditTenant(null);
@@ -195,6 +253,50 @@ const SuperAdminPanel: React.FC = () => {
     await supabase.auth.signOut();
     navigate('/');
   };
+
+  // Login screen
+  if (authLoading) {
+    return (
+      <WinWindow icon="🏢" title="Süper Admin — siparis.co">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-sm text-muted-foreground">Kontrol ediliyor...</div>
+        </div>
+      </WinWindow>
+    );
+  }
+
+  if (!authed) {
+    return (
+      <WinWindow
+        icon="🏢"
+        title="Süper Admin Girişi — siparis.co"
+        controls={[{ label: '×', onClick: () => navigate('/') }]}
+      >
+        <div className="flex flex-col items-center py-8">
+          <div className="text-3xl mb-3">🔐</div>
+          <h2 className="text-[15px] font-bold mb-4">Süper Admin Girişi</h2>
+          <div className="w-full max-w-xs space-y-3">
+            <div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">E-posta</div>
+              <input className="neu-input w-full" type="email" value={loginEmail}
+                onChange={e => setLoginEmail(e.target.value)} placeholder="admin@siparis.co" />
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Şifre</div>
+              <input className="neu-input w-full" type="password" value={loginPassword}
+                onChange={e => setLoginPassword(e.target.value)} placeholder="••••••"
+                onKeyDown={e => e.key === 'Enter' && handleLogin()} />
+            </div>
+            <button className="neu-btn neu-btn-primary w-full" onClick={handleLogin} disabled={loginLoading}>
+              {loginLoading ? 'Giriş yapılıyor...' : '🔑 Giriş Yap'}
+            </button>
+          </div>
+          <button className="text-[10px] text-muted-foreground mt-4 cursor-pointer bg-transparent border-none hover:text-foreground"
+            onClick={() => navigate('/')}>← Ana Sayfa</button>
+        </div>
+      </WinWindow>
+    );
+  }
 
   if (showAdminForm && adminTenant) {
     return (
