@@ -53,11 +53,11 @@ const SplashScreen = () => {
         { label: <Menu size={14} />, onClick: () => navigate('/admin-login') },
       ]}
     >
-      <div className="flex flex-col items-center justify-center py-4 gap-3">
-        <button className="neu-btn text-sm font-medium" onClick={() => navigate(`/register?table=${tableNum}`)}>
+      <div className="flex flex-col items-stretch gap-2.5 py-4 px-2">
+        <button className="neu-btn text-sm font-semibold py-3 w-full" onClick={() => navigate(`/register?table=${tableNum}`)}>
           🍽️ Sipariş Ver
         </button>
-        <button className="neu-btn text-[11px]" onClick={() => navigate(`/member-signup?table=${tableNum}`)}>
+        <button className="neu-btn text-sm font-medium py-3 w-full" onClick={() => navigate(`/member-signup?table=${tableNum}`)}>
           ⭐ Üye Ol
         </button>
       </div>
