@@ -53,10 +53,19 @@ const SuperAdminPanel: React.FC = () => {
 
   // Check if user is authenticated and has admin role
   useEffect(() => {
+    let isActive = true;
+
+    // Safety net: never keep user on endless "Kontrol ediliyor..."
+    const loadingGuard = window.setTimeout(() => {
+      if (isActive) setAuthLoading(false);
+    }, 3000);
+
     const checkAuth = async () => {
       try {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         if (sessionError) throw sessionError;
+
+        if (!isActive) return;
 
         if (session?.user) {
           const { data: role, error: roleError } = await supabase
@@ -67,6 +76,8 @@ const SuperAdminPanel: React.FC = () => {
             .maybeSingle();
 
           if (roleError) throw roleError;
+          if (!isActive) return;
+
           setAuthed(!!role);
           if (!role) showToast('Süper admin yetkisi yok', false);
         } else {
@@ -74,10 +85,12 @@ const SuperAdminPanel: React.FC = () => {
         }
       } catch (error) {
         console.error('Auth check error:', error);
-        setAuthed(false);
-        showToast('Oturum kontrolünde hata oluştu', false);
+        if (isActive) {
+          setAuthed(false);
+          showToast('Oturum kontrolünde hata oluştu', false);
+        }
       } finally {
-        setAuthLoading(false);
+        if (isActive) setAuthLoading(false);
       }
     };
 
@@ -85,8 +98,11 @@ const SuperAdminPanel: React.FC = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       try {
+        if (!isActive) return;
+
         if (!session) {
           setAuthed(false);
+          setAuthLoading(false);
           return;
         }
 
@@ -98,14 +114,24 @@ const SuperAdminPanel: React.FC = () => {
           .maybeSingle();
 
         if (roleError) throw roleError;
+        if (!isActive) return;
+
         setAuthed(!!role);
+        setAuthLoading(false);
       } catch (error) {
         console.error('Auth state change error:', error);
-        setAuthed(false);
+        if (isActive) {
+          setAuthed(false);
+          setAuthLoading(false);
+        }
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isActive = false;
+      window.clearTimeout(loadingGuard);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleLogin = async () => {
@@ -113,15 +139,23 @@ const SuperAdminPanel: React.FC = () => {
       showToast('E-posta ve şifre gerekli', false);
       return;
     }
+
     setLoginLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: loginEmail,
-      password: loginPassword,
-    });
-    if (error) {
-      showToast('Giriş hatası: ' + error.message, false);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: loginEmail,
+        password: loginPassword,
+      });
+
+      if (error) {
+        showToast('Giriş hatası: ' + error.message, false);
+      }
+    } catch (error: any) {
+      showToast('Giriş hatası: ' + (error?.message || 'Bilinmeyen hata'), false);
+    } finally {
+      setLoginLoading(false);
+      setAuthLoading(false);
     }
-    setLoginLoading(false);
   };
 
   const fetchTenants = async () => {
