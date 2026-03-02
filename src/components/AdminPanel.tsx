@@ -201,8 +201,8 @@ const AdminPanel = () => {
     { id: 'orders', label: `Siparişler ${waitingCount > 0 ? `(${waitingCount})` : ''}` },
     { id: 'quick', label: 'Hızlı Sipariş' },
     { id: 'tables', label: 'Masalar' },
-    { id: 'closed', label: 'Kapanan Masalar' },
     { id: 'transfer', label: 'Masa Taşıma' },
+    { id: 'closed', label: 'Kapanan Masalar' },
     { id: 'accounts', label: 'Cari Hesaplar' },
   ];
 
