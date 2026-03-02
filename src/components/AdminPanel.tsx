@@ -115,10 +115,8 @@ const AdminPanel = () => {
         const newOrder = payload.new as unknown as Order;
         if (!knownOrderIds.current.has(newOrder.id)) {
           knownOrderIds.current.add(newOrder.id);
-          // Only auto-print if this device is the print server AND auto-print is enabled
-          if (localStorage.getItem('ju_print_server') === '1') {
-            triggerPrint(newOrder);
-          }
+          // Auto-print all new orders
+          triggerPrint(newOrder);
         }
         fetchOrders();
       })
