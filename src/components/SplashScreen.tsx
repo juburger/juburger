@@ -104,6 +104,18 @@ const SplashScreen = () => {
       )}
 
       <p className="text-muted-foreground text-[11px] mt-6 text-center">© 2025 siparis.co</p>
+
+      {/* Ad Banners */}
+      {tenant?.ad_banner_1 && (
+        <div className="mt-4">
+          <img src={tenant.ad_banner_1} alt="Reklam" className="w-full rounded-xl object-cover" />
+        </div>
+      )}
+      {tenant?.ad_banner_2 && (
+        <div className="mt-3">
+          <img src={tenant.ad_banner_2} alt="Reklam" className="w-full rounded-xl object-cover" />
+        </div>
+      )}
     </WinWindow>
   );
 };
