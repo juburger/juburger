@@ -22,9 +22,6 @@ const SplashScreen = () => {
         <button className="neu-btn text-sm font-medium" onClick={() => navigate(`/register?table=${tableNum}`)}>
           Sipariş Ver
         </button>
-        <button className="neu-btn text-[11px]" onClick={() => navigate(`/member-signup?table=${tableNum}`)}>
-          ⭐ Üye Ol
-        </button>
       </div>
       <p className="text-muted-foreground text-[11px] mt-4">© 2025 siparis.co</p>
     </WinWindow>
