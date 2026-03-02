@@ -77,7 +77,15 @@ const SuperAdminPanel: React.FC = () => {
 
     const checkAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+        if (sessionError) {
+          console.error('Session restore error:', sessionError);
+          await supabase.auth.signOut();
+          if (isActive) setAuthed(false);
+          return;
+        }
+
         if (!isActive) return;
 
         if (session?.user) {
