@@ -250,8 +250,8 @@ const AdminPanel = () => {
             <p className="text-muted-foreground text-center py-3.5 text-xs">Sipariş bulunamadı.</p>
           ) : filteredOrders.map(o => (
             <div key={o.id} className="neu-raised mb-3 text-xs overflow-hidden">
-              <div className="bg-card text-foreground px-3 py-2 flex justify-between items-center text-xs rounded-t-[var(--radius)] neu-flat">
-                <span>#{o.id.substring(0, 6).toUpperCase()} — Masa {o.table_num} — {o.user_name}</span>
+              <div className="bg-card px-3 py-2 flex justify-between items-center text-xs rounded-t-[var(--radius)] neu-flat">
+                <span className="text-[#5EBC80] font-semibold">#{o.id.substring(0, 6).toUpperCase()} — Masa {o.table_num} — {o.user_name}</span>
                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider ${statusClass[o.status] || ''}`}>
                   {statusLabels[o.status] || o.status}
                 </span>
