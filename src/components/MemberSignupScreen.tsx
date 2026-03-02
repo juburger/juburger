@@ -4,6 +4,7 @@ import { ChevronLeft } from 'lucide-react';
 import WinWindow from '@/components/WinWindow';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
+import { useTenantId } from '@/hooks/useTenantQuery';
 
 const MemberSignupScreen = () => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const MemberSignupScreen = () => {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const tenantId = useTenantId();
 
   const handleSignup = async () => {
     if (!name.trim()) { showToast('Lütfen adınızı girin', false); return; }
@@ -28,7 +30,7 @@ const MemberSignupScreen = () => {
         await supabase.auth.signInAnonymously();
       }
 
-      const { data: existing } = await supabase.from('members').select('id').eq('phone', cleanPhone).maybeSingle();
+      const { data: existing } = await supabase.from('members').select('id').eq('phone', cleanPhone).eq('tenant_id', tenantId).maybeSingle();
       if (existing) {
         showToast('Bu numara zaten kayıtlı! Üye girişi yapabilirsiniz.', false);
         setLoading(false);
@@ -38,6 +40,7 @@ const MemberSignupScreen = () => {
       const { error } = await supabase.from('members').insert({
         name: name.trim(),
         phone: cleanPhone,
+        tenant_id: tenantId,
       });
       if (error) throw error;
 

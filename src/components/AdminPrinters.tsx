@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
+import { useTenantId } from '@/hooks/useTenantQuery';
 
 interface Printer {
   id: string;
@@ -21,6 +22,7 @@ interface Category {
 
 const AdminPrinters: React.FC = () => {
   const { showToast } = useToast95Context();
+  const tenantId = useTenantId();
   const [printers, setPrinters] = useState<Printer[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -31,15 +33,16 @@ const AdminPrinters: React.FC = () => {
   });
 
   const fetchData = async () => {
+    if (!tenantId) return;
     const [{ data: p }, { data: c }] = await Promise.all([
-      supabase.from('printers').select('*').order('created_at'),
-      supabase.from('categories').select('*').order('sort_order'),
+      supabase.from('printers').select('*').eq('tenant_id', tenantId).order('created_at'),
+      supabase.from('categories').select('*').eq('tenant_id', tenantId).order('sort_order'),
     ]);
     if (p) setPrinters(p as Printer[]);
     if (c) setCategories(c);
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [tenantId]);
 
   const openAdd = () => {
     setEditPrinter(null);
@@ -72,13 +75,12 @@ const AdminPrinters: React.FC = () => {
     if (editPrinter) {
       const { error } = await supabase.from('printers').update(payload).eq('id', editPrinter.id);
       if (error) { showToast('Güncelleme hatası', false); return; }
-      // If setting as default, unset others
       if (form.is_default) {
-        await supabase.from('printers').update({ is_default: false }).neq('id', editPrinter.id);
+        await supabase.from('printers').update({ is_default: false }).neq('id', editPrinter.id).eq('tenant_id', tenantId);
       }
       showToast('Yazıcı güncellendi ✓');
     } else {
-      const { error } = await supabase.from('printers').insert(payload);
+      const { error } = await supabase.from('printers').insert({ ...payload, tenant_id: tenantId });
       if (error) { showToast('Ekleme hatası', false); return; }
       showToast('Yazıcı eklendi ✓');
     }

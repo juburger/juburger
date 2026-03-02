@@ -3,6 +3,7 @@ import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
 import type { Order } from '@/data/menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useTenantId } from '@/hooks/useTenantQuery';
 
 interface Product {
   id: string;
@@ -52,6 +53,7 @@ interface Props {
 
 const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrintOrder }) => {
   const { showToast } = useToast95Context();
+  const tenantId = useTenantId();
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -89,11 +91,12 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
   };
 
   const fetchData = async () => {
+    if (!tenantId) return;
     const [{ data: cats }, { data: prods }, { data: ords }, { data: opts }] = await Promise.all([
-      supabase.from('categories').select('*').order('sort_order'),
-      supabase.from('products').select('*').eq('is_available', true).order('sort_order'),
-      supabase.from('orders').select('*').eq('table_num', tableNum).in('status', ['waiting', 'preparing', 'ready']).order('created_at', { ascending: false }),
-      supabase.from('product_options').select('*').order('sort_order'),
+      supabase.from('categories').select('*').eq('tenant_id', tenantId).order('sort_order'),
+      supabase.from('products').select('*').eq('tenant_id', tenantId).eq('is_available', true).order('sort_order'),
+      supabase.from('orders').select('*').eq('tenant_id', tenantId).eq('table_num', tableNum).in('status', ['waiting', 'preparing', 'ready']).order('created_at', { ascending: false }),
+      supabase.from('product_options').select('*').eq('tenant_id', tenantId).order('sort_order'),
     ]);
     if (cats) { setCategories(cats); if (!selectedCat && cats.length > 0) setSelectedCat(cats[0].id); }
     if (prods) setProducts(prods);
@@ -107,7 +110,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => fetchData())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [tableNum]);
+  }, [tableNum, tenantId]);
 
   const filteredProducts = searchQuery.trim()
     ? products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -176,6 +179,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
       total: pendingTotal,
       status: 'preparing',
       payment_type: 'cash',
+      tenant_id: tenantId,
     }).select().single();
 
     if (error) { showToast('Sipariş oluşturulamadı', false); return; }
@@ -187,6 +191,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
       user_name: 'Administrator',
       action: 'Sipariş eklendi!',
       details: `(${userName} - ${itemSummary})`,
+      tenant_id: tenantId,
     });
 
     // Print is handled automatically by AdminPanel realtime subscription — no manual print here
@@ -228,6 +233,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
       user_name: 'Administrator',
       action: 'Ürün iptal edildi',
       details: `(${userName} - ${itemQty}x ${itemName} ₺${removedTotal})`,
+      tenant_id: tenantId,
     });
 
     // Print cancellation receipt
@@ -293,6 +299,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
       await supabase.from('table_logs').insert({
         table_num: tableNum, user_name: 'Administrator', action: 'Ürün eklendi',
         details: `(${userName} - +${diff}x ${editItem.name})`,
+        tenant_id: tenantId,
       });
       if (onPrintOrder && userData?.user) {
         const fakeOrder = {
@@ -309,6 +316,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
       await supabase.from('table_logs').insert({
         table_num: tableNum, user_name: 'Administrator', action: 'Ürün azaltıldı',
         details: `(${userName} - -${cancelledCount}x ${editItem.name})`,
+        tenant_id: tenantId,
       });
       if (onPrintOrder && userData?.user) {
         const fakeOrder = {
@@ -339,12 +347,14 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
       details: `(${userName} - ${paymentType} (${Math.round(discountedTotal)})${discount > 0 ? ` -%${discount}` : ''})`,
       amount: discountedTotal,
       payment_type: paymentType,
+      tenant_id: tenantId,
     });
     await supabase.from('table_logs').insert({
       table_num: tableNum,
       user_name: 'Administrator',
       action: 'Masa kapatıldı',
       details: `(${userName})`,
+      tenant_id: tenantId,
     });
     showToast(`Ödeme alındı — ₺${Math.round(discountedTotal)} (${paymentType}) ✓`);
     onClose();
@@ -360,6 +370,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
       user_name: 'Administrator',
       action: 'Siparişler iptal edildi!',
       details: `(${userName} ${itemList})`,
+      tenant_id: tenantId,
     });
 
     // Print cancellation receipt for all items
@@ -411,6 +422,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
       table_num: tableNum, user_name: 'Administrator',
       action: 'Seçili ürünler iptal edildi',
       details: `(${userName} - ${names})`,
+      tenant_id: tenantId,
     });
 
     // Print cancellation receipt for selected items
@@ -464,6 +476,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
       details: `(${userName} - ${paymentType} ₺${checkedTotal} - ${names})`,
       amount: checkedTotal,
       payment_type: paymentType,
+      tenant_id: tenantId,
     });
     showToast(`Kısmi ödeme — ₺${checkedTotal} (${paymentType}) ✓`);
     setCheckedItems(new Set());
@@ -474,7 +487,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
   const [showPartialPayment, setShowPartialPayment] = useState(false);
 
   const fetchAccounts = async () => {
-    const { data } = await supabase.from('accounts').select('id, name, balance').order('name');
+    const { data } = await supabase.from('accounts').select('id, name, balance').eq('tenant_id', tenantId).order('name');
     if (data) setAccountsList(data as any);
   };
 
@@ -486,6 +499,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
       amount: tableTotal,
       description: `Masa ${tableNum} - ${userName}`,
       table_num: tableNum,
+      tenant_id: tenantId,
     } as any);
     // Update account balance
     const account = accountsList.find(a => a.id === accountId);
@@ -502,13 +516,14 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
       action: 'Cariye taşındı',
       details: `(${userName} → ${accountName} ₺${tableTotal})`,
       amount: tableTotal,
+      tenant_id: tenantId,
     });
     showToast(`₺${tableTotal} → ${accountName} cariye aktarıldı ✓`);
     onClose();
   };
 
   const fetchAllTables = async () => {
-    const { data } = await supabase.from('tables').select('table_num').order('table_num');
+    const { data } = await supabase.from('tables').select('table_num').eq('tenant_id', tenantId).order('table_num');
     if (data) setAllTables(data as any);
   };
 
@@ -522,6 +537,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
       action: 'Masa taşındı',
       details: `Masa ${tableNum} → Masa ${targetNum} (₺${tableTotal})`,
       amount: tableTotal,
+      tenant_id: tenantId,
     });
     showToast(`Masa ${tableNum} → Masa ${targetNum} taşındı ✓`);
     onClose();
