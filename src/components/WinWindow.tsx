@@ -38,7 +38,7 @@ const WinWindow = ({ icon, title, menuItems, controls, statusItems, children, bo
 
         {/* Menu bar */}
         {menuItems && menuItems.length > 0 && (
-          <div className="bg-background px-3 py-2.5 flex gap-1.5 flex-wrap">
+          <div className="bg-card px-3 py-2.5 flex gap-1.5 flex-wrap">
             {menuItems.map((m, i) => (
               <button key={i} onClick={m.onClick}
                 className="px-3 py-1.5 text-xs cursor-pointer text-card-foreground font-medium rounded-full transition-all neu-flat">
