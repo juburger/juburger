@@ -50,19 +50,11 @@ const SplashScreen = () => {
       icon={icon}
       title={`Masa ${tableNum}`}
       controls={[
+        { label: <span className="text-[11px] whitespace-nowrap">🍽️ Sipariş</span>, onClick: () => navigate(`/register?table=${tableNum}`) },
+        { label: <span className="text-[11px] whitespace-nowrap">⭐ Üye Ol</span>, onClick: () => navigate(`/member-signup?table=${tableNum}`) },
         { label: <Menu size={14} />, onClick: () => navigate('/admin-login') },
       ]}
     >
-      <div className="flex flex-col items-stretch gap-2.5 py-4 px-2">
-        <button className="neu-btn text-base font-semibold py-2.5 w-full" onClick={() => navigate(`/register?table=${tableNum}`)}>
-          🍽️ Sipariş Ver
-        </button>
-        <button className="neu-btn text-base font-medium py-2.5 w-full" onClick={() => navigate(`/member-signup?table=${tableNum}`)}>
-          ⭐ Üye Ol
-        </button>
-      </div>
-
-      <div className="h-px bg-border my-3" />
 
       {/* Read-only menu */}
       <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">Menü</div>
