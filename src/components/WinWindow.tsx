@@ -23,7 +23,7 @@ const WinWindow = ({ icon, title, menuItems, controls, statusItems, children, bo
           <div className="flex gap-2">
             {controls?.map((c, i) => (
               <button key={i} onClick={c.onClick}
-                className="w-8 h-8 rounded-full text-foreground text-xs flex items-center justify-center cursor-pointer transition-all neu-flat">
+                className="min-w-8 h-8 px-2 rounded-full text-foreground text-xs flex items-center justify-center cursor-pointer transition-all neu-flat">
                 {c.label}
               </button>
             )) || (
