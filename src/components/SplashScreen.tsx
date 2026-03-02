@@ -1,18 +1,24 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import WinWindow from '@/components/WinWindow';
 import { useToast95Context } from '@/contexts/Toast95Context';
+import { useTenant } from '@/contexts/TenantContext';
 
 const SplashScreen = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const tableNum = searchParams.get('table') || '3';
   const { showToast } = useToast95Context();
+  const { tenant } = useTenant();
+
+  const icon = tenant?.logo_url
+    ? <img src={tenant.logo_url} alt="" className="w-5 h-5 rounded-full object-cover" />
+    : "🍔";
 
   return (
     <WinWindow
-      icon="🍔"
+      icon={icon}
       title={`Masa ${tableNum}`}
       controls={[
         { label: <Menu size={14} />, onClick: () => navigate('/admin-login') },
