@@ -17,7 +17,7 @@ const WinWindow = ({ icon, title, menuItems, controls, statusItems, children, bo
         {/* Title bar */}
         <div className="bg-card text-foreground px-3 py-2 flex items-center justify-between text-xs font-medium select-none" style={{ borderRadius: 'calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0 0' }}>
           <div className="flex items-center gap-2.5">
-            <span className="text-lg">{icon}</span>
+            {icon && <span className="text-lg">{icon}</span>}
             <span className="tracking-wide">{title}</span>
           </div>
           <div className="flex gap-2">
