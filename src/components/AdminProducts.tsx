@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
+import { useTenant } from '@/contexts/TenantContext';
 
 interface Category {
   id: string;
@@ -30,6 +31,7 @@ interface ProductOption {
 
 const AdminProducts = () => {
   const { showToast } = useToast95Context();
+  const { tenantId } = useTenant();
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedCat, setSelectedCat] = useState<string>('all');
@@ -43,15 +45,16 @@ const AdminProducts = () => {
   const [newOptionPrice, setNewOptionPrice] = useState('');
 
   const fetchData = async () => {
+    if (!tenantId) return;
     const [{ data: cats }, { data: prods }] = await Promise.all([
-      supabase.from('categories').select('*').order('sort_order'),
-      supabase.from('products').select('*').order('sort_order'),
+      supabase.from('categories').select('*').eq('tenant_id', tenantId).order('sort_order'),
+      supabase.from('products').select('*').eq('tenant_id', tenantId).order('sort_order'),
     ]);
     if (cats) setCategories(cats);
     if (prods) setProducts(prods);
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [tenantId]);
 
   const filtered = selectedCat === 'all' ? products : products.filter(p => p.category_id === selectedCat);
 
@@ -77,6 +80,7 @@ const AdminProducts = () => {
       name: newOptionName.trim(),
       extra_price: Number(newOptionPrice) || 0,
       sort_order: productOptions.length,
+      tenant_id: tenantId,
     });
     if (error) { showToast('Seçenek eklenemedi', false); return; }
     setNewOptionName('');
@@ -102,6 +106,7 @@ const AdminProducts = () => {
       tag: form.tag,
       category_id: form.category_id || null,
       is_available: form.is_available,
+      tenant_id: tenantId,
     };
 
     if (editProduct) {
@@ -131,7 +136,7 @@ const AdminProducts = () => {
 
   const addCategory = async () => {
     if (!catName.trim()) return;
-    const { error } = await supabase.from('categories').insert({ name: catName.trim(), sort_order: categories.length + 1 });
+    const { error } = await supabase.from('categories').insert({ name: catName.trim(), sort_order: categories.length + 1, tenant_id: tenantId });
     if (error) { showToast('Kategori eklenemedi', false); return; }
     showToast('Kategori eklendi ✓');
     setCatName('');
@@ -149,7 +154,6 @@ const AdminProducts = () => {
   const getCatName = (catId: string | null) => categories.find(c => c.id === catId)?.name || '—';
 
   const moveProduct = async (product: Product, direction: 'up' | 'down') => {
-    // Get products in same category, sorted by sort_order
     const sameCat = products
       .filter(p => p.category_id === product.category_id)
       .sort((a, b) => a.sort_order - b.sort_order);
@@ -176,6 +180,7 @@ const AdminProducts = () => {
     ]);
     fetchData();
   };
+
   if (showForm) {
     return (
       <div>
@@ -220,7 +225,6 @@ const AdminProducts = () => {
           <span className="text-[12px]">Satışta</span>
         </div>
 
-        {/* Product Options - only when editing */}
         {editProduct && (
           <>
             <hr className="border-t border-foreground my-2" />
@@ -263,7 +267,6 @@ const AdminProducts = () => {
 
   return (
     <>
-      {/* Category tabs */}
       <div className="flex gap-1 flex-wrap mb-2">
         <button
           className={`text-[11px] px-3 py-1 cursor-pointer rounded-full transition-all ${selectedCat === 'all' ? 'neu-sunken text-foreground font-semibold' : 'neu-flat text-muted-foreground'}`}
@@ -275,13 +278,11 @@ const AdminProducts = () => {
         ))}
       </div>
 
-      {/* Action buttons */}
       <div className="flex gap-1.5 mb-2.5">
         <button className="win-btn win-btn-primary text-[10px]" onClick={openAdd}>+ Ürün Ekle</button>
         <button className="win-btn text-[10px]" onClick={() => setShowCatForm(!showCatForm)}>+ Kategori Ekle</button>
       </div>
 
-      {/* Category add form */}
       {showCatForm && (
         <div className="border border-foreground p-2 mb-2.5 bg-muted">
           <div className="flex gap-1.5 items-end">
@@ -310,7 +311,6 @@ const AdminProducts = () => {
         </div>
       )}
 
-      {/* Product cards */}
       {!filtered.length ? (
         <p className="text-muted-foreground text-center py-3.5 text-xs">Ürün bulunamadı.</p>
       ) : (

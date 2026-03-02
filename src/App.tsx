@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 import { Toast95Provider } from "@/contexts/Toast95Context";
+import { TenantProvider } from "@/contexts/TenantContext";
 import Index from "./pages/Index";
 import Register from "./pages/Register";
 import MenuPage from "./pages/MenuPage";
@@ -25,6 +26,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <TenantProvider>
         <CartProvider>
           <Toast95Provider>
             <div className="flex justify-center min-h-screen">
@@ -44,6 +46,7 @@ const App = () => (
             </div>
           </Toast95Provider>
         </CartProvider>
+        </TenantProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

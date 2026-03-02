@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
+import { useTenant } from '@/contexts/TenantContext';
 import type { Order } from '@/data/menu';
 import AdminTableDetail from '@/components/AdminTableDetail';
 
@@ -20,6 +21,7 @@ interface Props {
 
 const AdminTables: React.FC<Props> = ({ onPrintOrder }) => {
   const { showToast } = useToast95Context();
+  const { tenantId } = useTenant();
   const [areas, setAreas] = useState<TableArea[]>([]);
   const [tables, setTables] = useState<TableConfig[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -27,10 +29,11 @@ const AdminTables: React.FC<Props> = ({ onPrintOrder }) => {
   const [selectedTable, setSelectedTable] = useState<{ tableNum: number; userName: string } | null>(null);
 
   const fetchAll = async () => {
+    if (!tenantId) return;
     const [{ data: a }, { data: t }, { data: o }] = await Promise.all([
-      supabase.from('table_areas').select('*').order('sort_order'),
-      supabase.from('tables').select('*').order('table_num'),
-      supabase.from('orders').select('*').in('status', ['waiting', 'preparing', 'ready']).order('created_at', { ascending: false }),
+      supabase.from('table_areas').select('*').eq('tenant_id', tenantId).order('sort_order'),
+      supabase.from('tables').select('*').eq('tenant_id', tenantId).order('table_num'),
+      supabase.from('orders').select('*').eq('tenant_id', tenantId).in('status', ['waiting', 'preparing', 'ready']).order('created_at', { ascending: false }),
     ]);
     if (a) setAreas(a);
     if (t) setTables(t);
@@ -39,11 +42,11 @@ const AdminTables: React.FC<Props> = ({ onPrintOrder }) => {
 
   useEffect(() => {
     fetchAll();
-    const channel = supabase.channel('admin-tables')
+    const channel = supabase.channel('admin-tables-' + tenantId)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => fetchAll())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [tenantId]);
 
   // Group active orders by table_num
   const ordersByTable: Record<number, Order[]> = {};

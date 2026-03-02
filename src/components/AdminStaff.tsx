@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
+import { useTenant } from '@/contexts/TenantContext';
 
 interface Staff {
   id: string;
@@ -60,6 +61,7 @@ const PERMISSION_DEFS: { key: string; label: string; color?: string }[] = [
 
 const AdminStaff = () => {
   const { showToast } = useToast95Context();
+  const { tenantId } = useTenant();
   const [staffList, setStaffList] = useState<Staff[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
@@ -72,11 +74,11 @@ const AdminStaff = () => {
   });
 
   const fetchStaff = async () => {
-    const { data } = await supabase.from('staff').select('*').order('created_at');
+    const { data } = await supabase.from('staff').select('*').eq('tenant_id', tenantId).order('created_at');
     if (data) setStaffList(data as unknown as Staff[]);
   };
 
-  useEffect(() => { fetchStaff(); }, []);
+  useEffect(() => { fetchStaff(); }, [tenantId]);
 
   const fetchPermissions = async (staffId: string) => {
     const { data } = await supabase.from('staff_permissions').select('perm_key, enabled').eq('staff_id', staffId);

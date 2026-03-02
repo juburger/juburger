@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useTenant } from '@/contexts/TenantContext';
 import type { Order } from '@/data/menu';
 
 type Period = 'daily' | 'monthly' | 'yearly';
 
 const AdminReports = () => {
+  const { tenantId } = useTenant();
   const [orders, setOrders] = useState<Order[]>([]);
   const [period, setPeriod] = useState<Period>('daily');
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -27,13 +29,14 @@ const AdminReports = () => {
       }
 
       const { data } = await supabase.from('orders').select('*')
+        .eq('tenant_id', tenantId)
         .gte('created_at', start).lte('created_at', end)
         .order('created_at', { ascending: false })
         .limit(1000);
       if (data) setOrders(data as unknown as Order[]);
     };
     fetchOrders();
-  }, [period, selectedDate]);
+  }, [period, selectedDate, tenantId]);
 
   const paidOrders = orders.filter(o => o.payment_status === 'paid');
   const cancelledOrders = orders.filter(o => o.payment_status === 'cancelled');

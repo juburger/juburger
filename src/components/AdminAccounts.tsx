@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
+import { useTenant } from '@/contexts/TenantContext';
 
 interface Account {
   id: string;
@@ -24,6 +25,7 @@ interface Transaction {
 
 const AdminAccounts = () => {
   const { showToast } = useToast95Context();
+  const { tenantId } = useTenant();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
@@ -33,7 +35,7 @@ const AdminAccounts = () => {
   const [paymentAmount, setPaymentAmount] = useState('');
 
   const fetchAccounts = async () => {
-    const { data } = await supabase.from('accounts').select('*').order('name');
+    const { data } = await supabase.from('accounts').select('*').eq('tenant_id', tenantId).order('name');
     if (data) setAccounts(data as unknown as Account[]);
   };
 
@@ -42,12 +44,12 @@ const AdminAccounts = () => {
     if (data) setTransactions(data as unknown as Transaction[]);
   };
 
-  useEffect(() => { fetchAccounts(); }, []);
+  useEffect(() => { fetchAccounts(); }, [tenantId]);
 
   const createAccount = async () => {
     if (!form.name) { showToast('Cari hesap adı zorunlu', false); return; }
     setLoading(true);
-    const { error } = await supabase.from('accounts').insert(form as any);
+    const { error } = await supabase.from('accounts').insert({ ...form, tenant_id: tenantId } as any);
     if (error) { showToast('Hata: ' + error.message, false); }
     else { showToast('Cari hesap eklendi ✓'); setShowForm(false); setForm({ name: '', phone: '', note: '' }); fetchAccounts(); }
     setLoading(false);

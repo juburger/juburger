@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useTenant } from '@/contexts/TenantContext';
 
 interface LogEntry {
   id: string;
@@ -27,6 +28,7 @@ const actionColors: Record<string, string> = {
 };
 
 const AdminLogs = () => {
+  const { tenantId } = useTenant();
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [startDate, setStartDate] = useState(() => {
     const d = new Date(); d.setDate(d.getDate() - 1);
@@ -35,7 +37,9 @@ const AdminLogs = () => {
   const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
 
   const fetchLogs = async () => {
+    if (!tenantId) return;
     const { data } = await supabase.from('table_logs').select('*')
+      .eq('tenant_id', tenantId)
       .gte('created_at', startDate + 'T00:00:00')
       .lte('created_at', endDate + 'T23:59:59')
       .order('created_at', { ascending: false })
@@ -49,7 +53,7 @@ const AdminLogs = () => {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'table_logs' }, () => fetchLogs())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [startDate, endDate]);
+  }, [startDate, endDate, tenantId]);
 
   const formatDate = (d: string) => new Date(d).toLocaleString('tr-TR', {
     year: 'numeric', month: '2-digit', day: '2-digit',
