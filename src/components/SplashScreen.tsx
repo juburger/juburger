@@ -17,7 +17,7 @@ const SplashScreen = () => {
   const { tenant, tenantId } = useTenant();
   const [categories, setCategories] = useState<DbCategory[]>([]);
   const [products, setProducts] = useState<DbProduct[]>([]);
-  const [activeCat, setActiveCat] = useState('all');
+  const [activeCat, setActiveCat] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -71,8 +71,6 @@ const SplashScreen = () => {
       ) : (
         <>
           <div className="flex gap-1.5 mb-3 flex-wrap">
-            <button className={`text-xs px-3 py-1.5 cursor-pointer rounded-full transition-all ${activeCat === 'all' ? 'neu-sunken' : 'neu-flat'}`}
-              onClick={() => setActiveCat('all')}>Tümü</button>
             {categories.map(c => (
               <button key={c.id}
                 className={`text-xs px-3 py-1.5 cursor-pointer rounded-full transition-all ${activeCat === c.id ? 'neu-sunken' : 'neu-flat'}`}
@@ -80,7 +78,7 @@ const SplashScreen = () => {
             ))}
           </div>
 
-          {grouped.filter(g => activeCat === 'all' || g.catId === activeCat).map(group => (
+          {grouped.filter(g => !activeCat || g.catId === activeCat).map(group => (
             <div key={group.catId}>
               <div className="text-xs font-bold mt-3 mb-1.5 pb-1 uppercase tracking-widest text-muted-foreground border-b border-border/50">
                 {group.cat}
