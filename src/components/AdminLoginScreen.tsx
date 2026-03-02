@@ -73,10 +73,6 @@ const AdminLoginScreen = () => {
         <button className="neu-btn" onClick={() => navigate('/')}>İptal</button>
       </div>
       <div className="h-px bg-border/40 my-3" />
-      <div className="neu-flat p-2 mb-2 text-[10px] text-muted-foreground space-y-0.5">
-        <div>📧 <strong>admin@ju.com</strong></div>
-        <div>🔑 <strong>Admin123!</strong></div>
-      </div>
       <div className="flex items-center justify-between">
         <p className="text-muted-foreground text-xs">Admin hesabı Cloud üzerinden oluşturulmalıdır.</p>
         <button className="text-xs text-primary underline cursor-pointer bg-transparent border-none" onClick={() => navigate('/super-admin')}>🏢 Süper Admin</button>
