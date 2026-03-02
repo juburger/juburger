@@ -618,6 +618,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_staff_permission: { Args: { _perm_key: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

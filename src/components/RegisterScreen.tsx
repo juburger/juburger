@@ -46,7 +46,6 @@ const RegisterScreen = () => {
         await supabase.from('profiles').insert({
           user_id: data.user.id,
           display_name: name.trim(),
-          is_admin: false,
         });
       }
 
