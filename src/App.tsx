@@ -17,6 +17,7 @@ import MemberSignup from "./pages/MemberSignup";
 import MemberProfile from "./pages/MemberProfile";
 import NotFound from "./pages/NotFound";
 import Install from "./pages/Install";
+import SuperAdmin from "./pages/SuperAdmin";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
                   <Route path="/member-signup" element={<div className="max-w-[500px] w-full mx-auto"><MemberSignup /></div>} />
                   <Route path="/member-profile" element={<div className="max-w-[500px] w-full mx-auto"><MemberProfile /></div>} />
                   <Route path="/admin" element={<Admin />} />
+                  <Route path="/super-admin" element={<SuperAdmin />} />
                   <Route path="/install" element={<div className="max-w-[500px] w-full mx-auto"><Install /></div>} />
                   <Route path="*" element={<div className="max-w-[500px] w-full mx-auto"><NotFound /></div>} />
                 </Routes>
