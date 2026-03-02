@@ -216,7 +216,6 @@ const AdminPanel = () => {
       menuItems={[
         { label: '← Geri', onClick: () => navigate(-1 as any) },
         { label: 'Yenile', onClick: () => window.location.reload() },
-        { label: '🏢 Süper Admin', onClick: () => navigate('/super-admin') },
         { label: '🚪 Çıkış', onClick: handleLogout },
       ]}
       controls={[{ label: '×', onClick: handleLogout }]}
