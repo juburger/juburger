@@ -54,32 +54,45 @@ const AdminPanel = () => {
 
   const triggerPrint = useCallback((order: Order) => {
     setPrintOrder(order);
+
     setTimeout(() => {
       const iframe = printIframeRef.current;
-      if (iframe) {
-        const doc = iframe.contentDocument || iframe.contentWindow?.document;
-        if (doc && printRef.current) {
-          doc.open();
-          doc.write(`
-            <html><head><style>
-              body { margin: 0; padding: 4mm; font-family: 'Courier New', monospace; font-size: 14px; font-weight: 600; -webkit-print-color-adjust: exact; }
+      const receiptHtml = printRef.current?.innerHTML;
+
+      if (!iframe || !receiptHtml) {
+        showToast('Yazdırma içeriği hazırlanamadı', false);
+        return;
+      }
+
+      const doc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!doc || !iframe.contentWindow) {
+        showToast('Yazdırma penceresi açılamadı', false);
+        return;
+      }
+
+      doc.open();
+      doc.write(`
+        <html>
+          <head>
+            <style>
+              body { margin: 0; padding: 4mm; font-family: 'Courier New', monospace; font-size: 14px; font-weight: 600; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
               .line { display: flex; justify-content: space-between; }
               .bold { font-weight: 900; }
               .center { text-align: center; }
               .sep { font-size: 13px; font-weight: 700; }
-            </style></head><body>${printRef.current.innerHTML}</body></html>
-          `);
-          doc.close();
-          setTimeout(() => {
-            iframe.contentWindow?.print();
-            showToast(`Fiş yazdırıldı: #${order.id.substring(0, 6).toUpperCase()}`);
-          }, 200);
-          return;
-        }
-      }
-      window.print();
-      showToast(`Fiş yazdırıldı: #${order.id.substring(0, 6).toUpperCase()}`);
-    }, 400);
+            </style>
+          </head>
+          <body>${receiptHtml}</body>
+        </html>
+      `);
+      doc.close();
+
+      setTimeout(() => {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+        showToast(`Fiş yazdırıldı: #${order.id.substring(0, 6).toUpperCase()}`);
+      }, 250);
+    }, 500);
   }, [showToast]);
 
   // Load orders realtime
