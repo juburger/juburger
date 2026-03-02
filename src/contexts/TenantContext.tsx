@@ -37,21 +37,27 @@ export const useTenant = () => useContext(TenantContext);
 function resolveSlug(): string {
   const hostname = window.location.hostname;
 
-  // Production: slug.siparis.co
+  // Production: slug.siparis.co (skip superadmin subdomain)
   if (hostname.endsWith('.siparis.co')) {
     const parts = hostname.split('.');
-    if (parts.length >= 3) return parts[0];
+    if (parts.length >= 3 && parts[0] !== 'superadmin') return parts[0];
   }
 
-  // Lovable preview: check for slug in subdomain pattern
-  // e.g. juburger--xxxxx.lovable.app or similar
-  // For now, check URL param as override for dev
+  // Lovable preview: check URL param as override for dev
   const params = new URLSearchParams(window.location.search);
   const tenantParam = params.get('tenant');
   if (tenantParam) return tenantParam;
 
   // Default fallback for dev/preview
   return 'juburger';
+}
+
+/**
+ * Check if current hostname is the superadmin subdomain
+ */
+export function isSuperAdminDomain(): boolean {
+  const hostname = window.location.hostname;
+  return hostname === 'superadmin.siparis.co';
 }
 
 export const TenantProvider = ({ children }: { children: ReactNode }) => {
@@ -61,7 +67,7 @@ export const TenantProvider = ({ children }: { children: ReactNode }) => {
 
   // Super admin routes don't need tenant resolution
   const location = useLocation();
-  const isSuperAdmin = location.pathname.startsWith('/super-admin');
+  const isSuperAdmin = location.pathname.startsWith('/super-admin') || isSuperAdminDomain();
 
   useEffect(() => {
     if (isSuperAdmin) {
