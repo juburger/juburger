@@ -40,7 +40,7 @@ const SuperAdminPanel: React.FC = () => {
 
   // Auth state
   const [authed, setAuthed] = useState(false);
-  const [authLoading, setAuthLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(false);
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
@@ -51,65 +51,16 @@ const SuperAdminPanel: React.FC = () => {
   const [adminForm, setAdminForm] = useState({ email: '', password: '' });
   const [creatingAdmin, setCreatingAdmin] = useState(false);
 
-  // Check if user is authenticated and has admin role
+  // Non-blocking auth check: never lock UI on "Kontrol ediliyor..."
   useEffect(() => {
     let isActive = true;
 
-    // Safety net: never keep user on endless "Kontrol ediliyor..."
-    const loadingGuard = window.setTimeout(() => {
-      if (isActive) setAuthLoading(false);
-    }, 3000);
-
-    const checkAuth = async () => {
+    const resolveAdminRole = async (userId: string) => {
       try {
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError) throw sessionError;
-
-        if (!isActive) return;
-
-        if (session?.user) {
-          const { data: role, error: roleError } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', session.user.id)
-            .eq('role', 'admin')
-            .maybeSingle();
-
-          if (roleError) throw roleError;
-          if (!isActive) return;
-
-          setAuthed(!!role);
-          if (!role) showToast('Süper admin yetkisi yok', false);
-        } else {
-          setAuthed(false);
-        }
-      } catch (error) {
-        console.error('Auth check error:', error);
-        if (isActive) {
-          setAuthed(false);
-          showToast('Oturum kontrolünde hata oluştu', false);
-        }
-      } finally {
-        if (isActive) setAuthLoading(false);
-      }
-    };
-
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      try {
-        if (!isActive) return;
-
-        if (!session) {
-          setAuthed(false);
-          setAuthLoading(false);
-          return;
-        }
-
         const { data: role, error: roleError } = await supabase
           .from('user_roles')
           .select('role')
-          .eq('user_id', session.user.id)
+          .eq('user_id', userId)
           .eq('role', 'admin')
           .maybeSingle();
 
@@ -117,22 +68,51 @@ const SuperAdminPanel: React.FC = () => {
         if (!isActive) return;
 
         setAuthed(!!role);
-        setAuthLoading(false);
+        if (!role) showToast('Süper admin yetkisi yok', false);
       } catch (error) {
-        console.error('Auth state change error:', error);
-        if (isActive) {
-          setAuthed(false);
-          setAuthLoading(false);
-        }
+        console.error('Role check error:', error);
+        if (isActive) setAuthed(false);
       }
+    };
+
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!isActive) return;
+
+        if (session?.user) {
+          void resolveAdminRole(session.user.id);
+        } else {
+          setAuthed(false);
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        if (isActive) setAuthed(false);
+      } finally {
+        if (isActive) setAuthLoading(false);
+      }
+    };
+
+    void checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!isActive) return;
+
+      if (!session?.user) {
+        setAuthed(false);
+        setAuthLoading(false);
+        return;
+      }
+
+      setAuthLoading(false);
+      void resolveAdminRole(session.user.id);
     });
 
     return () => {
       isActive = false;
-      window.clearTimeout(loadingGuard);
       subscription.unsubscribe();
     };
-  }, []);
+  }, [showToast]);
 
   const handleLogin = async () => {
     if (!loginEmail || !loginPassword) {
