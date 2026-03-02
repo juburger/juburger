@@ -38,10 +38,10 @@ const WinWindow = ({ icon, title, menuItems, controls, statusItems, children, bo
 
         {/* Menu bar */}
         {menuItems && menuItems.length > 0 && (
-          <div className="bg-card px-3 py-2 flex gap-1">
+          <div className="bg-card px-3 py-2 flex gap-1.5 flex-wrap">
             {menuItems.map((m, i) => (
               <button key={i} onClick={m.onClick}
-                className="px-4 py-1.5 text-xs cursor-pointer text-card-foreground font-medium bg-transparent border-none rounded-full hover:bg-accent transition-colors">
+                className="px-3 py-1.5 text-xs cursor-pointer text-card-foreground font-medium rounded-full transition-all neu-flat">
                 {m.label}
               </button>
             ))}
