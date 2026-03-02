@@ -2,23 +2,27 @@ import React, { useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast95Context } from '@/contexts/Toast95Context';
+import { useTenant } from '@/contexts/TenantContext';
 import { useQuery } from '@tanstack/react-query';
-
-const BASE_URL = 'https://juburger.lovable.app';
 
 const AdminQRCodes = () => {
   const { showToast } = useToast95Context();
+  const { tenant, tenantId } = useTenant();
+  const BASE_URL = tenant?.slug ? `https://${tenant.slug}.siparis.co` : 'https://juburger.lovable.app';
 
   const { data: tables = [] } = useQuery({
-    queryKey: ['tables-qr'],
+    queryKey: ['tables-qr', tenantId],
     queryFn: async () => {
+      if (!tenantId) return [];
       const { data } = await supabase
         .from('tables')
         .select('table_num, capacity, is_active, area_id, table_areas(name)')
+        .eq('tenant_id', tenantId)
         .eq('is_active', true)
         .order('table_num');
       return (data || []) as any[];
     },
+    enabled: !!tenantId,
   });
 
   const downloadQR = (tableNum: number) => {

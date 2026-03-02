@@ -5,6 +5,7 @@ import WinWindow from '@/components/WinWindow';
 import { useCart } from '@/contexts/CartContext';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
+import { useTenant } from '@/contexts/TenantContext';
 
 const CheckoutScreen = () => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const CheckoutScreen = () => {
   const memberId = searchParams.get('member') || '';
   const { cart, cartTotal, clearCart } = useCart();
   const { showToast } = useToast95Context();
+  const { tenantId } = useTenant();
   const [selPay, setSelPay] = useState('card');
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
@@ -86,6 +88,7 @@ const CheckoutScreen = () => {
         status: 'waiting',
         note: `${note}${pointsToUse > 0 ? ` [${pointsToUse} puan kullanıldı, ₺${pointDiscount} indirim]` : ''}`,
         member_id: memberId || null,
+        tenant_id: tenantId,
       }).select().single();
 
       if (error) throw error;

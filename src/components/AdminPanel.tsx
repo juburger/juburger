@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import WinWindow from '@/components/WinWindow';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
+import { useTenant } from '@/contexts/TenantContext';
 import type { Order } from '@/data/menu';
 import ReceiptPrint from '@/components/ReceiptPrint';
 import AdminProducts from '@/components/AdminProducts';
@@ -25,6 +26,7 @@ type FilterType = 'all' | 'waiting' | 'preparing' | 'ready' | 'paid' | 'cancelle
 const AdminPanel = () => {
   const navigate = useNavigate();
   const { showToast } = useToast95Context();
+  const { tenant, tenantId } = useTenant();
   const [tab, setTab] = useState<TabType>('orders');
   const [filter, setFilter] = useState<FilterType>('all');
   const [orders, setOrders] = useState<Order[]>([]);
@@ -83,7 +85,7 @@ const AdminPanel = () => {
   // Load orders realtime
   useEffect(() => {
     const fetchOrders = async () => {
-      const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(50);
+      const { data } = await supabase.from('orders').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false }).limit(50);
       if (data) {
         const typedData = data as unknown as Order[];
         if (!initialLoadDone.current) {
@@ -116,7 +118,7 @@ const AdminPanel = () => {
   // Load settings
   useEffect(() => {
     const fetchSettings = async () => {
-      const { data } = await supabase.from('settings').select('*').eq('id', 'payment').single();
+      const { data } = await supabase.from('settings').select('*').eq('id', 'payment').eq('tenant_id', tenantId).single();
       if (data) setSettings(data as any);
     };
     fetchSettings();
@@ -148,7 +150,7 @@ const AdminPanel = () => {
   const saveSettings = async (key: string, val: boolean | string) => {
     const updated = { ...settings, [key]: val };
     setSettings(updated);
-    await supabase.from('settings').update({ [key]: val }).eq('id', 'payment');
+    await supabase.from('settings').update({ [key]: val }).eq('id', 'payment').eq('tenant_id', tenantId);
     showToast('Ayarlar kaydedildi ✓');
   };
 
@@ -210,7 +212,7 @@ const AdminPanel = () => {
   return (
     <WinWindow
       icon="⚙️"
-      title="JU — Yönetici Paneli"
+      title={`${tenant?.name || 'siparis.co'} — Yönetici Paneli`}
       menuItems={[
         { label: '← Geri', onClick: () => navigate(-1 as any) },
         { label: 'Yenile', onClick: () => window.location.reload() },

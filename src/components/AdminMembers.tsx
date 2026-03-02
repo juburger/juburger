@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
+import { useTenant } from '@/contexts/TenantContext';
 
 interface Member {
   id: string;
@@ -32,6 +33,7 @@ interface LoyaltySettings {
 
 const AdminMembers = () => {
   const { showToast } = useToast95Context();
+  const { tenantId } = useTenant();
   const [members, setMembers] = useState<Member[]>([]);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [transactions, setTransactions] = useState<PointTransaction[]>([]);
@@ -49,7 +51,7 @@ const AdminMembers = () => {
   });
 
   const fetchMembers = async () => {
-    const { data } = await supabase.from('members').select('*').order('name');
+    const { data } = await supabase.from('members').select('*').eq('tenant_id', tenantId).order('name');
     if (data) setMembers(data as unknown as Member[]);
   };
 
@@ -59,18 +61,18 @@ const AdminMembers = () => {
   };
 
   const fetchLoyaltySettings = async () => {
-    const { data } = await supabase.from('loyalty_settings').select('*').eq('id', 'default').single();
+    const { data } = await supabase.from('loyalty_settings').select('*').eq('id', 'default').eq('tenant_id', tenantId).single();
     if (data) setLoyaltySettings(data as unknown as LoyaltySettings);
   };
 
-  useEffect(() => { fetchMembers(); fetchLoyaltySettings(); }, []);
+  useEffect(() => { fetchMembers(); fetchLoyaltySettings(); }, [tenantId]);
 
   const createMember = async () => {
     if (!form.name || !form.phone) { showToast('Ad ve telefon zorunlu', false); return; }
     const cleanPhone = form.phone.replace(/\s/g, '');
     if (cleanPhone.length < 10) { showToast('Geçerli telefon numarası girin', false); return; }
     setLoading(true);
-    const { error } = await supabase.from('members').insert({ name: form.name.trim(), phone: cleanPhone } as any);
+    const { error } = await supabase.from('members').insert({ name: form.name.trim(), phone: cleanPhone, tenant_id: tenantId } as any);
     if (error) {
       if (error.message.includes('unique') || error.message.includes('duplicate')) {
         showToast('Bu telefon numarası zaten kayıtlı', false);
@@ -130,7 +132,7 @@ const AdminMembers = () => {
   };
 
   const saveLoyaltySettings = async (key: string, value: number) => {
-    await supabase.from('loyalty_settings').update({ [key]: value } as any).eq('id', 'default');
+    await supabase.from('loyalty_settings').update({ [key]: value } as any).eq('id', 'default').eq('tenant_id', tenantId);
     setLoyaltySettings(prev => ({ ...prev, [key]: value }));
     showToast('Sadakat ayarı güncellendi ✓');
   };

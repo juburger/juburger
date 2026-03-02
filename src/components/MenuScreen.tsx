@@ -5,6 +5,7 @@ import WinWindow from '@/components/WinWindow';
 import { useCart } from '@/contexts/CartContext';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
+import { useTenant } from '@/contexts/TenantContext';
 import type { MenuItem } from '@/data/menu';
 import CartDrawer from '@/components/CartDrawer';
 
@@ -19,6 +20,7 @@ const MenuScreen = () => {
   const memberId = searchParams.get('member') || '';
   const { cart, addItem, removeItem, cartCount, cartTotal } = useCart();
   const { showToast } = useToast95Context();
+  const { tenant, tenantId } = useTenant();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeCat, setActiveCat] = useState('all');
   const [categories, setCategories] = useState<DbCategory[]>([]);
@@ -27,16 +29,17 @@ const MenuScreen = () => {
 
   useEffect(() => {
     const fetch = async () => {
+      if (!tenantId) return;
       const [{ data: cats }, { data: prods }] = await Promise.all([
-        supabase.from('categories').select('*').order('sort_order'),
-        supabase.from('products').select('*').eq('is_available', true).order('sort_order'),
+        supabase.from('categories').select('*').eq('tenant_id', tenantId).order('sort_order'),
+        supabase.from('products').select('*').eq('tenant_id', tenantId).eq('is_available', true).order('sort_order'),
       ]);
       if (cats) setCategories(cats);
       if (prods) setProducts(prods);
       setLoading(false);
     };
     fetch();
-  }, []);
+  }, [tenantId]);
 
   const count = cartCount();
   const total = cartTotal();

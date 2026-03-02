@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
+import { useTenant } from '@/contexts/TenantContext';
 
 interface TableArea { id: string; name: string; sort_order: number; }
 interface TableConfig { id: string; table_num: number; area_id: string | null; capacity: number; is_active: boolean; name: string; }
 
 const AdminTableManagement = () => {
   const { showToast } = useToast95Context();
+  const { tenantId } = useTenant();
   const [areas, setAreas] = useState<TableArea[]>([]);
   const [tables, setTables] = useState<TableConfig[]>([]);
   const [selectedArea, setSelectedArea] = useState<TableArea | null>(null);
@@ -15,22 +17,23 @@ const AdminTableManagement = () => {
   const [customTableName, setCustomTableName] = useState('');
 
   const fetchAll = async () => {
+    if (!tenantId) return;
     const [{ data: a }, { data: t }] = await Promise.all([
-      supabase.from('table_areas').select('*').order('sort_order'),
-      supabase.from('tables').select('*').order('table_num'),
+      supabase.from('table_areas').select('*').eq('tenant_id', tenantId).order('sort_order'),
+      supabase.from('tables').select('*').eq('tenant_id', tenantId).order('table_num'),
     ]);
     if (a) setAreas(a);
     if (t) setTables(t);
   };
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => { fetchAll(); }, [tenantId]);
 
   // Add new area
   const addArea = async () => {
     const name = newAreaName.trim();
     if (!name) return;
     const nextOrder = areas.length > 0 ? Math.max(...areas.map(a => a.sort_order)) + 1 : 0;
-    const { error } = await supabase.from('table_areas').insert({ name, sort_order: nextOrder });
+    const { error } = await supabase.from('table_areas').insert({ name, sort_order: nextOrder, tenant_id: tenantId });
     if (error) { showToast('Alan eklenemedi', false); return; }
     setNewAreaName('');
     showToast('Alan eklendi ✓');
@@ -69,6 +72,7 @@ const AdminTableManagement = () => {
       capacity: editCapacity,
       is_active: true,
       name,
+      tenant_id: tenantId,
     });
     if (error) { showToast('Masa eklenemedi', false); return; }
     setCustomTableName('');
