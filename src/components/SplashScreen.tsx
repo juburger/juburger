@@ -71,10 +71,10 @@ const SplashScreen = () => {
         <p className="text-muted-foreground text-center py-4 text-sm">Yükleniyor...</p>
       ) : (
         <>
-          <div className="flex gap-1.5 mb-3 flex-wrap">
+          <div className="grid grid-cols-2 gap-2 mb-3">
             {categories.map(c => (
               <button key={c.id}
-                className={`text-xs px-3 py-1.5 cursor-pointer rounded-full transition-all ${activeCat === c.id ? 'neu-sunken' : 'neu-flat'}`}
+                className={`text-sm px-4 py-2.5 cursor-pointer rounded-full transition-all font-medium ${activeCat === c.id ? 'neu-sunken' : 'neu-flat'}`}
                 onClick={() => { setActiveCat(activeCat === c.id ? null : c.id); setMenuExpanded(true); }}>{c.name}</button>
             ))}
           </div>
