@@ -100,10 +100,10 @@ const SplashScreen = () => {
         <div className="mt-4">
           {tenant.ad_link_1 ? (
             <a href={tenant.ad_link_1.startsWith('http') ? tenant.ad_link_1 : `https://${tenant.ad_link_1}`} target="_blank" rel="noopener noreferrer">
-              <img src={tenant.ad_banner_1} alt="Reklam" width={460} height={259} loading="lazy" decoding="async" className="w-full rounded-xl object-cover" />
+              <img src={tenant.ad_banner_1} alt="Reklam" width={460} height={259} fetchPriority="high" decoding="async" className="w-full rounded-xl object-cover" />
             </a>
           ) : (
-            <img src={tenant.ad_banner_1} alt="Reklam" width={460} height={259} loading="lazy" decoding="async" className="w-full rounded-xl object-cover" />
+            <img src={tenant.ad_banner_1} alt="Reklam" width={460} height={259} fetchPriority="high" decoding="async" className="w-full rounded-xl object-cover" />
           )}
         </div>
       )}
