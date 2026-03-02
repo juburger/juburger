@@ -221,7 +221,7 @@ const AdminPanel = () => {
       title={`${tenant?.name || 'siparis.co'} — Yönetici Paneli`}
       menuItems={[
         { label: '← Geri', onClick: () => navigate(-1 as any) },
-        { label: 'Yenile', onClick: () => window.location.reload() },
+        
         { label: 'Üyeler', onClick: () => setTab('members') },
         { label: 'İstatistik', onClick: () => setTab('stats') },
         { label: 'Raporlar', onClick: () => setTab('reports') },
