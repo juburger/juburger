@@ -229,6 +229,13 @@ const AdminPanel = () => {
       menuItems={[
         { label: '← Geri', onClick: () => navigate(-1 as any) },
         { label: 'Yenile', onClick: () => window.location.reload() },
+        { label: 'Üyeler', onClick: () => setTab('members') },
+        { label: 'İstatistik', onClick: () => setTab('stats') },
+        { label: 'Raporlar', onClick: () => setTab('reports') },
+        { label: 'Ürünler', onClick: () => setTab('products') },
+        { label: 'QR', onClick: () => setTab('qr') },
+        { label: 'Ayarlar', onClick: () => setTab('settings') },
+        { label: 'Log', onClick: () => setTab('logs') },
         { label: '🚪 Çıkış', onClick: handleLogout },
       ]}
       controls={[{ label: '×', onClick: handleLogout }]}
