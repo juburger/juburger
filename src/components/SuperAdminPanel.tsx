@@ -31,6 +31,12 @@ const SuperAdminPanel: React.FC = () => {
   });
   const [saving, setSaving] = useState(false);
 
+  // Admin creation state
+  const [showAdminForm, setShowAdminForm] = useState(false);
+  const [adminTenant, setAdminTenant] = useState<Tenant | null>(null);
+  const [adminForm, setAdminForm] = useState({ email: '', password: '' });
+  const [creatingAdmin, setCreatingAdmin] = useState(false);
+
   const fetchTenants = async () => {
     const { data, error } = await supabase
       .from('tenants')
@@ -139,10 +145,104 @@ const SuperAdminPanel: React.FC = () => {
     fetchTenants();
   };
 
+  const openAdminForm = (t: Tenant) => {
+    setAdminTenant(t);
+    setAdminForm({ email: '', password: '' });
+    setShowAdminForm(true);
+  };
+
+  const createTenantAdmin = async () => {
+    if (!adminForm.email || !adminForm.password) {
+      showToast('E-posta ve şifre zorunlu', false);
+      return;
+    }
+    if (adminForm.password.length < 6) {
+      showToast('Şifre en az 6 karakter olmalı', false);
+      return;
+    }
+    setCreatingAdmin(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Oturum bulunamadı');
+
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-tenant-admin`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            email: adminForm.email.trim(),
+            password: adminForm.password,
+            tenant_id: adminTenant!.id,
+          }),
+        }
+      );
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Bilinmeyen hata');
+      showToast(`Admin oluşturuldu: ${adminForm.email} ✓`);
+      setShowAdminForm(false);
+    } catch (err: any) {
+      showToast('Hata: ' + err.message, false);
+    } finally {
+      setCreatingAdmin(false);
+    }
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/');
   };
+
+  if (showAdminForm && adminTenant) {
+    return (
+      <WinWindow
+        icon="👤"
+        title="Süper Admin — siparis.co"
+        menuItems={[
+          { label: '← Geri', onClick: () => setShowAdminForm(false) },
+          { label: '🚪 Çıkış', onClick: handleLogout },
+        ]}
+        controls={[{ label: '×', onClick: () => setShowAdminForm(false) }]}
+      >
+        <h2 className="text-[15px] font-bold mb-1">İşletme Admini Oluştur</h2>
+        <p className="text-xs text-muted-foreground mb-3">
+          <strong>{adminTenant.name}</strong> ({adminTenant.slug}.siparis.co) için yeni admin hesabı
+        </p>
+        <div className="h-px bg-border my-3" />
+
+        <div className="space-y-3 max-w-lg">
+          <div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">E-posta *</div>
+            <input className="neu-input" type="email" value={adminForm.email}
+              onChange={e => setAdminForm({ ...adminForm, email: e.target.value })}
+              placeholder="admin@isletme.com" />
+          </div>
+          <div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Şifre *</div>
+            <input className="neu-input" type="password" value={adminForm.password}
+              onChange={e => setAdminForm({ ...adminForm, password: e.target.value })}
+              placeholder="En az 6 karakter"
+              onKeyDown={e => e.key === 'Enter' && createTenantAdmin()} />
+          </div>
+          <div className="flex gap-2 pt-2">
+            <button className="neu-btn neu-btn-primary" onClick={createTenantAdmin} disabled={creatingAdmin}>
+              {creatingAdmin ? 'Oluşturuluyor...' : '👤 Admin Oluştur'}
+            </button>
+            <button className="neu-btn" onClick={() => setShowAdminForm(false)}>İptal</button>
+          </div>
+        </div>
+
+        <div className="h-px bg-border/40 my-3" />
+        <p className="text-[10px] text-muted-foreground">
+          Oluşturulan hesap, otomatik olarak admin rolü ve işletme bağlantısı ile yapılandırılır. 
+          Admin, /admin-login sayfasından giriş yapabilir.
+        </p>
+      </WinWindow>
+    );
+  }
 
   if (showForm) {
     return (
@@ -276,6 +376,8 @@ const SuperAdminPanel: React.FC = () => {
               <div className="flex text-xs border-t border-border/30">
                 <button className="flex-1 py-2 cursor-pointer bg-transparent border-none hover:bg-accent/50 text-foreground transition-colors rounded-none"
                   onClick={() => openEdit(t)}>✏️ Düzenle</button>
+                <button className="flex-1 py-2 cursor-pointer bg-transparent border-none hover:bg-accent/50 text-foreground transition-colors rounded-none"
+                  onClick={() => openAdminForm(t)}>👤 Admin Ekle</button>
                 <button className={`flex-1 py-2 cursor-pointer bg-transparent border-none hover:bg-accent/50 transition-colors rounded-none ${t.is_active ? 'text-destructive' : 'text-primary'}`}
                   onClick={() => toggleActive(t)}>
                   {t.is_active ? '⏸ Pasif Yap' : '▶ Aktif Yap'}
