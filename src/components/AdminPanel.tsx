@@ -238,7 +238,7 @@ const AdminPanel = () => {
       <div className="flex gap-1.5 mb-3 overflow-x-auto pb-1">
         {tabs.map(t => (
           <button key={t.id}
-            className={`px-3 py-1.5 text-xs font-medium cursor-pointer rounded-full whitespace-nowrap transition-all ${tab === t.id ? 'neu-sunken text-foreground font-semibold' : 'neu-btn'}`}
+            className={`px-4 py-2 text-xs font-medium cursor-pointer rounded-full whitespace-nowrap transition-all ${tab === t.id ? 'neu-sunken text-foreground font-semibold' : 'neu-flat'}`}
             onClick={() => setTab(t.id)}>{t.label}</button>
         ))}
       </div>
