@@ -61,10 +61,10 @@ const MenuScreen = () => {
         icon="🍔"
         title={`Menü — Masa ${tableNum}`}
         menuItems={[
-          { label: '← Ana Sayfa', onClick: () => navigate('/') },
+          { label: '← Ana Sayfa', onClick: () => navigate(memberId ? `/register?table=${tableNum}&member=${memberId}` : '/') },
         ]}
         controls={[
-          { label: <Home size={14} />, onClick: () => navigate('/') },
+          { label: <Home size={14} />, onClick: () => navigate(memberId ? `/register?table=${tableNum}&member=${memberId}` : '/') },
           ...(memberId ? [{ label: <User size={14} />, onClick: () => navigate(`/member-profile?member=${memberId}&table=${tableNum}`) }] : []),
           { label: <ShoppingCart size={14} />, onClick: () => setDrawerOpen(true) },
         ]}

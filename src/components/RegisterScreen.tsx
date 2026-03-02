@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, X } from 'lucide-react';
 import WinWindow from '@/components/WinWindow';
@@ -9,13 +9,31 @@ const RegisterScreen = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const defaultTable = searchParams.get('table') || '3';
+  const existingMemberId = searchParams.get('member') || '';
   const [name, setName] = useState('');
   const [table, setTable] = useState(defaultTable);
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
-  const [memberMode, setMemberMode] = useState(false);
+  const [memberMode, setMemberMode] = useState(!!existingMemberId);
   const [memberFound, setMemberFound] = useState<{ id: string; name: string; points: number } | null>(null);
   const { showToast } = useToast95Context();
+
+  // Auto-load member if returning with member param
+  useEffect(() => {
+    if (existingMemberId) {
+      const loadMember = async () => {
+        const { data } = await supabase.from('members').select('id, name, phone, total_points, used_points').eq('id', existingMemberId).maybeSingle();
+        if (data) {
+          const m = data as any;
+          setMemberFound({ id: m.id, name: m.name, points: m.total_points - m.used_points });
+          setName(m.name);
+          setPhone(m.phone);
+          setMemberMode(true);
+        }
+      };
+      loadMember();
+    }
+  }, [existingMemberId]);
 
   const lookupMember = async () => {
     const cleanPhone = phone.replace(/\s/g, '');
