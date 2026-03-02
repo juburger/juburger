@@ -85,7 +85,22 @@ export const TenantProvider = ({ children }: { children: ReactNode }) => {
       } else if (!data) {
         setError(`İşletme bulunamadı: ${slug}`);
       } else {
-        setTenant(data as Tenant);
+        const t = data as Tenant;
+        setTenant(t);
+        // Update browser tab title & favicon
+        document.title = t.name;
+        if (t.logo_url) {
+          let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
+          if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            document.head.appendChild(link);
+          }
+          link.href = t.logo_url;
+          // Also update apple-touch-icon
+          let appleLink = document.querySelector("link[rel='apple-touch-icon']") as HTMLLinkElement;
+          if (appleLink) appleLink.href = t.logo_url;
+        }
       }
       setLoading(false);
     };
