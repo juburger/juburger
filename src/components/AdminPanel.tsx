@@ -238,7 +238,7 @@ const AdminPanel = () => {
       <div className="flex gap-1.5 mb-3 pb-1 flex-wrap">
         {tabs.map(t => (
           <button key={t.id}
-            className={`px-3 py-1.5 text-xs cursor-pointer font-medium rounded-full transition-all ${tab === t.id ? 'neu-sunken font-semibold text-orange-500' : 'neu-flat text-orange-500'}`}
+            className={`px-3 py-1.5 text-xs cursor-pointer font-medium rounded-full transition-all ${tab === t.id ? 'neu-sunken font-semibold bg-[#F97316] text-black' : 'neu-flat bg-[#F97316]/80 text-black'}`}
             onClick={() => setTab(t.id)}>{t.label}</button>
         ))}
       </div>
