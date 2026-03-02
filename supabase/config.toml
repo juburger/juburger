@@ -1,1 +1,7 @@
 project_id = "wesqdfphdziuvdfkjwqj"
+
+[functions.create-tenant-admin]
+verify_jwt = false
+
+[functions.manage-staff]
+verify_jwt = false
