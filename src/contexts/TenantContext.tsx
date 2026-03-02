@@ -58,7 +58,15 @@ export const TenantProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Super admin routes don't need tenant resolution
+  const isSuperAdmin = window.location.pathname.startsWith('/super-admin');
+
   useEffect(() => {
+    if (isSuperAdmin) {
+      setLoading(false);
+      return;
+    }
+
     const slug = resolveSlug();
 
     const fetchTenant = async () => {
@@ -85,7 +93,9 @@ export const TenantProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <TenantContext.Provider value={{ tenant, tenantId: tenant?.id || null, loading, error }}>
-      {loading ? (
+      {isSuperAdmin ? (
+        children
+      ) : loading ? (
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="text-2xl mb-2">⏳</div>
