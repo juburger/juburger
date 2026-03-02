@@ -1,7 +1,7 @@
 import React, { type ReactNode } from 'react';
 
 interface WinWindowProps {
-  icon: string;
+  icon: ReactNode;
   title: string;
   menuItems?: { label: string; onClick: () => void }[];
   controls?: { label: ReactNode; onClick: () => void }[];
