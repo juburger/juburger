@@ -12,8 +12,8 @@ interface WinWindowProps {
 
 const WinWindow = ({ icon, title, menuItems, controls, statusItems, children, bodyClass }: WinWindowProps) => {
   return (
-    <div className="min-h-screen p-2 bg-background overflow-x-hidden">
-      <div className="neu-raised max-w-full overflow-hidden p-1">
+    <div className="min-h-screen bg-background overflow-x-hidden">
+      <div className="neu-raised max-w-full overflow-hidden">
         {/* Title bar */}
         <div className="neu-flat text-foreground px-3 py-2.5 flex items-center justify-between text-xs font-medium select-none" style={{ borderRadius: 'calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0 0' }}>
           <div className="flex items-center gap-2.5">
