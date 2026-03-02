@@ -89,7 +89,20 @@ export const TenantProvider = ({ children }: { children: ReactNode }) => {
         setTenant(t);
         // Update browser tab title & favicon
         document.title = t.name;
+        // Update OG meta tags for link previews
+        const setMeta = (prop: string, content: string) => {
+          let el = document.querySelector(`meta[property="${prop}"]`) as HTMLMetaElement;
+          if (!el) {
+            el = document.createElement('meta');
+            el.setAttribute('property', prop);
+            document.head.appendChild(el);
+          }
+          el.content = content;
+        };
+        setMeta('og:title', t.name);
+        setMeta('og:description', `${t.name} - Sipariş Sistemi`);
         if (t.logo_url) {
+          setMeta('og:image', t.logo_url);
           let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
           if (!link) {
             link = document.createElement('link');
@@ -97,7 +110,6 @@ export const TenantProvider = ({ children }: { children: ReactNode }) => {
             document.head.appendChild(link);
           }
           link.href = t.logo_url;
-          // Also update apple-touch-icon
           let appleLink = document.querySelector("link[rel='apple-touch-icon']") as HTMLLinkElement;
           if (appleLink) appleLink.href = t.logo_url;
         }
