@@ -70,26 +70,37 @@ const CheckoutScreen = () => {
 
       // Update member stats & earn points
       if (memberId) {
-        const { data: currentMember } = await supabase.from('members').select('total_points, used_points, total_spent, visit_count').eq('id', memberId).single();
+        const { data: currentMember, error: memberFetchError } = await supabase
+          .from('members')
+          .select('total_points, used_points, total_spent, visit_count')
+          .eq('id', memberId)
+          .single();
+
+        if (memberFetchError) throw memberFetchError;
+
         if (currentMember) {
           const cm = currentMember as any;
 
           if (earnedPoints > 0) {
-            await supabase.from('point_transactions').insert({
+            const { error: pointsInsertError } = await supabase.from('point_transactions').insert({
               member_id: memberId,
               type: 'earn',
               points: earnedPoints,
               description: `Sipariş #${data.id.substring(0, 6).toUpperCase()} - ₺${grand} harcama`,
               order_id: data.id,
             } as any);
+
+            if (pointsInsertError) throw pointsInsertError;
           }
 
-          await supabase.from('members').update({
+          const { error: memberUpdateError } = await supabase.from('members').update({
             total_points: cm.total_points + earnedPoints,
             total_spent: Number(cm.total_spent) + grand,
             visit_count: cm.visit_count + 1,
             last_visit_at: new Date().toISOString(),
           }).eq('id', memberId);
+
+          if (memberUpdateError) throw memberUpdateError;
         }
       }
 

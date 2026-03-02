@@ -36,6 +36,7 @@ const RegisterScreen = () => {
 
   const handleRegister = async () => {
     if (!name.trim()) { showToast('Lütfen adınızı girin!', false); return; }
+    if (memberMode && !memberFound) { showToast('Üye girişi için önce telefonla üye doğrulaması yapın.', false); return; }
     
     setLoading(true);
     try {
@@ -138,7 +139,7 @@ const RegisterScreen = () => {
       
       <div className="h-px bg-border/40 my-3" />
       <div className="flex justify-center mt-3">
-        <button className="neu-btn" onClick={handleRegister} disabled={loading || (memberMode && !memberFound && !name.trim())}>
+        <button className="neu-btn" onClick={handleRegister} disabled={loading || (memberMode && !memberFound)}>
           {loading ? 'Giriş yapılıyor...' : 'MENU'}
         </button>
       </div>

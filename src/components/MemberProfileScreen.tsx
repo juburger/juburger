@@ -37,7 +37,12 @@ const MemberProfileScreen = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!memberId) return;
+    if (!memberId) {
+      setLoading(false);
+      setMember(null);
+      setOrders([]);
+      return;
+    }
     const fetchData = async () => {
       const [{ data: m }, { data: o }] = await Promise.all([
         supabase.from('members').select('*').eq('id', memberId).single(),
