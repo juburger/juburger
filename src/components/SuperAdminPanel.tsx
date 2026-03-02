@@ -409,19 +409,23 @@ const SuperAdminPanel: React.FC = () => {
                   return;
                 }
                 setUploadingLogo(true);
-                const slug = form.slug || editTenant?.slug || 'temp';
-                const ext = file.name.split('.').pop();
-                const path = `${slug}/logo-${Date.now()}.${ext}`;
-                const { error: upErr } = await supabase.storage.from('tenant-logos').upload(path, file, { upsert: true });
-                if (upErr) {
-                  showToast('Yükleme hatası: ' + upErr.message, false);
+                try {
+                  const slug = form.slug || editTenant?.slug || 'temp';
+                  const ext = file.name.split('.').pop();
+                  const path = `${slug}/logo-${Date.now()}.${ext}`;
+                  const { error: upErr } = await supabase.storage.from('tenant-logos').upload(path, file, { upsert: true });
+                  if (upErr) {
+                    showToast('Yükleme hatası: ' + upErr.message, false);
+                    return;
+                  }
+                  const { data: urlData } = supabase.storage.from('tenant-logos').getPublicUrl(path);
+                  setForm(prev => ({ ...prev, logo_url: urlData.publicUrl }));
+                  showToast('Logo yüklendi ✓');
+                } catch (err: any) {
+                  showToast('Yükleme hatası: ' + err.message, false);
+                } finally {
                   setUploadingLogo(false);
-                  return;
                 }
-                const { data: urlData } = supabase.storage.from('tenant-logos').getPublicUrl(path);
-                setForm({ ...form, logo_url: urlData.publicUrl });
-                showToast('Logo yüklendi ✓');
-                setUploadingLogo(false);
               }} />
             </label>
           </div>
