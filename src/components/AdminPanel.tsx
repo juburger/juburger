@@ -199,11 +199,11 @@ const AdminPanel = () => {
 
   const tabs: { id: TabType; label: string }[] = [
     { id: 'orders', label: `Siparişler ${waitingCount > 0 ? `(${waitingCount})` : ''}` },
+    { id: 'quick', label: 'Hızlı Sipariş' },
     { id: 'tables', label: 'Masalar' },
     { id: 'closed', label: 'Kapanan Masalar' },
     { id: 'transfer', label: 'Masa Taşıma' },
     { id: 'accounts', label: 'Cari Hesaplar' },
-    { id: 'quick', label: 'Hızlı Sipariş' },
   ];
 
   const filters: { id: FilterType; label: string }[] = [
@@ -222,9 +222,9 @@ const AdminPanel = () => {
       menuItems={[
         { label: '← Geri', onClick: () => navigate(-1 as any) },
         
+        { label: 'Raporlar', onClick: () => setTab('reports') },
         { label: 'Üyeler', onClick: () => setTab('members') },
         { label: 'İstatistik', onClick: () => setTab('stats') },
-        { label: 'Raporlar', onClick: () => setTab('reports') },
         { label: 'Ürünler', onClick: () => setTab('products') },
         { label: 'QR', onClick: () => setTab('qr') },
         { label: 'Ayarlar', onClick: () => setTab('settings') },
