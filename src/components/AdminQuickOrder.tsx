@@ -193,8 +193,8 @@ const AdminQuickOrder: React.FC<Props> = ({ onPrintOrder }) => {
               <button key={p.id}
                 className="border border-foreground/30 p-1.5 text-left text-[10px] hover:bg-muted/50 active:bg-muted cursor-pointer"
                 onClick={() => addItem(p)}>
-                <div className="font-bold truncate">{p.name}</div>
-                <div className="text-[#5EBC80] font-semibold">₺{p.price}</div>
+                <div className="font-bold truncate text-[#5EBC80]">{p.name}</div>
+                <div className="text-foreground">₺{p.price}</div>
               </button>
             ))}
           </div>
