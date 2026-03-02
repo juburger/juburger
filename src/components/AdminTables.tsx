@@ -8,11 +8,19 @@ import AdminTableDetail from '@/components/AdminTableDetail';
 interface TableArea { id: string; name: string; sort_order: number; }
 interface TableConfig { id: string; table_num: number; area_id: string | null; capacity: number; is_active: boolean; }
 
-const statusColors: Record<string, string> = {
-  waiting: 'bg-[#c0392b]',
-  preparing: 'bg-[#d35400]',
-  ready: 'bg-[#27ae60]',
-  paid: 'bg-muted',
+// Time-based color for tables with active orders
+const getTableColor = (orders: Order[]): string => {
+  if (orders.length === 0) return 'bg-card';
+  // Find the earliest active order's created_at
+  const earliest = orders.reduce((min, o) => {
+    const t = new Date(o.created_at).getTime();
+    return t < min ? t : min;
+  }, Infinity);
+  const mins = Math.floor((Date.now() - earliest) / 60000);
+  if (mins <= 15) return 'bg-[#5EBC80]';       // neon green
+  if (mins <= 30) return 'bg-[#F97316]';        // neon orange
+  if (mins <= 45) return 'bg-[#EF4444]';        // red
+  return 'bg-[#1a1a1a]';                         // black
 };
 
 interface Props {
@@ -132,9 +140,7 @@ const AdminTables: React.FC<Props> = ({ onPrintOrder }) => {
             const latestOrder = tableOrders[0];
             const tableTotal = tableOrders.reduce((s, o) => s + Number(o.total), 0);
 
-            const hasWaiting = tableOrders.some(o => o.status === 'waiting');
-            const hasPreparing = tableOrders.some(o => o.status === 'preparing');
-            const bgColor = hasWaiting ? statusColors.waiting : hasPreparing ? statusColors.preparing : hasOrders ? statusColors.ready : 'bg-card';
+            const bgColor = getTableColor(tableOrders);
             const textColor = hasOrders ? 'text-white' : 'text-foreground';
             const displayName = getTableDisplayName(t);
 
