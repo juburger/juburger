@@ -17,6 +17,8 @@ interface Tenant {
   created_at: string;
   ad_banner_1: string;
   ad_banner_2: string;
+  ad_link_1: string;
+  ad_link_2: string;
 }
 
 const SuperAdminPanel: React.FC = () => {
@@ -30,6 +32,7 @@ const SuperAdminPanel: React.FC = () => {
     name: '', slug: '', phone: '', address: '',
     logo_url: '', primary_color: '#000000',
     owner_email: '', ad_banner_1: '', ad_banner_2: '',
+    ad_link_1: '', ad_link_2: '',
   });
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -116,7 +119,7 @@ const SuperAdminPanel: React.FC = () => {
 
   const openAdd = () => {
     setEditTenant(null);
-    setForm({ name: '', slug: '', phone: '', address: '', logo_url: '', primary_color: '#000000', owner_email: '', ad_banner_1: '', ad_banner_2: '' });
+    setForm({ name: '', slug: '', phone: '', address: '', logo_url: '', primary_color: '#000000', owner_email: '', ad_banner_1: '', ad_banner_2: '', ad_link_1: '', ad_link_2: '' });
     setShowForm(true);
   };
 
@@ -126,6 +129,7 @@ const SuperAdminPanel: React.FC = () => {
       name: t.name, slug: t.slug, phone: t.phone, address: t.address,
       logo_url: t.logo_url, primary_color: t.primary_color, owner_email: '',
       ad_banner_1: t.ad_banner_1 || '', ad_banner_2: t.ad_banner_2 || '',
+      ad_link_1: t.ad_link_1 || '', ad_link_2: t.ad_link_2 || '',
     });
     setShowForm(true);
   };
@@ -149,6 +153,8 @@ const SuperAdminPanel: React.FC = () => {
           primary_color: form.primary_color,
           ad_banner_1: form.ad_banner_1.trim(),
           ad_banner_2: form.ad_banner_2.trim(),
+          ad_link_1: form.ad_link_1.trim(),
+          ad_link_2: form.ad_link_2.trim(),
         }).eq('id', editTenant.id);
 
         if (error) throw error;
@@ -450,35 +456,46 @@ const SuperAdminPanel: React.FC = () => {
             <>
               <div className="h-px bg-border my-2" />
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 font-bold">📢 Reklam Bannerları</div>
-              {(['ad_banner_1', 'ad_banner_2'] as const).map((key, idx) => (
-                <div key={key}>
+              {([
+                { bannerKey: 'ad_banner_1' as const, linkKey: 'ad_link_1' as const, idx: 0 },
+                { bannerKey: 'ad_banner_2' as const, linkKey: 'ad_link_2' as const, idx: 1 },
+              ]).map(({ bannerKey, linkKey, idx }) => (
+                <div key={bannerKey} className="mb-3">
                   <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Reklam {idx + 1}</div>
-                  {form[key] && (
+                  {form[bannerKey] && (
                     <div className="mb-2 flex items-center gap-2">
-                      <img src={form[key]} alt={`Banner ${idx + 1}`} className="h-16 rounded-lg object-cover border border-border" />
-                      <button className="text-[10px] text-destructive hover:underline" onClick={() => setForm({ ...form, [key]: '' })}>Kaldır</button>
+                      <img src={form[bannerKey]} alt={`Banner ${idx + 1}`} className="h-16 rounded-lg object-cover border border-border" />
+                      <button className="text-[10px] text-destructive hover:underline" onClick={() => setForm({ ...form, [bannerKey]: '', [linkKey]: '' })}>Kaldır</button>
                     </div>
                   )}
-                  <label className={`neu-btn text-xs cursor-pointer inline-block ${uploadingBanner === key ? 'opacity-50 pointer-events-none' : ''}`}>
-                    {uploadingBanner === key ? '⏳ Yükleniyor...' : `📷 Görsel Yükle`}
+                  <label className={`neu-btn text-xs cursor-pointer inline-block ${uploadingBanner === bannerKey ? 'opacity-50 pointer-events-none' : ''}`}>
+                    {uploadingBanner === bannerKey ? '⏳ Yükleniyor...' : `📷 Görsel Yükle`}
                     <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
                       if (file.size > 5 * 1024 * 1024) { showToast('Dosya 5MB\'dan küçük olmalı', false); return; }
-                      setUploadingBanner(key);
+                      setUploadingBanner(bannerKey);
                       try {
                         const slug = form.slug || editTenant?.slug || 'temp';
                         const ext = file.name.split('.').pop();
-                        const path = `${slug}/${key}-${Date.now()}.${ext}`;
+                        const path = `${slug}/${bannerKey}-${Date.now()}.${ext}`;
                         const { error: upErr } = await supabase.storage.from('tenant-logos').upload(path, file, { upsert: true });
                         if (upErr) { showToast('Yükleme hatası: ' + upErr.message, false); return; }
                         const { data: urlData } = supabase.storage.from('tenant-logos').getPublicUrl(path);
-                        setForm(prev => ({ ...prev, [key]: urlData.publicUrl }));
+                        setForm(prev => ({ ...prev, [bannerKey]: urlData.publicUrl }));
                         showToast(`Reklam ${idx + 1} yüklendi ✓`);
                       } catch (err: any) { showToast('Yükleme hatası: ' + err.message, false); }
                       finally { setUploadingBanner(null); }
                     }} />
                   </label>
+                  {form[bannerKey] && (
+                    <div className="mt-1.5">
+                      <input className="neu-input text-[11px]" value={form[linkKey]}
+                        onChange={e => setForm({ ...form, [linkKey]: e.target.value })}
+                        placeholder="https://ornek.com (opsiyonel)" />
+                      <div className="text-[9px] text-muted-foreground mt-0.5">Tıklanınca açılacak link (boş bırakılabilir)</div>
+                    </div>
+                  )}
                 </div>
               ))}
             </>

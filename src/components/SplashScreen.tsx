@@ -108,12 +108,24 @@ const SplashScreen = () => {
       {/* Ad Banners */}
       {tenant?.ad_banner_1 && (
         <div className="mt-4">
-          <img src={tenant.ad_banner_1} alt="Reklam" className="w-full rounded-xl object-cover" />
+          {tenant.ad_link_1 ? (
+            <a href={tenant.ad_link_1} target="_blank" rel="noopener noreferrer">
+              <img src={tenant.ad_banner_1} alt="Reklam" className="w-full rounded-xl object-cover" />
+            </a>
+          ) : (
+            <img src={tenant.ad_banner_1} alt="Reklam" className="w-full rounded-xl object-cover" />
+          )}
         </div>
       )}
       {tenant?.ad_banner_2 && (
         <div className="mt-3">
-          <img src={tenant.ad_banner_2} alt="Reklam" className="w-full rounded-xl object-cover" />
+          {tenant.ad_link_2 ? (
+            <a href={tenant.ad_link_2} target="_blank" rel="noopener noreferrer">
+              <img src={tenant.ad_banner_2} alt="Reklam" className="w-full rounded-xl object-cover" />
+            </a>
+          ) : (
+            <img src={tenant.ad_banner_2} alt="Reklam" className="w-full rounded-xl object-cover" />
+          )}
         </div>
       )}
     </WinWindow>

@@ -811,6 +811,8 @@ export type Database = {
         Row: {
           ad_banner_1: string
           ad_banner_2: string
+          ad_link_1: string
+          ad_link_2: string
           address: string
           created_at: string
           id: string
@@ -826,6 +828,8 @@ export type Database = {
         Insert: {
           ad_banner_1?: string
           ad_banner_2?: string
+          ad_link_1?: string
+          ad_link_2?: string
           address?: string
           created_at?: string
           id?: string
@@ -841,6 +845,8 @@ export type Database = {
         Update: {
           ad_banner_1?: string
           ad_banner_2?: string
+          ad_link_1?: string
+          ad_link_2?: string
           address?: string
           created_at?: string
           id?: string
