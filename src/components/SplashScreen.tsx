@@ -14,7 +14,7 @@ const SplashScreen = () => {
 
   const icon = tenant?.logo_url
     ? <img src={tenant.logo_url} alt="" className="w-5 h-5 rounded-full object-cover" />
-    : "🍔";
+    : null;
 
   return (
     <WinWindow
