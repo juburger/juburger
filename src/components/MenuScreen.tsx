@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Home, ShoppingCart, Plus, Minus, ArrowRight } from 'lucide-react';
+import { Home, ShoppingCart, Plus, Minus, ArrowRight, User } from 'lucide-react';
 import WinWindow from '@/components/WinWindow';
 import { useCart } from '@/contexts/CartContext';
 import { useToast95Context } from '@/contexts/Toast95Context';
@@ -65,6 +65,7 @@ const MenuScreen = () => {
         ]}
         controls={[
           { label: <Home size={14} />, onClick: () => navigate('/') },
+          ...(memberId ? [{ label: <User size={14} />, onClick: () => navigate(`/member-profile?member=${memberId}&table=${tableNum}`) }] : []),
           { label: <ShoppingCart size={14} />, onClick: () => setDrawerOpen(true) },
         ]}
         bodyClass="pb-14"
