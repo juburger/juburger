@@ -30,6 +30,7 @@ const SuperAdminPanel: React.FC = () => {
     owner_email: '',
   });
   const [saving, setSaving] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   // Auth state
   const [authed, setAuthed] = useState(false);
@@ -391,9 +392,38 @@ const SuperAdminPanel: React.FC = () => {
           </div>
 
           <div>
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Logo URL</div>
-            <input className="neu-input" value={form.logo_url}
-              onChange={e => setForm({ ...form, logo_url: e.target.value })} placeholder="https://..." />
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Logo</div>
+            {form.logo_url && (
+              <div className="mb-2 flex items-center gap-2">
+                <img src={form.logo_url} alt="Logo" className="w-12 h-12 rounded-lg object-cover border border-border" />
+                <button className="text-[10px] text-destructive hover:underline" onClick={() => setForm({ ...form, logo_url: '' })}>Kaldır</button>
+              </div>
+            )}
+            <label className={`neu-btn text-xs cursor-pointer inline-block ${uploadingLogo ? 'opacity-50 pointer-events-none' : ''}`}>
+              {uploadingLogo ? '⏳ Yükleniyor...' : '📷 Logo Yükle'}
+              <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                if (file.size > 2 * 1024 * 1024) {
+                  showToast('Dosya 2MB\'dan küçük olmalı', false);
+                  return;
+                }
+                setUploadingLogo(true);
+                const slug = form.slug || editTenant?.slug || 'temp';
+                const ext = file.name.split('.').pop();
+                const path = `${slug}/logo-${Date.now()}.${ext}`;
+                const { error: upErr } = await supabase.storage.from('tenant-logos').upload(path, file, { upsert: true });
+                if (upErr) {
+                  showToast('Yükleme hatası: ' + upErr.message, false);
+                  setUploadingLogo(false);
+                  return;
+                }
+                const { data: urlData } = supabase.storage.from('tenant-logos').getPublicUrl(path);
+                setForm({ ...form, logo_url: urlData.publicUrl });
+                showToast('Logo yüklendi ✓');
+                setUploadingLogo(false);
+              }} />
+            </label>
           </div>
 
           <div>
