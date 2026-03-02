@@ -15,6 +15,8 @@ interface Tenant {
   is_active: boolean;
   owner_user_id: string;
   created_at: string;
+  ad_banner_1: string;
+  ad_banner_2: string;
 }
 
 const SuperAdminPanel: React.FC = () => {
@@ -27,10 +29,11 @@ const SuperAdminPanel: React.FC = () => {
   const [form, setForm] = useState({
     name: '', slug: '', phone: '', address: '',
     logo_url: '', primary_color: '#000000',
-    owner_email: '',
+    owner_email: '', ad_banner_1: '', ad_banner_2: '',
   });
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState<string | null>(null);
 
   // Auth state
   const [authed, setAuthed] = useState(false);
@@ -113,7 +116,7 @@ const SuperAdminPanel: React.FC = () => {
 
   const openAdd = () => {
     setEditTenant(null);
-    setForm({ name: '', slug: '', phone: '', address: '', logo_url: '', primary_color: '#000000', owner_email: '' });
+    setForm({ name: '', slug: '', phone: '', address: '', logo_url: '', primary_color: '#000000', owner_email: '', ad_banner_1: '', ad_banner_2: '' });
     setShowForm(true);
   };
 
@@ -122,6 +125,7 @@ const SuperAdminPanel: React.FC = () => {
     setForm({
       name: t.name, slug: t.slug, phone: t.phone, address: t.address,
       logo_url: t.logo_url, primary_color: t.primary_color, owner_email: '',
+      ad_banner_1: t.ad_banner_1 || '', ad_banner_2: t.ad_banner_2 || '',
     });
     setShowForm(true);
   };
@@ -143,6 +147,8 @@ const SuperAdminPanel: React.FC = () => {
           address: form.address.trim(),
           logo_url: form.logo_url.trim(),
           primary_color: form.primary_color,
+          ad_banner_1: form.ad_banner_1.trim(),
+          ad_banner_2: form.ad_banner_2.trim(),
         }).eq('id', editTenant.id);
 
         if (error) throw error;
@@ -438,6 +444,45 @@ const SuperAdminPanel: React.FC = () => {
               <span className="text-xs text-muted-foreground">{form.primary_color}</span>
             </div>
           </div>
+
+          {/* Ad Banners */}
+          {editTenant && (
+            <>
+              <div className="h-px bg-border my-2" />
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 font-bold">📢 Reklam Bannerları</div>
+              {(['ad_banner_1', 'ad_banner_2'] as const).map((key, idx) => (
+                <div key={key}>
+                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Reklam {idx + 1}</div>
+                  {form[key] && (
+                    <div className="mb-2 flex items-center gap-2">
+                      <img src={form[key]} alt={`Banner ${idx + 1}`} className="h-16 rounded-lg object-cover border border-border" />
+                      <button className="text-[10px] text-destructive hover:underline" onClick={() => setForm({ ...form, [key]: '' })}>Kaldır</button>
+                    </div>
+                  )}
+                  <label className={`neu-btn text-xs cursor-pointer inline-block ${uploadingBanner === key ? 'opacity-50 pointer-events-none' : ''}`}>
+                    {uploadingBanner === key ? '⏳ Yükleniyor...' : `📷 Görsel Yükle`}
+                    <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (file.size > 5 * 1024 * 1024) { showToast('Dosya 5MB\'dan küçük olmalı', false); return; }
+                      setUploadingBanner(key);
+                      try {
+                        const slug = form.slug || editTenant?.slug || 'temp';
+                        const ext = file.name.split('.').pop();
+                        const path = `${slug}/${key}-${Date.now()}.${ext}`;
+                        const { error: upErr } = await supabase.storage.from('tenant-logos').upload(path, file, { upsert: true });
+                        if (upErr) { showToast('Yükleme hatası: ' + upErr.message, false); return; }
+                        const { data: urlData } = supabase.storage.from('tenant-logos').getPublicUrl(path);
+                        setForm(prev => ({ ...prev, [key]: urlData.publicUrl }));
+                        showToast(`Reklam ${idx + 1} yüklendi ✓`);
+                      } catch (err: any) { showToast('Yükleme hatası: ' + err.message, false); }
+                      finally { setUploadingBanner(null); }
+                    }} />
+                  </label>
+                </div>
+              ))}
+            </>
+          )}
 
           {!editTenant && (
             <div>

@@ -809,6 +809,8 @@ export type Database = {
       }
       tenants: {
         Row: {
+          ad_banner_1: string
+          ad_banner_2: string
           address: string
           created_at: string
           id: string
@@ -822,6 +824,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ad_banner_1?: string
+          ad_banner_2?: string
           address?: string
           created_at?: string
           id?: string
@@ -835,6 +839,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ad_banner_1?: string
+          ad_banner_2?: string
           address?: string
           created_at?: string
           id?: string

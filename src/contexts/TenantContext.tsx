@@ -11,6 +11,8 @@ interface Tenant {
   phone: string;
   address: string;
   is_active: boolean;
+  ad_banner_1: string;
+  ad_banner_2: string;
 }
 
 interface TenantContextType {
