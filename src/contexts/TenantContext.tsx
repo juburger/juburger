@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Tenant {
@@ -59,7 +60,8 @@ export const TenantProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
 
   // Super admin routes don't need tenant resolution
-  const isSuperAdmin = window.location.pathname.startsWith('/super-admin');
+  const location = useLocation();
+  const isSuperAdmin = location.pathname.startsWith('/super-admin');
 
   useEffect(() => {
     if (isSuperAdmin) {
@@ -89,7 +91,7 @@ export const TenantProvider = ({ children }: { children: ReactNode }) => {
     };
 
     fetchTenant();
-  }, []);
+  }, [isSuperAdmin]);
 
   return (
     <TenantContext.Provider value={{ tenant, tenantId: tenant?.id || null, loading, error }}>
