@@ -16,22 +16,30 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Verify caller is admin
+    // Verify caller: service role key, admin secret, or authenticated admin
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("Yetkilendirme gerekli");
+    const apikeyHeader = req.headers.get("apikey");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const isServiceRole = apikeyHeader === serviceRoleKey || authHeader === `Bearer ${serviceRoleKey}`;
+    const adminSecret = req.headers.get("x-admin-secret");
+    const isAdminSecret = adminSecret === serviceRoleKey;
+    
+    if (!isServiceRole && !isAdminSecret) {
+      if (!authHeader) throw new Error("Yetkilendirme gerekli");
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user: caller }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    if (authError || !caller) throw new Error("Geçersiz oturum");
+      const token = authHeader.replace("Bearer ", "");
+      const { data: { user: caller }, error: authError } = await supabaseAdmin.auth.getUser(token);
+      if (authError || !caller) throw new Error("Geçersiz oturum");
 
-    const { data: callerRole } = await supabaseAdmin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", caller.id)
-      .eq("role", "admin")
-      .maybeSingle();
+      const { data: callerRole } = await supabaseAdmin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", caller.id)
+        .eq("role", "admin")
+        .maybeSingle();
 
-    if (!callerRole) throw new Error("Yönetici yetkisi gerekli");
+      if (!callerRole) throw new Error("Yönetici yetkisi gerekli");
+    }
 
     const { email, password, tenant_id } = await req.json();
     if (!email || !password || !tenant_id) {
