@@ -235,10 +235,10 @@ const AdminPanel = () => {
       statusItems={['Yönetici girişi yapıldı']}
     >
       {/* Tabs */}
-      <div className="flex gap-1.5 mb-3 overflow-x-auto pb-1 flex-wrap">
+      <div className="flex gap-1.5 mb-3 pb-1 flex-wrap">
         {tabs.map(t => (
           <button key={t.id}
-            className={`px-3 py-1.5 text-xs font-medium cursor-pointer rounded-full whitespace-nowrap transition-all ${tab === t.id ? 'neu-sunken text-foreground font-semibold' : 'neu-flat'}`}
+            className={`px-3 py-1.5 text-xs cursor-pointer text-card-foreground font-medium rounded-full transition-all ${tab === t.id ? 'neu-sunken font-semibold' : 'neu-flat'}`}
             onClick={() => setTab(t.id)}>{t.label}</button>
         ))}
       </div>
