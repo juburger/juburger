@@ -143,8 +143,7 @@ const SuperAdminPanel: React.FC = () => {
     setSaving(true);
     try {
       if (editTenant) {
-        // Update existing tenant
-        const { error } = await supabase.from('tenants').update({
+        const updateData = {
           name: form.name.trim(),
           slug: form.slug.trim().toLowerCase(),
           phone: form.phone.trim(),
@@ -155,21 +154,20 @@ const SuperAdminPanel: React.FC = () => {
           ad_banner_2: form.ad_banner_2.trim(),
           ad_link_1: form.ad_link_1.trim(),
           ad_link_2: form.ad_link_2.trim(),
-        }).eq('id', editTenant.id);
+        };
+        console.log('Updating tenant:', editTenant.id, updateData);
+        const { error, data } = await supabase.from('tenants').update(updateData).eq('id', editTenant.id).select();
+        console.log('Update result:', { error, data });
 
         if (error) throw error;
         showToast('İşletme güncellendi ✓');
       } else {
-        // Create new tenant — need owner_email to resolve user
         if (!form.owner_email.trim()) {
           showToast('Sahip e-posta adresi zorunlu', false);
           setSaving(false);
           return;
         }
 
-        // Look up user by email via edge function or direct query
-        // For now, we'll create tenant with a placeholder and let admin set owner later
-        // Actually, we need the owner_user_id. Let's use the current user as owner for now
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('Oturum bulunamadı');
 
@@ -185,7 +183,6 @@ const SuperAdminPanel: React.FC = () => {
 
         if (error) throw error;
 
-        // Also create tenant_users entry
         if (newTenant) {
           await supabase.from('tenant_users').insert({
             tenant_id: newTenant.id,
@@ -200,7 +197,8 @@ const SuperAdminPanel: React.FC = () => {
       setShowForm(false);
       fetchTenants();
     } catch (err: any) {
-      showToast('Hata: ' + err.message, false);
+      console.error('Save error:', err);
+      showToast('Hata: ' + (err.message || 'Bilinmeyen hata'), false);
     } finally {
       setSaving(false);
     }
