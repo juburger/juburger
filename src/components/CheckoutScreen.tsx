@@ -17,24 +17,46 @@ const CheckoutScreen = () => {
   const [selPay, setSelPay] = useState('card');
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
-  const [memberData, setMemberData] = useState<{ id: string; name: string } | null>(null);
+  const [memberData, setMemberData] = useState<{ id: string; name: string; total_points: number; used_points: number } | null>(null);
+  const [usePoints, setUsePoints] = useState(false);
+  const [pointsToUse, setPointsToUse] = useState(0);
+  const [loyaltySettings, setLoyaltySettings] = useState({ min_redeem_points: 50, point_value: 0.1 });
 
   const isMember = !!memberId;
   const total = cartTotal();
   const svc = Math.round(total * 0.05);
-  const grand = total + svc;
+  const grandBeforePoints = total + svc;
 
-  // Points earned: 1/10 of spending
+  const availablePoints = memberData ? memberData.total_points - memberData.used_points : 0;
+  const maxPointsForOrder = Math.min(availablePoints, Math.floor(grandBeforePoints / loyaltySettings.point_value));
+  const pointDiscount = usePoints ? Math.round(pointsToUse * loyaltySettings.point_value) : 0;
+  const grand = grandBeforePoints - pointDiscount;
+
+  // Points earned: 1/10 of actual spending (after point discount)
   const earnedPoints = isMember ? Math.floor(grand / 10) : 0;
 
   useEffect(() => {
     if (memberId) {
-      supabase.from('members').select('id, name').eq('id', memberId).maybeSingle()
-        .then(({ data }) => {
-          if (data) setMemberData(data as any);
-        });
+      Promise.all([
+        supabase.from('members').select('id, name, total_points, used_points').eq('id', memberId).maybeSingle(),
+        supabase.from('loyalty_settings').select('*').eq('id', 'default').maybeSingle(),
+      ]).then(([{ data: m }, { data: ls }]) => {
+        if (m) setMemberData(m as any);
+        if (ls) setLoyaltySettings(ls as any);
+      });
     }
   }, [memberId]);
+
+  // Update pointsToUse when toggling or when maxPointsForOrder changes
+  useEffect(() => {
+    if (usePoints) {
+      setPointsToUse(maxPointsForOrder);
+    } else {
+      setPointsToUse(0);
+    }
+  }, [usePoints, maxPointsForOrder]);
+
+  const canUsePoints = availablePoints >= loyaltySettings.min_redeem_points;
 
   const allPayOpts = [
     { id: 'card', icon: '💳', title: 'Kredi / Banka Kartı', desc: 'Güvenli online ödeme', requiresMember: false },
@@ -62,13 +84,13 @@ const CheckoutScreen = () => {
         payment_type: selPay,
         payment_status: selPay === 'card' ? 'pending' : 'cash',
         status: 'waiting',
-        note,
+        note: `${note}${pointsToUse > 0 ? ` [${pointsToUse} puan kullanıldı, ₺${pointDiscount} indirim]` : ''}`,
         member_id: memberId || null,
       }).select().single();
 
       if (error) throw error;
 
-      // Update member stats & earn points
+      // Update member stats & handle points
       if (memberId) {
         const { data: currentMember, error: memberFetchError } = await supabase
           .from('members')
@@ -81,6 +103,7 @@ const CheckoutScreen = () => {
         if (currentMember) {
           const cm = currentMember as any;
 
+          // Record earned points
           if (earnedPoints > 0) {
             const { error: pointsInsertError } = await supabase.from('point_transactions').insert({
               member_id: memberId,
@@ -89,12 +112,24 @@ const CheckoutScreen = () => {
               description: `Sipariş #${data.id.substring(0, 6).toUpperCase()} - ₺${grand} harcama`,
               order_id: data.id,
             } as any);
-
             if (pointsInsertError) throw pointsInsertError;
+          }
+
+          // Record spent points
+          if (pointsToUse > 0) {
+            const { error: pointsSpendError } = await supabase.from('point_transactions').insert({
+              member_id: memberId,
+              type: 'spend',
+              points: -pointsToUse,
+              description: `Sipariş #${data.id.substring(0, 6).toUpperCase()} - ${pointsToUse} puan kullanıldı (₺${pointDiscount} indirim)`,
+              order_id: data.id,
+            } as any);
+            if (pointsSpendError) throw pointsSpendError;
           }
 
           const { error: memberUpdateError } = await supabase.from('members').update({
             total_points: cm.total_points + earnedPoints,
+            used_points: cm.used_points + pointsToUse,
             total_spent: Number(cm.total_spent) + grand,
             visit_count: cm.visit_count + 1,
             last_visit_at: new Date().toISOString(),
@@ -106,7 +141,7 @@ const CheckoutScreen = () => {
 
       const orderId = data.id.substring(0, 6).toUpperCase();
       clearCart();
-      navigate(`/success?order=${orderId}&pay=${selPay}${earnedPoints > 0 ? `&points=${earnedPoints}` : ''}${memberId ? `&member=${memberId}` : ''}`);
+      navigate(`/success?order=${orderId}&pay=${selPay}${earnedPoints > 0 ? `&points=${earnedPoints}` : ''}${pointsToUse > 0 ? `&usedPoints=${pointsToUse}&discount=${pointDiscount}` : ''}${memberId ? `&member=${memberId}` : ''}`);
     } catch (err: any) {
       showToast('Sipariş hatası: ' + err.message, false);
     } finally {
@@ -137,14 +172,55 @@ const CheckoutScreen = () => {
         <span>Servis (%5)</span><span>₺{svc}</span>
       </div>
 
-      {/* Member info */}
+      {/* Member info & points */}
       {memberData && (
         <>
           <div className="h-px bg-border my-3" />
           <div className="p-2.5 border border-primary/30 rounded-lg bg-primary/5 mb-2">
             <div className="text-[12px] font-bold text-primary">⭐ {memberData.name}</div>
+            <div className="text-[10px] text-muted-foreground mt-0.5">
+              Kullanılabilir puan: <span className="font-bold text-primary">{availablePoints}</span>
+            </div>
+
+            {/* Points redemption */}
+            {canUsePoints ? (
+              <div className="mt-2 p-2 rounded-lg bg-background/60 border border-border/50">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={usePoints}
+                    onChange={e => setUsePoints(e.target.checked)}
+                    className="rounded"
+                  />
+                  <span className="text-[11px] font-semibold">Puanla Öde</span>
+                </label>
+                {usePoints && (
+                  <div className="mt-2">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="range"
+                        min={loyaltySettings.min_redeem_points}
+                        max={maxPointsForOrder}
+                        value={pointsToUse}
+                        onChange={e => setPointsToUse(Number(e.target.value))}
+                        className="flex-1 accent-primary"
+                      />
+                      <span className="text-[11px] font-bold text-primary min-w-[50px] text-right">{pointsToUse} puan</span>
+                    </div>
+                    <div className="text-[10px] text-muted-foreground mt-1">
+                      İndirim: <span className="font-bold text-green-600">-₺{pointDiscount}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : availablePoints > 0 ? (
+              <div className="text-[9px] text-muted-foreground mt-1">
+                Puan kullanmak için en az {loyaltySettings.min_redeem_points} puan gerekir
+              </div>
+            ) : null}
+
             {earnedPoints > 0 && (
-              <div className="text-[10px] text-muted-foreground mt-1">
+              <div className="text-[10px] text-muted-foreground mt-1.5">
                 Bu siparişten ⭐ <span className="font-bold text-primary">{earnedPoints} puan</span> kazanacaksınız
               </div>
             )}
@@ -186,6 +262,16 @@ const CheckoutScreen = () => {
         value={note} onChange={e => setNote(e.target.value)} />
 
       <div className="h-px bg-border my-3" />
+      <div className="flex justify-between items-center mb-1">
+        <span className="text-xs text-muted-foreground">Ara Toplam</span>
+        <span className="text-sm">₺{grandBeforePoints}</span>
+      </div>
+      {pointDiscount > 0 && (
+        <div className="flex justify-between items-center mb-1">
+          <span className="text-xs text-green-600">⭐ Puan İndirimi</span>
+          <span className="text-sm font-bold text-green-600">-₺{pointDiscount}</span>
+        </div>
+      )}
       <div className="flex justify-between items-center mb-3">
         <strong className="text-sm">TOPLAM</strong>
         <strong className="text-xl">₺{grand}</strong>
