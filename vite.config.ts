@@ -24,9 +24,9 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
       },
       manifest: {
-        name: "JU Burger",
-        short_name: "JU Burger",
-        description: "JU Burger - Sipariş ve Yönetim Sistemi",
+        name: "siparis.co",
+        short_name: "siparis.co",
+        description: "siparis.co - Sipariş ve Yönetim Sistemi",
         theme_color: "#0a0a0a",
         background_color: "#0a0a0a",
         display: "standalone",
