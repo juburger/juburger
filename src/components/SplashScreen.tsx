@@ -103,8 +103,6 @@ const SplashScreen = () => {
         </>
       )}
 
-      <p className="text-muted-foreground text-[11px] mt-6 text-center">© 2025 siparis.co</p>
-
       {/* Ad Banners */}
       {tenant?.ad_banner_1 && (
         <div className="mt-4">
@@ -128,6 +126,8 @@ const SplashScreen = () => {
           )}
         </div>
       )}
+
+      <p className="text-muted-foreground text-[11px] mt-6 text-center">© 2025 siparis.co</p>
     </WinWindow>
   );
 };
