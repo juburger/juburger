@@ -235,6 +235,13 @@ const AdminPanel = () => {
       {/* ORDERS TAB */}
       {tab === 'orders' && (
         <>
+          <div className="flex gap-1.5 mb-3 flex-wrap">
+            {filters.map(f => (
+              <button key={f.id}
+                className={`px-2.5 py-1 text-[11px] cursor-pointer font-medium rounded-full transition-all ${filter === f.id ? 'neu-sunken font-semibold bg-foreground text-background' : 'neu-flat'}`}
+                onClick={() => setFilter(f.id)}>{f.label}</button>
+            ))}
+          </div>
           {!filteredOrders.length ? (
             <p className="text-muted-foreground text-center py-3.5 text-xs">Sipariş bulunamadı.</p>
           ) : filteredOrders.map(o => (
