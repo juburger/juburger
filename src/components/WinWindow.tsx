@@ -98,25 +98,12 @@ const ModLayout = ({ icon, title, menuItems, controls, statusItems, children, bo
           <span className="text-sm font-semibold tracking-tight text-foreground">{title}</span>
         </div>
         <div className="flex items-center gap-2">
-          {controls?.slice(0, -1).map((c, i) => (
+          {controls?.map((c, i) => (
             <button key={i} onClick={c.onClick}
               className="h-8 px-3 rounded-full flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-xs whitespace-nowrap gap-1">
               {c.label}
             </button>
           ))}
-          <button
-            onClick={() => setDark(!dark)}
-            className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            aria-label={dark ? 'Açık mod' : 'Koyu mod'}
-          >
-            {dark ? <Sun size={16} /> : <Moon size={16} />}
-          </button>
-          {controls && controls.length > 0 && (
-            <button onClick={controls[controls.length - 1].onClick}
-              className="h-8 px-3 rounded-full flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-xs whitespace-nowrap gap-1">
-              {controls[controls.length - 1].label}
-            </button>
-          )}
         </div>
       </div>
 
@@ -148,6 +135,15 @@ const ModLayout = ({ icon, title, menuItems, controls, statusItems, children, bo
         </div>
       </footer>
     )}
+
+    {/* Dark mode toggle — fixed bottom right */}
+    <button
+      onClick={() => setDark(!dark)}
+      className="fixed bottom-5 right-5 z-50 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer bg-muted/80 backdrop-blur-sm text-muted-foreground hover:text-foreground hover:bg-muted border border-border transition-colors shadow-sm"
+      aria-label={dark ? 'Açık mod' : 'Koyu mod'}
+    >
+      {dark ? <Sun size={16} /> : <Moon size={16} />}
+    </button>
   </div>
   );
 };
