@@ -67,7 +67,7 @@ const SplashScreen = () => {
           <div className="grid grid-cols-2 gap-2 mb-3">
             {categories.map(c => (
               <button key={c.id}
-                className={`text-sm px-4 py-2.5 cursor-pointer rounded-full transition-all font-medium text-foreground ${activeCat === c.id ? 'neu-sunken' : 'neu-flat'}`}
+                className={`text-sm px-4 py-2.5 cursor-pointer rounded-full transition-all font-medium text-foreground border-2 border-border ${activeCat === c.id ? 'neu-sunken' : 'neu-flat'}`}
                 onClick={() => { setActiveCat(activeCat === c.id ? null : c.id); setMenuExpanded(true); }}>{c.name}</button>
             ))}
           </div>
