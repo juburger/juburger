@@ -72,14 +72,19 @@ const AdminPanel = () => {
       doc.open();
       doc.write(`<!DOCTYPE html><html><head><style>
         body { margin: 0; padding: 4mm; font-family: 'Courier New', monospace; font-size: 14px; font-weight: 600; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .receipt-print { position: static !important; left: auto !important; top: auto !important; }
         @page { margin: 0; }
       </style></head><body>${receiptHtml}</body></html>`);
       doc.close();
 
       setTimeout(() => {
-        iframe.contentWindow?.focus();
-        iframe.contentWindow?.print();
-        showToast(`✅ Fiş yazdırıldı: #${order.id.substring(0, 6).toUpperCase()}`);
+        try {
+          iframe.contentWindow?.focus();
+          iframe.contentWindow?.print();
+          showToast(`✅ Fiş yazdırıldı: #${order.id.substring(0, 6).toUpperCase()}`);
+        } catch {
+          showToast('❌ Yazdırma başarısız. Yazıcı/Chrome kiosk ayarını kontrol edin.', false);
+        }
       }, 500);
     }, 900);
   }, [showToast]);
