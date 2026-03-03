@@ -1,5 +1,26 @@
-import React, { type ReactNode } from 'react';
+import React, { type ReactNode, useState, useEffect } from 'react';
+import { Sun, Moon } from 'lucide-react';
 import { useTenant } from '@/contexts/TenantContext';
+
+function useModDarkMode() {
+  const [dark, setDark] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const saved = localStorage.getItem('mod-dark-mode');
+    if (saved !== null) return saved === 'true';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('mod-dark-mode', String(dark));
+    if (dark) {
+      document.body.classList.add('dark');
+    } else {
+      document.body.classList.remove('dark');
+    }
+  }, [dark]);
+
+  return [dark, setDark] as const;
+}
 
 interface WinWindowProps {
   icon: ReactNode;
@@ -67,7 +88,10 @@ const NeuLayout = ({ icon, title, menuItems, controls, statusItems, children, bo
 );
 
 /** MOD layout — Apple/Tesla minimal */
-const ModLayout = ({ icon, title, menuItems, controls, statusItems, children, bodyClass }: WinWindowProps) => (
+const ModLayout = ({ icon, title, menuItems, controls, statusItems, children, bodyClass }: WinWindowProps) => {
+  const [dark, setDark] = useModDarkMode();
+
+  return (
   <div className="min-h-screen bg-background overflow-x-hidden">
     {/* Minimal top bar */}
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
@@ -77,6 +101,13 @@ const ModLayout = ({ icon, title, menuItems, controls, statusItems, children, bo
           <span className="text-sm font-semibold tracking-tight text-foreground">{title}</span>
         </div>
         <div className="flex items-center gap-1">
+          <button
+            onClick={() => setDark(!dark)}
+            className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            aria-label={dark ? 'Açık mod' : 'Koyu mod'}
+          >
+            {dark ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
           {controls?.map((c, i) => (
             <button key={i} onClick={c.onClick}
               className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
@@ -115,7 +146,8 @@ const ModLayout = ({ icon, title, menuItems, controls, statusItems, children, bo
       </footer>
     )}
   </div>
-);
+  );
+};
 
 const WinWindow = (props: WinWindowProps) => {
   const { uiTheme } = useTenant();
