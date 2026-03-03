@@ -143,10 +143,10 @@ export const TenantProvider = ({ children }: { children: ReactNode }) => {
       {isSuperAdmin ? (
         children
       ) : loading ? (
-        <div className="flex items-center justify-center min-h-screen">
+        <div className="flex items-center justify-center min-h-screen" style={{ background: '#000', color: '#fff' }}>
           <div className="text-center">
             <div className="text-2xl mb-2">⏳</div>
-            <div className="text-sm text-muted-foreground">Yükleniyor...</div>
+            <div className="text-sm" style={{ opacity: 0.6 }}>Yükleniyor...</div>
           </div>
         </div>
       ) : error ? (
