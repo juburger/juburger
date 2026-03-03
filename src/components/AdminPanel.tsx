@@ -5,7 +5,6 @@ import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenant } from '@/contexts/TenantContext';
 import type { Order } from '@/data/menu';
-import ReceiptPrint from '@/components/ReceiptPrint';
 import AdminProducts from '@/components/AdminProducts';
 import AdminStaff from '@/components/AdminStaff';
 import AdminTables from '@/components/AdminTables';
@@ -22,6 +21,45 @@ import AdminMembers from '@/components/AdminMembers';
 
 type TabType = 'orders' | 'tables' | 'closed' | 'transfer' | 'accounts' | 'members' | 'quick' | 'stats' | 'reports' | 'products' | 'settings' | 'qr' | 'logs';
 
+const payLabels: Record<string, string> = { card: 'Kart', cash: 'Nakit', pos: 'POS' };
+
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+const buildReceiptHtml = (order: Order, paperSize: string) => {
+  const width = paperSize === '58' ? '58mm' : '80mm';
+  const fontSize = paperSize === '58' ? '12px' : '14px';
+  const createdAt = new Date(order.created_at);
+  const time = createdAt.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+  const date = createdAt.toLocaleDateString('tr-TR');
+  const safeNote = order.note ? `<div>Not: ${escapeHtml(order.note)}</div>` : '';
+  const items = (Array.isArray(order.items) ? order.items : []) as Array<{ name: string; qty: number; price: number }>;
+  const itemRows = items
+    .map((item) => `<div style="display:flex;justify-content:space-between;font-weight:700;"><span>${escapeHtml(item.name)} x${item.qty}</span><span>₺${(Number(item.price) * Number(item.qty)).toFixed(2)}</span></div>`)
+    .join('');
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8" /><style>
+    @page { margin: 0; }
+    html, body { margin: 0; padding: 0; }
+    body { width: ${width}; padding: ${paperSize === '58' ? '2mm' : '4mm'}; font-family: 'Courier New', monospace; font-size: ${fontSize}; font-weight: 600; color: #000; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  </style></head><body>
+    <div style="text-align:center;margin-bottom:8px;"><div style="font-size:22px;font-weight:900;">JU - Sipariş Sistemi</div><div style="font-size:13px;font-weight:700;">================================</div></div>
+    <div style="margin-bottom:6px;font-weight:700;"><div>Sipariş: #${order.id.substring(0, 6).toUpperCase()}</div><div>Masa: ${order.table_num} — ${escapeHtml(order.user_name)}</div><div>${date} ${time}</div></div>
+    <div style="font-size:13px;font-weight:700;">--------------------------------</div>
+    <div style="margin-bottom:6px;">${itemRows}</div>
+    <div style="font-size:13px;font-weight:700;">--------------------------------</div>
+    <div style="display:flex;justify-content:space-between;font-weight:900;font-size:18px;margin-top:4px;"><span>TOPLAM</span><span>₺${Number(order.total).toFixed(2)}</span></div>
+    <div style="margin-top:6px;font-size:13px;font-weight:700;"><div>Ödeme: ${payLabels[order.payment_type] || escapeHtml(order.payment_type)}</div>${safeNote}</div>
+    <div style="font-size:13px;font-weight:700;margin-top:8px;">================================</div>
+    <div style="text-align:center;font-size:13px;font-weight:700;margin-top:4px;">Afiyet olsun!</div>
+  </body></html>`;
+};
+
 const AdminPanel = () => {
   const navigate = useNavigate();
   const { showToast } = useToast95Context();
@@ -33,8 +71,6 @@ const AdminPanel = () => {
     sound_enabled: true, waiter_enabled: true,
     auto_print_enabled: true, paper_size: '80', printer_name: '',
   });
-  const [printOrder, setPrintOrder] = useState<Order | null>(null);
-  const printRef = useRef<HTMLDivElement>(null);
   const knownOrderIds = useRef<Set<string>>(new Set());
   const initialLoadDone = useRef(false);
   const settingsRef = useRef(settings);
@@ -51,33 +87,21 @@ const AdminPanel = () => {
   };
 
   const triggerPrint = useCallback((order: Order) => {
+    const iframe = printIframeRef.current;
+    if (!iframe || !iframe.contentWindow) {
+      showToast('❌ Yazdırma penceresi açılamadı', false);
+      return;
+    }
+
     showToast(`🖨️ Yazdırma başlatılıyor: #${order.id.substring(0, 6).toUpperCase()}`);
-    setPrintOrder(order);
 
-    setTimeout(() => {
-      const iframe = printIframeRef.current;
-      const receiptHtml = printRef.current?.innerHTML;
-
-      if (!iframe || !receiptHtml) {
-        showToast('❌ Yazdırma içeriği hazırlanamadı', false);
-        return;
-      }
-
-      const doc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (!doc || !iframe.contentWindow) {
-        showToast('❌ Yazdırma penceresi açılamadı', false);
-        return;
-      }
-
+    try {
+      const doc = iframe.contentDocument || iframe.contentWindow.document;
       doc.open();
-      doc.write(`<!DOCTYPE html><html><head><style>
-        body { margin: 0; padding: 4mm; font-family: 'Courier New', monospace; font-size: 14px; font-weight: 600; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .receipt-print { position: static !important; left: auto !important; top: auto !important; }
-        @page { margin: 0; }
-      </style></head><body>${receiptHtml}</body></html>`);
+      doc.write(buildReceiptHtml(order, settings.paper_size || '80'));
       doc.close();
 
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         try {
           iframe.contentWindow?.focus();
           iframe.contentWindow?.print();
@@ -85,9 +109,11 @@ const AdminPanel = () => {
         } catch {
           showToast('❌ Yazdırma başarısız. Yazıcı/Chrome kiosk ayarını kontrol edin.', false);
         }
-      }, 500);
-    }, 900);
-  }, [showToast]);
+      });
+    } catch {
+      showToast('❌ Fiş oluşturulamadı', false);
+    }
+  }, [showToast, settings.paper_size]);
 
   // Load orders realtime
   useEffect(() => {
@@ -370,22 +396,6 @@ const AdminPanel = () => {
 
       {/* QR TAB */}
       {tab === 'qr' && <AdminQRCodes />}
-
-      {/* Hidden receipt for printing */}
-      {printOrder && (
-        <ReceiptPrint
-          ref={printRef}
-          orderId={printOrder.id}
-          tableNum={printOrder.table_num}
-          userName={printOrder.user_name}
-          items={Array.isArray(printOrder.items) ? printOrder.items as any : []}
-          total={printOrder.total}
-          paymentType={printOrder.payment_type}
-          note={printOrder.note}
-          createdAt={printOrder.created_at}
-          paperSize={settings.paper_size}
-        />
-      )}
 
       {/* Hidden iframe for silent printing */}
       <iframe
