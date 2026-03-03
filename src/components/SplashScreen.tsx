@@ -125,10 +125,10 @@ const SplashScreen = () => {
         {uiTheme === 'mod' && (
           <button
             onClick={() => setDark(!dark)}
-            className="w-7 h-7 rounded-full flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+            className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-foreground/70 hover:text-foreground transition-colors border border-border"
             aria-label={dark ? 'Açık mod' : 'Koyu mod'}
           >
-            {dark ? <Sun size={14} /> : <Moon size={14} />}
+            {dark ? <Sun size={16} /> : <Moon size={16} />}
           </button>
         )}
       </div>
