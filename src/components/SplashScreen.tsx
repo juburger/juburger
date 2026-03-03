@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Menu } from 'lucide-react';
-import WinWindow from '@/components/WinWindow';
+import { Menu, Sun, Moon } from 'lucide-react';
+import WinWindow, { useModDarkMode } from '@/components/WinWindow';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { useTenant } from '@/contexts/TenantContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,7 +14,8 @@ const SplashScreen = () => {
   const [searchParams] = useSearchParams();
   const tableNum = searchParams.get('table') || '3';
   const { showToast } = useToast95Context();
-  const { tenant, tenantId } = useTenant();
+  const { tenant, tenantId, uiTheme } = useTenant();
+  const [dark, setDark] = useModDarkMode();
   const [categories, setCategories] = useState<DbCategory[]>([]);
   const [products, setProducts] = useState<DbProduct[]>([]);
   const [activeCat, setActiveCat] = useState<string | null>(null);
@@ -119,7 +120,18 @@ const SplashScreen = () => {
         </div>
       )}
 
-      <p className="text-muted-foreground text-[11px] mt-6 text-center">© 2025 siparis.co</p>
+      <div className="flex items-center justify-between mt-6">
+        <p className="text-muted-foreground text-[11px]">© 2025 siparis.co</p>
+        {uiTheme === 'mod' && (
+          <button
+            onClick={() => setDark(!dark)}
+            className="w-7 h-7 rounded-full flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+            aria-label={dark ? 'Açık mod' : 'Koyu mod'}
+          >
+            {dark ? <Sun size={14} /> : <Moon size={14} />}
+          </button>
+        )}
+      </div>
     </WinWindow>
   );
 };
