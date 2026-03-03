@@ -53,52 +53,80 @@ const AdminPanel = () => {
   };
 
   const triggerPrint = useCallback((order: Order) => {
-    console.log('[PRINT] triggerPrint called for order:', order.id.substring(0, 6));
     showToast(`🖨️ Yazdırma başlatılıyor: #${order.id.substring(0, 6).toUpperCase()}`);
     setPrintOrder(order);
 
-    // Wait longer for React to render the ReceiptPrint component
+    const printMarkup = (receiptHtml: string) => `
+      <html>
+        <head>
+          <style>
+            body { margin: 0; padding: 4mm; font-family: 'Courier New', monospace; font-size: 14px; font-weight: 600; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .line { display: flex; justify-content: space-between; }
+            .bold { font-weight: 900; }
+            .center { text-align: center; }
+            .sep { font-size: 13px; font-weight: 700; }
+          </style>
+        </head>
+        <body>${receiptHtml}</body>
+      </html>
+    `;
+
+    const fallbackPopupPrint = (receiptHtml: string) => {
+      const popup = window.open('', '_blank', 'width=420,height=720');
+      if (!popup) {
+        showToast('❌ Tarayıcı yazdırma penceresini engelledi. Pop-up izni verin.', false);
+        return;
+      }
+
+      popup.document.open();
+      popup.document.write(printMarkup(receiptHtml));
+      popup.document.close();
+
+      setTimeout(() => {
+        popup.focus();
+        popup.print();
+        showToast(`✅ Fiş yazdırıldı: #${order.id.substring(0, 6).toUpperCase()}`);
+        setTimeout(() => popup.close(), 400);
+      }, 250);
+    };
+
     setTimeout(() => {
       const iframe = printIframeRef.current;
       const receiptHtml = printRef.current?.innerHTML;
 
-      console.log('[PRINT] iframe:', !!iframe, 'receiptHtml length:', receiptHtml?.length || 0);
-
       if (!iframe || !receiptHtml) {
-        showToast('❌ Yazdırma içeriği hazırlanamadı (iframe:' + !!iframe + ', html:' + (receiptHtml?.length || 0) + ')', false);
+        showToast('❌ Yazdırma içeriği hazırlanamadı', false);
         return;
       }
 
-      const doc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (!doc || !iframe.contentWindow) {
-        showToast('❌ Yazdırma penceresi açılamadı', false);
-        return;
+      try {
+        const doc = iframe.contentDocument || iframe.contentWindow?.document;
+        if (!doc || !iframe.contentWindow) {
+          fallbackPopupPrint(receiptHtml);
+          return;
+        }
+
+        doc.open();
+        doc.write(printMarkup(receiptHtml));
+        doc.close();
+
+        setTimeout(() => {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              try {
+                iframe.contentWindow?.focus();
+                iframe.contentWindow?.print();
+                showToast(`✅ Fiş yazdırıldı: #${order.id.substring(0, 6).toUpperCase()}`);
+              } catch {
+                fallbackPopupPrint(receiptHtml);
+              }
+            });
+          });
+        }, 250);
+      } catch {
+        fallbackPopupPrint(receiptHtml);
       }
-
-      doc.open();
-      doc.write(`
-        <html>
-          <head>
-            <style>
-              body { margin: 0; padding: 4mm; font-family: 'Courier New', monospace; font-size: 14px; font-weight: 600; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-              .line { display: flex; justify-content: space-between; }
-              .bold { font-weight: 900; }
-              .center { text-align: center; }
-              .sep { font-size: 13px; font-weight: 700; }
-            </style>
-          </head>
-          <body>${receiptHtml}</body>
-        </html>
-      `);
-      doc.close();
-
-      setTimeout(() => {
-        console.log('[PRINT] Calling iframe.print()');
-        iframe.contentWindow?.focus();
-        iframe.contentWindow?.print();
-        showToast(`✅ Fiş yazdırıldı: #${order.id.substring(0, 6).toUpperCase()}`);
-      }, 400);
-    }, 800);
+    }, 900);
   }, [showToast]);
 
   // Load orders realtime
