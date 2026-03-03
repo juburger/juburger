@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect, type ReactNode }
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
+export type UiTheme = 'neu' | 'mod';
+
 interface Tenant {
   id: string;
   slug: string;
@@ -15,6 +17,7 @@ interface Tenant {
   ad_banner_2: string;
   ad_link_1: string;
   ad_link_2: string;
+  ui_theme: UiTheme;
 }
 
 interface TenantContextType {
@@ -22,6 +25,7 @@ interface TenantContextType {
   tenantId: string | null;
   loading: boolean;
   error: string | null;
+  uiTheme: UiTheme;
 }
 
 const TenantContext = createContext<TenantContextType>({
@@ -29,6 +33,7 @@ const TenantContext = createContext<TenantContextType>({
   tenantId: null,
   loading: true,
   error: null,
+  uiTheme: 'neu',
 });
 
 export const useTenant = () => useContext(TenantContext);
@@ -97,6 +102,9 @@ export const TenantProvider = ({ children }: { children: ReactNode }) => {
       } else {
         const t = data as Tenant;
         setTenant(t);
+        // Apply theme class to body
+        document.body.classList.remove('theme-neu', 'theme-mod');
+        document.body.classList.add(`theme-${t.ui_theme || 'neu'}`);
         // Update browser tab title & favicon
         document.title = t.name;
         // Update OG meta tags for link previews
@@ -131,7 +139,7 @@ export const TenantProvider = ({ children }: { children: ReactNode }) => {
   }, [isSuperAdmin]);
 
   return (
-    <TenantContext.Provider value={{ tenant, tenantId: tenant?.id || null, loading, error }}>
+    <TenantContext.Provider value={{ tenant, tenantId: tenant?.id || null, loading, error, uiTheme: tenant?.ui_theme || 'neu' }}>
       {isSuperAdmin ? (
         children
       ) : loading ? (

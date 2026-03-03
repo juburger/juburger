@@ -19,6 +19,7 @@ interface Tenant {
   ad_banner_2: string;
   ad_link_1: string;
   ad_link_2: string;
+  ui_theme: string;
 }
 
 const SuperAdminPanel: React.FC = () => {
@@ -32,7 +33,7 @@ const SuperAdminPanel: React.FC = () => {
     name: '', slug: '', phone: '', address: '',
     logo_url: '', primary_color: '#000000',
     owner_email: '', ad_banner_1: '', ad_banner_2: '',
-    ad_link_1: '', ad_link_2: '',
+    ad_link_1: '', ad_link_2: '', ui_theme: 'neu',
   });
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -163,7 +164,7 @@ const SuperAdminPanel: React.FC = () => {
 
   const openAdd = () => {
     setEditTenant(null);
-    setForm({ name: '', slug: '', phone: '', address: '', logo_url: '', primary_color: '#000000', owner_email: '', ad_banner_1: '', ad_banner_2: '', ad_link_1: '', ad_link_2: '' });
+    setForm({ name: '', slug: '', phone: '', address: '', logo_url: '', primary_color: '#000000', owner_email: '', ad_banner_1: '', ad_banner_2: '', ad_link_1: '', ad_link_2: '', ui_theme: 'neu' });
     setShowForm(true);
   };
 
@@ -174,6 +175,7 @@ const SuperAdminPanel: React.FC = () => {
       logo_url: t.logo_url, primary_color: t.primary_color, owner_email: '',
       ad_banner_1: t.ad_banner_1 || '', ad_banner_2: t.ad_banner_2 || '',
       ad_link_1: t.ad_link_1 || '', ad_link_2: t.ad_link_2 || '',
+      ui_theme: t.ui_theme || 'neu',
     });
     setShowForm(true);
   };
@@ -198,6 +200,7 @@ const SuperAdminPanel: React.FC = () => {
           ad_banner_2: form.ad_banner_2.trim(),
           ad_link_1: form.ad_link_1.trim(),
           ad_link_2: form.ad_link_2.trim(),
+          ui_theme: form.ui_theme,
         };
         console.log('Updating tenant:', editTenant.id, updateData);
         const { error, data } = await supabase.from('tenants').update(updateData).eq('id', editTenant.id).select();
@@ -493,6 +496,26 @@ const SuperAdminPanel: React.FC = () => {
             </div>
           </div>
 
+          <div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Arayüz Teması</div>
+            <div className="flex gap-2">
+              <button
+                className={`flex-1 text-xs px-3 py-2.5 cursor-pointer rounded-xl transition-all text-center ${form.ui_theme === 'neu' ? 'neu-sunken font-bold' : 'neu-flat'}`}
+                onClick={() => setForm({ ...form, ui_theme: 'neu' })}
+              >
+                🎨 NEU
+                <div className="text-[9px] text-muted-foreground mt-0.5">Neumorphic</div>
+              </button>
+              <button
+                className={`flex-1 text-xs px-3 py-2.5 cursor-pointer rounded-xl transition-all text-center ${form.ui_theme === 'mod' ? 'neu-sunken font-bold' : 'neu-flat'}`}
+                onClick={() => setForm({ ...form, ui_theme: 'mod' })}
+              >
+                ✨ MOD
+                <div className="text-[9px] text-muted-foreground mt-0.5">Apple Minimal</div>
+              </button>
+            </div>
+          </div>
+
           {/* Ad Banners */}
           {editTenant && (
             <>
@@ -599,6 +622,9 @@ const SuperAdminPanel: React.FC = () => {
                       <span className="text-sm font-bold">{t.name}</span>
                       <span className={`text-[9px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider ${t.is_active ? 'bg-primary/10 text-primary' : 'bg-destructive/10 text-destructive'}`}>
                         {t.is_active ? 'AKTİF' : 'PASİF'}
+                      </span>
+                      <span className="text-[9px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider bg-muted text-muted-foreground">
+                        {t.ui_theme === 'mod' ? 'MOD' : 'NEU'}
                       </span>
                     </div>
                     <div className="text-[11px] text-muted-foreground space-y-0.5">

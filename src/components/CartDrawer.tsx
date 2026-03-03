@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
+import { useTenant } from '@/contexts/TenantContext';
 
 interface CartDrawerProps {
   open: boolean;
@@ -13,6 +14,8 @@ interface CartDrawerProps {
 const CartDrawer = ({ open, onClose, tableNum, userName, memberId }: CartDrawerProps) => {
   const navigate = useNavigate();
   const { cart, addItem, removeItem, clearCart, cartTotal } = useCart();
+  const { uiTheme } = useTenant();
+  const isMod = uiTheme === 'mod';
   const total = cartTotal();
   const svc = Math.round(total * 0.05);
 
@@ -29,10 +32,10 @@ const CartDrawer = ({ open, onClose, tableNum, userName, memberId }: CartDrawerP
       
       {/* Drawer */}
       <div className={`fixed bottom-0 left-1/2 w-full max-w-[480px] z-[101] transition-transform duration-300 max-h-[88vh] overflow-y-auto ${open ? '-translate-x-1/2 translate-y-0' : '-translate-x-1/2 translate-y-full'}`}>
-        <div className="neu-raised m-2 overflow-hidden">
-          <div className="bg-card text-foreground px-4 py-2.5 text-sm font-semibold flex justify-between items-center rounded-t-[var(--radius)]">
+        <div className={`${isMod ? 'bg-background border border-border rounded-t-2xl' : 'neu-raised m-2'} overflow-hidden`}>
+          <div className={`${isMod ? 'bg-background border-b border-border' : 'bg-card rounded-t-[var(--radius)]'} text-foreground px-4 py-3 text-sm font-semibold flex justify-between items-center`}>
             <span>🛒 Sepetim</span>
-            <button className="neu-flat w-7 h-7 rounded-full text-xs flex items-center justify-center cursor-pointer" onClick={onClose}>✕</button>
+            <button className={`${isMod ? 'w-7 h-7 rounded-full flex items-center justify-center hover:bg-muted transition-colors' : 'neu-flat w-7 h-7 rounded-full text-xs flex items-center justify-center'} cursor-pointer`} onClick={onClose}>✕</button>
           </div>
           <div className="p-4">
             {!cart.length ? (
