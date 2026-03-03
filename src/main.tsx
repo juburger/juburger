@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import "./styles/theme-mod.css";
 
 // SuperAdmin domain: aggressively clear stale service workers/caches to avoid old bundle lockups
 if (window.location.hostname === "superadmin.siparis.co") {

@@ -823,6 +823,7 @@ export type Database = {
           phone: string
           primary_color: string
           slug: string
+          ui_theme: string
           updated_at: string
         }
         Insert: {
@@ -840,6 +841,7 @@ export type Database = {
           phone?: string
           primary_color?: string
           slug: string
+          ui_theme?: string
           updated_at?: string
         }
         Update: {
@@ -857,6 +859,7 @@ export type Database = {
           phone?: string
           primary_color?: string
           slug?: string
+          ui_theme?: string
           updated_at?: string
         }
         Relationships: []
