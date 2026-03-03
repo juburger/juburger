@@ -100,7 +100,7 @@ const ModLayout = ({ icon, title, menuItems, controls, statusItems, children, bo
         <div className="flex items-center gap-1.5">
           {controls?.slice(0, -1).map((c, i) => (
             <button key={i} onClick={c.onClick}
-              className="h-7 px-2 sm:px-3 rounded-full flex items-center justify-center cursor-pointer text-foreground/70 hover:text-foreground hover:bg-muted transition-colors text-[10px] sm:text-xs font-medium whitespace-nowrap gap-0.5 border border-border">
+              className="h-7 px-2 sm:px-3 rounded-full flex items-center justify-center cursor-pointer text-foreground hover:text-foreground hover:bg-muted transition-colors text-[10px] sm:text-xs font-medium whitespace-nowrap gap-0.5 border border-border">
               {c.label}
             </button>
           ))}
