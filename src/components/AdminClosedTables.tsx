@@ -123,7 +123,7 @@ const AdminClosedTables: React.FC<Props> = ({ onPrintOrder }) => {
           <span className="text-[12px] font-bold">Masa {selectedTable} — Kapalı</span>
         </div>
 
-        <div className="neu-raised p-3 mb-2.5 text-[11px]">
+        <div className="neu-raised p-3 mb-2.5 text-[11px] text-foreground">
           <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Sipariş Detayları</div>
           {allItems.map((item, idx) => (
             <div key={idx} className="flex justify-between py-0.5 border-b border-dashed border-muted">
@@ -188,7 +188,7 @@ const AdminClosedTables: React.FC<Props> = ({ onPrintOrder }) => {
 
             return (
               <div key={num}
-                className="border border-foreground/30 bg-muted/30 cursor-pointer hover:bg-muted/50 active:opacity-75 transition-opacity"
+                className="border border-foreground/30 bg-muted/30 text-foreground cursor-pointer hover:bg-muted/50 active:opacity-75 transition-opacity"
                 onClick={() => setSelectedTable(num)}>
                 <div className="p-2.5">
                   <div className="flex justify-between items-start">

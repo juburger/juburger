@@ -164,7 +164,7 @@ const AdminQuickOrder: React.FC<Props> = ({ onPrintOrder }) => {
   };
 
   return (
-    <div className="flex flex-col" style={{ minHeight: '60vh' }}>
+    <div className="flex flex-col text-foreground" style={{ minHeight: '60vh' }}>
       <div className="flex flex-1 overflow-hidden">
         {/* LEFT: Categories + Products */}
         <div className="flex-1 border-r border-foreground/20 overflow-y-auto p-1.5">

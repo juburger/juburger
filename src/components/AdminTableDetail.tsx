@@ -546,7 +546,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
   // Table transfer dialog
   if (showTableTransfer) {
     return (
-      <div className="p-3">
+      <div className="p-3 text-foreground">
         <div className="text-center mb-3">
           <div className="text-2xl mb-1">🪑</div>
           <div className="text-sm font-bold">Masayı Taşı</div>
@@ -571,7 +571,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
   // Account transfer dialog
   if (showAccountTransfer) {
     return (
-      <div className="p-3">
+      <div className="p-3 text-foreground">
         <div className="text-center mb-3">
           <div className="text-2xl mb-1">📋</div>
           <div className="text-sm font-bold">Cariye Taşı</div>
@@ -604,7 +604,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
   // Payment dialog
   if (showPayment) {
     return (
-      <div className="p-3">
+      <div className="p-3 text-foreground">
         <div className="text-center mb-3">
           <div className="text-2xl mb-1">💰</div>
           <div className="text-sm font-bold">{userName}</div>
@@ -653,7 +653,7 @@ const AdminTableDetail: React.FC<Props> = ({ tableNum, userName, onClose, onPrin
   }
 
   return (
-    <div className="flex flex-col h-full w-full max-w-full overflow-hidden" style={{ minHeight: '70vh' }}>
+    <div className="flex flex-col h-full w-full max-w-full overflow-hidden text-foreground" style={{ minHeight: '70vh' }}>
       {/* Header */}
       <div className="bg-card text-foreground px-2.5 py-1.5 flex justify-between items-center neu-raised rounded-t-[var(--radius)]">
         <span className="text-[12px] font-bold">Masa {tableNum} — {userName}</span>

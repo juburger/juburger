@@ -68,7 +68,7 @@ const NeuLayout = ({ icon, title, menuItems, controls, statusItems, children, bo
       )}
 
       {/* Body */}
-      <div className={`bg-card p-5 text-sm leading-relaxed overflow-x-hidden overflow-y-auto min-h-[calc(100vh-120px)] ${bodyClass || ''}`} style={{ borderRadius: '0 0 calc(var(--radius) - 4px) calc(var(--radius) - 4px)' }}>
+      <div className={`bg-card text-card-foreground p-5 text-sm leading-relaxed overflow-x-hidden overflow-y-auto min-h-[calc(100vh-120px)] ${bodyClass || ''}`} style={{ borderRadius: '0 0 calc(var(--radius) - 4px) calc(var(--radius) - 4px)' }}>
         {children}
       </div>
 
@@ -127,7 +127,7 @@ const ModLayout = ({ icon, title, menuItems, controls, statusItems, children, bo
     </header>
 
     {/* Body — generous whitespace */}
-    <main className={`px-5 py-6 text-sm leading-relaxed overflow-x-hidden min-h-[calc(100vh-80px)] ${bodyClass || ''}`}>
+    <main className={`px-5 py-6 text-sm leading-relaxed overflow-x-hidden min-h-[calc(100vh-80px)] text-foreground ${bodyClass || ''}`}>
       {children}
     </main>
 
