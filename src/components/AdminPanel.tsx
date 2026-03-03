@@ -53,20 +53,25 @@ const AdminPanel = () => {
   };
 
   const triggerPrint = useCallback((order: Order) => {
+    console.log('[PRINT] triggerPrint called for order:', order.id.substring(0, 6));
+    showToast(`🖨️ Yazdırma başlatılıyor: #${order.id.substring(0, 6).toUpperCase()}`);
     setPrintOrder(order);
 
+    // Wait longer for React to render the ReceiptPrint component
     setTimeout(() => {
       const iframe = printIframeRef.current;
       const receiptHtml = printRef.current?.innerHTML;
 
+      console.log('[PRINT] iframe:', !!iframe, 'receiptHtml length:', receiptHtml?.length || 0);
+
       if (!iframe || !receiptHtml) {
-        showToast('Yazdırma içeriği hazırlanamadı', false);
+        showToast('❌ Yazdırma içeriği hazırlanamadı (iframe:' + !!iframe + ', html:' + (receiptHtml?.length || 0) + ')', false);
         return;
       }
 
       const doc = iframe.contentDocument || iframe.contentWindow?.document;
       if (!doc || !iframe.contentWindow) {
-        showToast('Yazdırma penceresi açılamadı', false);
+        showToast('❌ Yazdırma penceresi açılamadı', false);
         return;
       }
 
@@ -88,11 +93,12 @@ const AdminPanel = () => {
       doc.close();
 
       setTimeout(() => {
+        console.log('[PRINT] Calling iframe.print()');
         iframe.contentWindow?.focus();
         iframe.contentWindow?.print();
-        showToast(`Fiş yazdırıldı: #${order.id.substring(0, 6).toUpperCase()}`);
-      }, 250);
-    }, 500);
+        showToast(`✅ Fiş yazdırıldı: #${order.id.substring(0, 6).toUpperCase()}`);
+      }, 400);
+    }, 800);
   }, [showToast]);
 
   // Load orders realtime
