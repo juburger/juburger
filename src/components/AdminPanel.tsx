@@ -21,14 +21,12 @@ import AdminClosedTables from '@/components/AdminClosedTables';
 import AdminMembers from '@/components/AdminMembers';
 
 type TabType = 'orders' | 'tables' | 'closed' | 'transfer' | 'accounts' | 'members' | 'quick' | 'stats' | 'reports' | 'products' | 'settings' | 'qr' | 'logs';
-type FilterType = 'all' | 'waiting' | 'preparing' | 'ready' | 'paid' | 'cancelled';
 
 const AdminPanel = () => {
   const navigate = useNavigate();
   const { showToast } = useToast95Context();
   const { tenant, tenantId } = useTenant();
   const [tab, setTab] = useState<TabType>('orders');
-  const [filter, setFilter] = useState<FilterType>('all');
   const [orders, setOrders] = useState<Order[]>([]);
   const [settings, setSettings] = useState({
     card_enabled: true, cash_enabled: true, pos_enabled: true,
@@ -156,18 +154,7 @@ const AdminPanel = () => {
     showToast('Ayarlar kaydedildi ✓');
   };
 
-  const filteredOrders = filter === 'all' ? orders : filter === 'cancelled' ? orders.filter(o => o.payment_status === 'cancelled') : orders.filter(o => o.status === filter);
   const waitingCount = orders.filter(o => o.status === 'waiting').length;
-
-  const statusLabels: Record<string, string> = { waiting: 'Bekliyor', preparing: 'Hazırlanıyor', ready: 'Hazır', paid: 'Tamamlandı' };
-  const payLabels: Record<string, string> = { card: 'Kart', cash: 'Nakit', pos: 'POS' };
-  const statusClass: Record<string, string> = {
-    waiting: 'text-muted-foreground bg-muted/50',
-    preparing: 'text-foreground bg-muted/60',
-    ready: 'text-foreground bg-muted/80 font-bold',
-    paid: 'text-muted-foreground/50 bg-muted/30',
-  };
-  const cancelledCount = orders.filter(o => o.payment_status === 'cancelled').length;
 
   const totalRevenue = orders.reduce((s, o) => s + Number(o.total), 0);
   const doneCount = orders.filter(o => o.status === 'paid').length;
@@ -195,14 +182,6 @@ const AdminPanel = () => {
     { id: 'accounts', label: 'Cari Hesaplar' },
   ];
 
-  const filters: { id: FilterType; label: string }[] = [
-    { id: 'all', label: 'Tümü' },
-    { id: 'waiting', label: 'Bekliyor' },
-    { id: 'preparing', label: 'Hazırlanıyor' },
-    { id: 'ready', label: 'Hazır' },
-    { id: 'paid', label: 'Tamamlanan' },
-    { id: 'cancelled', label: `İptal (${cancelledCount})` },
-  ];
 
   return (
     <WinWindow
@@ -235,21 +214,14 @@ const AdminPanel = () => {
       {/* ORDERS TAB */}
       {tab === 'orders' && (
         <>
-          <div className="flex gap-1.5 mb-3 flex-wrap">
-            {filters.map(f => (
-              <button key={f.id}
-                className={`px-2.5 py-1 text-[11px] cursor-pointer font-medium rounded-full transition-all ${filter === f.id ? 'neu-sunken font-semibold bg-foreground text-background' : 'neu-flat'}`}
-                onClick={() => setFilter(f.id)}>{f.label}</button>
-            ))}
-          </div>
-          {!filteredOrders.length ? (
+          {!orders.length ? (
             <p className="text-muted-foreground text-center py-3.5 text-xs">Sipariş bulunamadı.</p>
-          ) : filteredOrders.map(o => (
+          ) : orders.map(o => (
             <div key={o.id} className="neu-raised mb-3 text-xs overflow-hidden">
               <div className="bg-card px-3 py-2 flex justify-between items-center text-xs rounded-t-[var(--radius)] neu-flat">
                 <span className="text-[#5EBC80] font-semibold">#{o.id.substring(0, 6).toUpperCase()} — Masa {o.table_num} — {o.user_name}</span>
-                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider ${statusClass[o.status] || ''}`}>
-                  {statusLabels[o.status] || o.status}
+                <span className="text-[10px]">
+                  {new Date(o.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
               <div className="p-3">
@@ -257,9 +229,6 @@ const AdminPanel = () => {
                   <div key={idx}>• {i.name} × {i.qty} — ₺{i.price * i.qty}</div>
                 ))}
                 {o.note && <div className="text-[10px] text-muted-foreground mt-1">Not: {o.note}</div>}
-                <div className="text-[10px] text-muted-foreground mt-1">
-                  {new Date(o.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })} — {payLabels[o.payment_type] || o.payment_type}
-                </div>
               </div>
               <div className="bg-muted/30 px-3 py-2 flex justify-between items-center border-t border-border/30 gap-2">
                 <strong>₺{o.total}</strong>
@@ -268,15 +237,9 @@ const AdminPanel = () => {
                   {o.payment_status === 'cancelled' ? (
                     <span className="text-[10px] text-destructive font-bold">❌ İptal Edildi</span>
                   ) : (
-                    <>
-                      {o.status === 'waiting' && <button className="neu-btn text-[10px] py-1 px-2.5" onClick={() => updateOrderStatus(o.id, 'preparing')}>Kabul Et</button>}
-                      {o.status === 'preparing' && <button className="neu-btn text-[10px] py-1 px-2.5" onClick={() => updateOrderStatus(o.id, 'ready')}>Hazır</button>}
-                      {o.status === 'ready' && <button className="neu-btn text-[10px] py-1 px-2.5" onClick={() => updateOrderStatus(o.id, 'paid')}>Ödendi</button>}
-                      {o.status === 'paid' && <span className="text-[10px] text-muted-foreground">✓ Tamamlandı</span>}
-                      {['waiting', 'preparing', 'ready'].includes(o.status) && (
-                        <button className="neu-btn text-[10px] py-1 px-2.5 text-destructive" onClick={() => cancelOrder(o)}>İptal</button>
-                      )}
-                    </>
+                    ['waiting', 'preparing', 'ready'].includes(o.status) && (
+                      <button className="neu-btn text-[10px] py-1 px-2.5 text-destructive" onClick={() => cancelOrder(o)}>İptal</button>
+                    )
                   )}
                 </div>
               </div>
