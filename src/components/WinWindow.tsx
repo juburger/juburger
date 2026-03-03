@@ -12,11 +12,8 @@ function useModDarkMode() {
 
   useEffect(() => {
     localStorage.setItem('mod-dark-mode', String(dark));
-    if (dark) {
-      document.body.classList.add('dark');
-    } else {
-      document.body.classList.remove('dark');
-    }
+    document.body.classList.remove('dark', 'light');
+    document.body.classList.add(dark ? 'dark' : 'light');
   }, [dark]);
 
   return [dark, setDark] as const;
