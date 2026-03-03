@@ -50,7 +50,7 @@
 
 /* ── MOD Dark Mode ── */
 @media (prefers-color-scheme: dark) {
-  .theme-mod {
+  .theme-mod:not(.light) {
     --background: 0 0% 0%;
     --foreground: 0 0% 92%;
 
@@ -126,6 +126,34 @@
   --neu-bg: 0 0% 0%;
 }
 
+/* Force light via class (override system dark preference) */
+.theme-mod.light {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 8%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 8%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 8%;
+  --primary: 0 0% 12%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 96%;
+  --secondary-foreground: 0 0% 20%;
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 45%;
+  --accent: 0 0% 96%;
+  --accent-foreground: 0 0% 8%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --success: 145 55% 38%;
+  --success-foreground: 0 0% 100%;
+  --border: 0 0% 90%;
+  --input: 0 0% 96%;
+  --ring: 0 0% 12%;
+  --neu-light: 0 0% 100%;
+  --neu-dark: 0 0% 90%;
+  --neu-bg: 0 0% 100%;
+}
+
 /* ── Override neumorphic classes to flat/minimal ── */
 
 .theme-mod .neu-raised {
@@ -188,10 +216,10 @@
   box-shadow: none;
 }
 @media (prefers-color-scheme: dark) {
-  .theme-mod .neu-btn-primary:hover {
+  .theme-mod:not(.light) .neu-btn-primary:hover {
     background: hsl(0 0% 85%);
   }
-  .theme-mod .neu-btn-primary:active {
+  .theme-mod:not(.light) .neu-btn-primary:active {
     background: hsl(0 0% 80%);
   }
 }
@@ -263,10 +291,10 @@
   border-radius: 2px;
 }
 @media (prefers-color-scheme: dark) {
-  .theme-mod ::-webkit-scrollbar-thumb {
+  .theme-mod:not(.light) ::-webkit-scrollbar-thumb {
     background: hsl(0 0% 25%);
   }
-  .theme-mod .neu-toast {
+  .theme-mod:not(.light) .neu-toast {
     box-shadow: 0 4px 24px rgba(0,0,0,0.4);
   }
 }
