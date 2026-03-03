@@ -97,7 +97,7 @@ const ModLayout = ({ icon, title, menuItems, controls, statusItems, children, bo
           {icon && <span className="text-base">{icon}</span>}
           <span className="text-sm font-semibold tracking-tight text-foreground">{title}</span>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setDark(!dark)}
             className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
@@ -107,7 +107,7 @@ const ModLayout = ({ icon, title, menuItems, controls, statusItems, children, bo
           </button>
           {controls?.map((c, i) => (
             <button key={i} onClick={c.onClick}
-              className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+              className="h-8 px-3 rounded-full flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-xs whitespace-nowrap gap-1">
               {c.label}
             </button>
           ))}
