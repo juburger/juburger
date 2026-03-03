@@ -53,71 +53,36 @@ const AdminPanel = () => {
   };
 
   const triggerPrint = useCallback((order: Order) => {
-    console.log('[PRINT] 1. triggerPrint başladı:', order.id.substring(0, 6));
     showToast(`🖨️ Yazdırma başlatılıyor: #${order.id.substring(0, 6).toUpperCase()}`);
     setPrintOrder(order);
 
-    const buildHtml = (receiptHtml: string) => `<!DOCTYPE html><html><head><style>
-      body { margin: 0; padding: 4mm; font-family: 'Courier New', monospace; font-size: 14px; font-weight: 600; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      @page { margin: 0; }
-    </style></head><body>${receiptHtml}</body></html>`;
-
     setTimeout(() => {
+      const iframe = printIframeRef.current;
       const receiptHtml = printRef.current?.innerHTML;
-      console.log('[PRINT] 2. receiptHtml uzunluk:', receiptHtml?.length || 0);
 
-      if (!receiptHtml) {
-        showToast('❌ Fiş içeriği oluşturulamadı', false);
+      if (!iframe || !receiptHtml) {
+        showToast('❌ Yazdırma içeriği hazırlanamadı', false);
         return;
       }
 
-      // Doğrudan yeni pencere ile yazdır (iframe cross-origin sorunlarını aşar)
-      try {
-        const printWindow = window.open('', 'print_receipt', 'width=400,height=600');
-        console.log('[PRINT] 3. printWindow:', !!printWindow);
-
-        if (!printWindow) {
-          showToast('❌ Yazdırma penceresi açılamadı. Tarayıcıda pop-up izni verin.', false);
-          return;
-        }
-
-        printWindow.document.open();
-        printWindow.document.write(buildHtml(receiptHtml));
-        printWindow.document.close();
-
-        printWindow.onload = () => {
-          console.log('[PRINT] 4. Pencere yüklendi, print() çağrılıyor');
-          setTimeout(() => {
-            printWindow.focus();
-            printWindow.print();
-            console.log('[PRINT] 5. print() çağrıldı');
-            showToast(`✅ Fiş yazdırıldı: #${order.id.substring(0, 6).toUpperCase()}`);
-            setTimeout(() => {
-              try { printWindow.close(); } catch {}
-            }, 1000);
-          }, 300);
-        };
-
-        // Fallback: onload tetiklenmezse
-        setTimeout(() => {
-          if (!printWindow.closed) {
-            console.log('[PRINT] 4b. Fallback: onload tetiklenmedi, direkt print()');
-            try {
-              printWindow.focus();
-              printWindow.print();
-              showToast(`✅ Fiş yazdırıldı: #${order.id.substring(0, 6).toUpperCase()}`);
-              setTimeout(() => { try { printWindow.close(); } catch {} }, 1000);
-            } catch (e) {
-              console.error('[PRINT] Fallback hata:', e);
-              showToast('❌ Yazdırma hatası: ' + String(e), false);
-            }
-          }
-        }, 2000);
-
-      } catch (e) {
-        console.error('[PRINT] Genel hata:', e);
-        showToast('❌ Yazdırma hatası: ' + String(e), false);
+      const doc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!doc || !iframe.contentWindow) {
+        showToast('❌ Yazdırma penceresi açılamadı', false);
+        return;
       }
+
+      doc.open();
+      doc.write(`<!DOCTYPE html><html><head><style>
+        body { margin: 0; padding: 4mm; font-family: 'Courier New', monospace; font-size: 14px; font-weight: 600; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        @page { margin: 0; }
+      </style></head><body>${receiptHtml}</body></html>`);
+      doc.close();
+
+      setTimeout(() => {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+        showToast(`✅ Fiş yazdırıldı: #${order.id.substring(0, 6).toUpperCase()}`);
+      }, 500);
     }, 900);
   }, [showToast]);
 
