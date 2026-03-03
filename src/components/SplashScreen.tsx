@@ -51,8 +51,8 @@ const SplashScreen = () => {
       icon={icon}
       title={`Masa ${tableNum}`}
       controls={[
-        { label: <span className="text-[11px] whitespace-nowrap">🍽️ Sipariş Ver</span>, onClick: () => navigate(`/register?table=${tableNum}`) },
-        { label: <span className="text-[11px] whitespace-nowrap">⭐ Üye Ol</span>, onClick: () => navigate(`/member-signup?table=${tableNum}`) },
+        { label: <span className="text-[11px] whitespace-nowrap font-medium tracking-tight text-foreground">🍽️ Sipariş Ver</span>, onClick: () => navigate(`/register?table=${tableNum}`) },
+        { label: <span className="text-[11px] whitespace-nowrap font-medium tracking-tight text-foreground">⭐ Üye Ol</span>, onClick: () => navigate(`/member-signup?table=${tableNum}`) },
         { label: <Menu size={14} />, onClick: () => navigate('/admin-login') },
       ]}
     >
