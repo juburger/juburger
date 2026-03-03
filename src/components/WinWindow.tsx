@@ -2,7 +2,7 @@ import React, { type ReactNode, useState, useEffect } from 'react';
 import { Sun, Moon } from 'lucide-react';
 import { useTenant } from '@/contexts/TenantContext';
 
-function useModDarkMode() {
+export function useModDarkMode() {
   const [dark, setDark] = useState(() => {
     if (typeof window === 'undefined') return false;
     const saved = localStorage.getItem('mod-dark-mode');
@@ -135,15 +135,6 @@ const ModLayout = ({ icon, title, menuItems, controls, statusItems, children, bo
         </div>
       </footer>
     )}
-
-    {/* Dark mode toggle — fixed bottom right */}
-    <button
-      onClick={() => setDark(!dark)}
-      className="fixed bottom-5 right-5 z-50 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer bg-muted/80 backdrop-blur-sm text-muted-foreground hover:text-foreground hover:bg-muted border border-border transition-colors shadow-sm"
-      aria-label={dark ? 'Açık mod' : 'Koyu mod'}
-    >
-      {dark ? <Sun size={16} /> : <Moon size={16} />}
-    </button>
   </div>
   );
 };
