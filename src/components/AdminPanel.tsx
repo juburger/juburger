@@ -261,7 +261,7 @@ const AdminPanel = () => {
           {!orders.length ? (
             <p className="text-muted-foreground text-center py-3.5 text-xs">Sipariş bulunamadı.</p>
           ) : orders.map(o => (
-            <div key={o.id} className="neu-raised mb-3 text-xs overflow-hidden">
+            <div key={o.id} className="neu-raised mb-3 text-xs overflow-hidden text-foreground">
               <div className="bg-card px-3 py-2 flex justify-between items-center text-xs rounded-t-[var(--radius)] neu-flat">
                 <span className="text-[#5EBC80] font-semibold">#{o.id.substring(0, 6).toUpperCase()} — Masa {o.table_num} — {o.user_name}</span>
                 <span className="text-[10px]">
@@ -295,7 +295,7 @@ const AdminPanel = () => {
       {/* STATS TAB */}
       {tab === 'stats' && (
         <>
-          <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="grid grid-cols-2 gap-3 mb-4 text-foreground">
             <div className="neu-raised p-4"><div className="text-xl font-bold">₺{totalRevenue.toLocaleString('tr')}</div><div className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">Günlük Ciro</div></div>
             <div className="neu-raised p-4"><div className="text-xl font-bold">{orders.length}</div><div className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">Toplam Sipariş</div></div>
             <div className="neu-raised p-4"><div className="text-xl font-bold">{doneCount}</div><div className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">Tamamlanan</div></div>
@@ -337,7 +337,7 @@ const AdminPanel = () => {
 
       {/* SETTINGS TAB */}
       {tab === 'settings' && (
-        <>
+        <div className="text-foreground">
           <h2 className="text-[13px] font-bold mb-2">Ödeme Yöntemleri</h2>
           {[
             { key: 'card_enabled', icon: '💳', name: 'Kredi/Banka Kartı (Online)', desc: 'Müşteriler kart bilgisi girerek öder' },
@@ -401,7 +401,7 @@ const AdminPanel = () => {
 
           <hr className="border-t border-foreground my-2.5" />
           <AdminStaff />
-        </>
+        </div>
       )}
 
       {/* LOGS TAB */}
