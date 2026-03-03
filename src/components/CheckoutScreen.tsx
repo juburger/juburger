@@ -74,77 +74,30 @@ const CheckoutScreen = () => {
     if (!cart.length) return;
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { showToast('Oturum bulunamadı', false); return; }
+      const { data: result, error } = await supabase.functions.invoke('place-order', {
+        body: {
+          items: cart.map(i => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })),
+          table_num: parseInt(tableNum),
+          user_name: userName,
+          payment_type: selPay,
+          note,
+          member_id: memberId || null,
+          tenant_id: tenantId,
+          use_points: usePoints,
+          points_to_use: pointsToUse,
+        },
+      });
 
-      const { data, error } = await supabase.from('orders').insert({
-        user_id: user.id,
-        user_name: userName,
-        table_num: parseInt(tableNum),
-        items: cart.map(i => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })),
-        total: grand,
-        payment_type: selPay,
-        payment_status: selPay === 'card' ? 'pending' : 'cash',
-        status: 'waiting',
-        note: `${note}${pointsToUse > 0 ? ` [${pointsToUse} puan kullanıldı, ₺${pointDiscount} indirim]` : ''}`,
-        member_id: memberId || null,
-        tenant_id: tenantId,
-      }).select().single();
+      if (error) throw new Error(error.message || 'Sipariş hatası');
+      if (result?.error) throw new Error(result.error);
 
-      if (error) throw error;
+      const orderId = result.order_id;
+      const serverEarnedPoints = result.earned_points || 0;
+      const serverPointsUsed = result.points_used || 0;
+      const serverDiscount = result.point_discount || 0;
 
-      // Update member stats & handle points
-      if (memberId) {
-        const { data: currentMember, error: memberFetchError } = await supabase
-          .from('members')
-          .select('total_points, used_points, total_spent, visit_count')
-          .eq('id', memberId)
-          .single();
-
-        if (memberFetchError) throw memberFetchError;
-
-        if (currentMember) {
-          const cm = currentMember as any;
-
-          // Record earned points
-          if (earnedPoints > 0) {
-            const { error: pointsInsertError } = await supabase.from('point_transactions').insert({
-              member_id: memberId,
-              type: 'earn',
-              points: earnedPoints,
-              description: `Sipariş #${data.id.substring(0, 6).toUpperCase()} - ₺${grand} harcama`,
-              order_id: data.id,
-            } as any);
-            if (pointsInsertError) throw pointsInsertError;
-          }
-
-          // Record spent points
-          if (pointsToUse > 0) {
-            const { error: pointsSpendError } = await supabase.from('point_transactions').insert({
-              member_id: memberId,
-              type: 'spend',
-              points: -pointsToUse,
-              description: `Sipariş #${data.id.substring(0, 6).toUpperCase()} - ${pointsToUse} puan kullanıldı (₺${pointDiscount} indirim)`,
-              order_id: data.id,
-            } as any);
-            if (pointsSpendError) throw pointsSpendError;
-          }
-
-          const { error: memberUpdateError } = await supabase.from('members').update({
-            total_points: cm.total_points + earnedPoints,
-            used_points: cm.used_points + pointsToUse,
-            total_spent: Number(cm.total_spent) + grand,
-            visit_count: cm.visit_count + 1,
-            last_visit_at: new Date().toISOString(),
-          }).eq('id', memberId);
-
-          if (memberUpdateError) throw memberUpdateError;
-        }
-      }
-
-      const orderId = data.id.substring(0, 6).toUpperCase();
       clearCart();
-      navigate(`/success?order=${orderId}&pay=${selPay}${earnedPoints > 0 ? `&points=${earnedPoints}` : ''}${pointsToUse > 0 ? `&usedPoints=${pointsToUse}&discount=${pointDiscount}` : ''}${memberId ? `&member=${memberId}` : ''}`);
+      navigate(`/success?order=${orderId}&pay=${selPay}${serverEarnedPoints > 0 ? `&points=${serverEarnedPoints}` : ''}${serverPointsUsed > 0 ? `&usedPoints=${serverPointsUsed}&discount=${serverDiscount}` : ''}${memberId ? `&member=${memberId}` : ''}`);
     } catch (err: any) {
       showToast('Sipariş hatası: ' + err.message, false);
     } finally {
