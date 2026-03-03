@@ -86,7 +86,15 @@ const AdminPanel = () => {
     showToast(val ? 'Bu cihaz yazıcı bilgisayar olarak ayarlandı ✓' : 'Yazıcı bilgisayar devre dışı');
   };
 
-  const triggerPrint = useCallback((order: Order) => {
+  const triggerPrint = useCallback((order: Order, source: 'manual' | 'auto' = 'manual') => {
+    const currentSettings = settingsRef.current;
+    const isCurrentDevicePrintServer = localStorage.getItem('ju_print_server') === '1';
+
+    if (source === 'auto') {
+      if (!currentSettings.auto_print_enabled) return;
+      if (!isCurrentDevicePrintServer) return;
+    }
+
     const iframe = printIframeRef.current;
     if (!iframe || !iframe.contentWindow) {
       showToast('❌ Yazdırma penceresi açılamadı', false);
@@ -98,10 +106,10 @@ const AdminPanel = () => {
     try {
       const doc = iframe.contentDocument || iframe.contentWindow.document;
       doc.open();
-      doc.write(buildReceiptHtml(order, settings.paper_size || '80'));
+      doc.write(buildReceiptHtml(order, currentSettings.paper_size || '80'));
       doc.close();
 
-      requestAnimationFrame(() => {
+      const runPrint = () => {
         try {
           iframe.contentWindow?.focus();
           iframe.contentWindow?.print();
@@ -109,14 +117,18 @@ const AdminPanel = () => {
         } catch {
           showToast('❌ Yazdırma başarısız. Yazıcı/Chrome kiosk ayarını kontrol edin.', false);
         }
-      });
+      };
+
+      setTimeout(runPrint, 450);
     } catch {
       showToast('❌ Fiş oluşturulamadı', false);
     }
-  }, [showToast, settings.paper_size]);
+  }, [showToast]);
 
   // Load orders realtime
   useEffect(() => {
+    if (!tenantId) return;
+
     const fetchOrders = async () => {
       const { data } = await supabase.from('orders').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false }).limit(50);
       if (data) {
@@ -130,30 +142,31 @@ const AdminPanel = () => {
     };
     fetchOrders();
 
-    const channel = supabase.channel('admin-orders')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => {
+    const channel = supabase.channel(`admin-orders-${tenantId}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders', filter: `tenant_id=eq.${tenantId}` }, (payload) => {
         const newOrder = payload.new as unknown as Order;
         if (!knownOrderIds.current.has(newOrder.id)) {
           knownOrderIds.current.add(newOrder.id);
-          // Auto-print all new orders
-          triggerPrint(newOrder);
+          triggerPrint(newOrder, 'auto');
         }
         fetchOrders();
       })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, () => fetchOrders())
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders', filter: `tenant_id=eq.${tenantId}` }, () => fetchOrders())
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [triggerPrint]);
+  }, [tenantId, triggerPrint]);
 
   // Load settings
   useEffect(() => {
+    if (!tenantId) return;
+
     const fetchSettings = async () => {
-      const { data } = await supabase.from('settings').select('*').eq('id', 'payment').eq('tenant_id', tenantId).single();
+      const { data } = await supabase.from('settings').select('*').eq('id', 'payment').eq('tenant_id', tenantId).maybeSingle();
       if (data) setSettings(data as any);
     };
     fetchSettings();
-  }, []);
+  }, [tenantId]);
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
