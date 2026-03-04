@@ -43,36 +43,46 @@ const SplashScreen = () => {
     items: products.filter(p => p.category_id === c.id),
   })).filter(g => g.items.length > 0);
 
-  // Instagram icon for header (replaces logo)
-  const instagramUrl = (tenant as any)?.instagram_url;
+  // Instagram icon (left header)
   const instagramIcon = instagramUrl
-    ? <a href={instagramUrl.startsWith('http') ? instagramUrl : `https://${instagramUrl}`} target="_blank" rel="noopener noreferrer" className="w-[60px] h-[60px] rounded-full flex items-center justify-center"><Instagram size={28} className="text-foreground" /></a>
-    : <span className="w-[60px] h-[60px] rounded-full flex items-center justify-center"><Instagram size={28} className="text-foreground/40" /></span>;
+    ? <a href={instagramUrl.startsWith('http') ? instagramUrl : `https://${instagramUrl}`} target="_blank" rel="noopener noreferrer" className="w-7 h-7 flex items-center justify-center"><Instagram size={20} className="text-foreground" /></a>
+    : <span className="w-7 h-7 flex items-center justify-center"><Instagram size={20} className="text-foreground/40" /></span>;
+
+  // Dark mode toggle (right header) — same size/color as instagram
+  const darkToggle = uiTheme === 'mod'
+    ? <button onClick={() => setDark(!dark)} className="w-7 h-7 flex items-center justify-center cursor-pointer text-foreground">{dark ? <Sun size={20} /> : <Moon size={20} />}</button>
+    : null;
+
+  // Centered logo between icons
+  const showLogo = tenant?.logo_url && (tenant as any)?.show_logo !== false;
+  const logoEl = showLogo ? (
+    tenant!.logo_link ? (
+      <a href={tenant!.logo_link.startsWith('http') ? tenant!.logo_link : `https://${tenant!.logo_link}`} target="_blank" rel="noopener noreferrer">
+        <img src={tenant!.logo_url} alt={tenant!.name} className="w-7 h-7 rounded-full object-cover" />
+      </a>
+    ) : (
+      <img src={tenant!.logo_url} alt={tenant!.name} className="w-7 h-7 rounded-full object-cover" />
+    )
+  ) : null;
 
   return (
     <WinWindow
-      icon={instagramIcon}
+      icon={null}
       title=""
       controls={[
         ...(isPremium ? [
           { label: <span className="text-[11px] whitespace-nowrap font-medium tracking-tight text-foreground">🍽️ Sipariş Ver</span>, onClick: () => navigate(`/register?table=${tableNum}`) },
           { label: <span className="text-[11px] whitespace-nowrap font-medium tracking-tight text-foreground">⭐ Üye Ol</span>, onClick: () => navigate(`/member-signup?table=${tableNum}`) },
         ] : []),
-        ...(uiTheme === 'mod' ? [{ label: <span className="w-[60px] h-[60px] rounded-full flex items-center justify-center cursor-pointer text-foreground/70 hover:text-foreground transition-colors">{dark ? <Sun size={24} /> : <Moon size={24} />}</span>, onClick: () => setDark(!dark) }] : []),
       ]}
     >
 
-      {/* Centered business logo */}
-      {tenant?.logo_url && (tenant as any)?.show_logo !== false && (
-        <div className="flex justify-center mb-4">
-          {tenant.logo_link ? (
-            <a href={tenant.logo_link.startsWith('http') ? tenant.logo_link : `https://${tenant.logo_link}`} target="_blank" rel="noopener noreferrer">
-              <img src={tenant.logo_url} alt={tenant.name} className="w-[80px] h-[80px] rounded-full object-cover" />
-            </a>
-          ) : (
-            <img src={tenant.logo_url} alt={tenant.name} className="w-[80px] h-[80px] rounded-full object-cover" />
-          )}
-        </div>
+      {/* Custom header row: Instagram — Logo — Dark mode toggle */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="w-7">{instagramIcon}</div>
+        <div className="flex-1 flex justify-center">{logoEl}</div>
+        <div className="w-7 flex justify-end">{darkToggle}</div>
+      </div>
       )}
 
       {loading ? (
