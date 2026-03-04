@@ -126,12 +126,7 @@ const SplashScreen = () => {
       )}
 
       <div className="flex items-center justify-between mt-6">
-        <div className="flex items-center gap-1.5">
-          {tenant?.logo_url && (
-            <img src={tenant.logo_url} alt="" className="w-4 h-4 rounded-full object-cover" />
-          )}
-          <p className="text-muted-foreground text-[11px]">siparis.co</p>
-        </div>
+        <p className="text-muted-foreground text-[11px]">© 2025 siparis.co</p>
         {uiTheme === 'mod' && (
           <button
             onClick={() => setDark(!dark)}
