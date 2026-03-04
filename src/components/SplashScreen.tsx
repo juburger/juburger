@@ -98,11 +98,13 @@ const SplashScreen = () => {
                      className={`text-base px-4 py-2 cursor-pointer transition-all font-normal tracking-tight text-foreground ${activeCat === c.id ? 'opacity-50' : ''}`}
                      style={{ fontFamily: "'Helvetica Now Display', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif", fontWeight: 500, letterSpacing: '-0.02em' }}
                      onClick={() => { if (activeCat === c.id) { setActiveCat(null); } else { setActiveCat(c.id); } }}
-                   >{c.name.toLocaleUpperCase('en-US')}</button>
+                   >
+                     <WaveText text={c.name.toLocaleUpperCase('en-US')} />
+                   </button>
                    {activeCat === c.id && catProducts.length > 0 && (
-                     <div className="w-full px-4 mb-2">
-                       {catProducts.map(p => (
-                         <div key={p.id} className="flex items-start justify-between py-3 gap-2">
+                     <div className="w-full px-4 mb-2 animate-fade-in">
+                       {catProducts.map((p, pi) => (
+                         <div key={p.id} className="flex items-start justify-between py-3 gap-2" style={{ animation: `fade-in 0.3s ease-out ${pi * 0.05}s both` }}>
                            <div className="flex-1">
                              <div className="text-sm lowercase text-foreground" style={{ fontFamily: "'Helvetica Now Display', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif", fontWeight: 500, letterSpacing: '-0.01em' }}>
                                {p.name}
