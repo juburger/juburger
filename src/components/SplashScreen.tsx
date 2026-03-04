@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Menu, Sun, Moon, Instagram } from 'lucide-react';
 import WinWindow, { useModDarkMode } from '@/components/WinWindow';
@@ -8,6 +8,22 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface DbCategory { id: string; name: string; sort_order: number; }
 interface DbProduct { id: string; category_id: string | null; name: string; description: string; price: number; tag: string; is_available: boolean; sort_order: number; }
+
+const WaveText = ({ text }: { text: string }) => (
+  <span className="inline-flex overflow-hidden">
+    {text.split('').map((char, i) => (
+      <span
+        key={i}
+        className="inline-block"
+        style={{
+          animation: `wave-morph 2.5s ease-in-out ${i * 0.07}s infinite`,
+        }}
+      >
+        {char === ' ' ? '\u00A0' : char}
+      </span>
+    ))}
+  </span>
+);
 
 const SplashScreen = () => {
   const navigate = useNavigate();
@@ -98,11 +114,13 @@ const SplashScreen = () => {
                      className={`text-base px-4 py-2 cursor-pointer transition-all font-normal tracking-tight text-foreground ${activeCat === c.id ? 'opacity-50' : ''}`}
                      style={{ fontFamily: "'Helvetica Now Display', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif", fontWeight: 500, letterSpacing: '-0.02em' }}
                      onClick={() => { if (activeCat === c.id) { setActiveCat(null); } else { setActiveCat(c.id); } }}
-                   >{c.name.toLocaleUpperCase('en-US')}</button>
+                   >
+                     <WaveText text={c.name.toLocaleUpperCase('en-US')} />
+                   </button>
                    {activeCat === c.id && catProducts.length > 0 && (
-                     <div className="w-full px-4 mb-2">
-                       {catProducts.map(p => (
-                         <div key={p.id} className="flex items-start justify-between py-3 gap-2">
+                     <div className="w-full px-4 mb-2 animate-fade-in">
+                       {catProducts.map((p, pi) => (
+                         <div key={p.id} className="flex items-start justify-between py-3 gap-2" style={{ animation: `fade-in 0.3s ease-out ${pi * 0.05}s both` }}>
                            <div className="flex-1">
                              <div className="text-sm lowercase text-foreground" style={{ fontFamily: "'Helvetica Now Display', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif", fontWeight: 500, letterSpacing: '-0.01em' }}>
                                {p.name}
