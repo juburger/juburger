@@ -64,6 +64,8 @@ const AdminPanel = () => {
   const navigate = useNavigate();
   const { showToast } = useToast95Context();
   const { tenant, tenantId } = useTenant();
+  const [hasTenantAccess, setHasTenantAccess] = useState(false);
+  const [accessChecking, setAccessChecking] = useState(true);
   const [tab, setTab] = useState<TabType>('orders');
   const [orders, setOrders] = useState<Order[]>([]);
   const [settings, setSettings] = useState({
@@ -79,6 +81,45 @@ const AdminPanel = () => {
   const printIframeRef = useRef<HTMLIFrameElement>(null);
 
   const [isPrintServer, setIsPrintServer] = useState(() => localStorage.getItem('ju_print_server') === '1');
+
+  useEffect(() => {
+    const verifyAccess = async () => {
+      if (!tenantId) {
+        setHasTenantAccess(false);
+        setAccessChecking(false);
+        return;
+      }
+
+      setAccessChecking(true);
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        setHasTenantAccess(false);
+        setAccessChecking(false);
+        navigate('/admin-login', { replace: true });
+        return;
+      }
+
+      const [roleRes, tenantAccessRes] = await Promise.all([
+        supabase.from('user_roles').select('role').eq('user_id', user.id).eq('role', 'admin').maybeSingle(),
+        supabase.from('tenant_users').select('id').eq('tenant_id', tenantId).eq('user_id', user.id).maybeSingle(),
+      ]);
+
+      if (roleRes.error || tenantAccessRes.error || !roleRes.data || !tenantAccessRes.data) {
+        await supabase.auth.signOut();
+        setHasTenantAccess(false);
+        setAccessChecking(false);
+        showToast('Bu işletmenin yönetim paneline erişim izniniz yok', false);
+        navigate('/admin-login', { replace: true });
+        return;
+      }
+
+      setHasTenantAccess(true);
+      setAccessChecking(false);
+    };
+
+    void verifyAccess();
+  }, [tenantId, navigate, showToast]);
 
   const togglePrintServer = (val: boolean) => {
     setIsPrintServer(val);
@@ -127,7 +168,7 @@ const AdminPanel = () => {
 
   // Load orders realtime
   useEffect(() => {
-    if (!tenantId) return;
+    if (!tenantId || !hasTenantAccess) return;
 
     const fetchOrders = async () => {
       const { data } = await supabase.from('orders').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false }).limit(50);
@@ -155,18 +196,18 @@ const AdminPanel = () => {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [tenantId, triggerPrint]);
+  }, [tenantId, hasTenantAccess, triggerPrint]);
 
   // Load settings
   useEffect(() => {
-    if (!tenantId) return;
+    if (!tenantId || !hasTenantAccess) return;
 
     const fetchSettings = async () => {
       const { data } = await supabase.from('settings').select('*').eq('id', 'payment').eq('tenant_id', tenantId).maybeSingle();
       if (data) setSettings(data as any);
     };
     fetchSettings();
-  }, [tenantId]);
+  }, [tenantId, hasTenantAccess]);
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
@@ -213,6 +254,7 @@ const AdminPanel = () => {
   const popular = Object.entries(itemCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
   const handleLogout = async () => {
+    setHasTenantAccess(false);
     await supabase.auth.signOut();
     navigate('/');
   };
@@ -226,6 +268,11 @@ const AdminPanel = () => {
     { id: 'accounts', label: 'Cari Hesaplar' },
   ];
 
+  if (accessChecking) {
+    return <div className="text-xs text-muted-foreground p-3">Yetki kontrol ediliyor...</div>;
+  }
+
+  if (!hasTenantAccess) return null;
 
   return (
     <WinWindow

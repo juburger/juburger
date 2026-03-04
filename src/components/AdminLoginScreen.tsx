@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import WinWindow from '@/components/WinWindow';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
+import { useTenant } from '@/contexts/TenantContext';
 
 const AdminLoginScreen = () => {
   const navigate = useNavigate();
   const { showToast } = useToast95Context();
+  const { tenantId, tenant } = useTenant();
   const [email, setEmail] = useState(() => localStorage.getItem('admin_email') || '');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem('admin_email'));
@@ -14,6 +16,8 @@ const AdminLoginScreen = () => {
 
   const handleLogin = async () => {
     if (!email || !password) { showToast('Email ve şifre girin', false); return; }
+    if (!tenantId) { showToast('İşletme bilgisi bulunamadı', false); return; }
+
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -22,11 +26,23 @@ const AdminLoginScreen = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Kullanıcı bulunamadı');
 
-      const { data: role } = await supabase.from('user_roles').select('role').eq('user_id', user.id).eq('role', 'admin').maybeSingle();
-      
-      if (!role) {
+      const [roleRes, tenantAccessRes] = await Promise.all([
+        supabase.from('user_roles').select('role').eq('user_id', user.id).eq('role', 'admin').maybeSingle(),
+        supabase.from('tenant_users').select('id').eq('tenant_id', tenantId).eq('user_id', user.id).maybeSingle(),
+      ]);
+
+      if (roleRes.error) throw roleRes.error;
+      if (tenantAccessRes.error) throw tenantAccessRes.error;
+
+      if (!roleRes.data) {
         await supabase.auth.signOut();
         showToast('Yönetici yetkisi yok', false);
+        return;
+      }
+
+      if (!tenantAccessRes.data) {
+        await supabase.auth.signOut();
+        showToast('Bu işletme için yönetici yetkiniz yok', false);
         return;
       }
 
@@ -51,7 +67,7 @@ const AdminLoginScreen = () => {
       controls={[{ label: '×', onClick: () => navigate('/') }]}
     >
       <h1 className="text-base font-bold mb-1">Yönetici Paneli</h1>
-      <p className="text-muted-foreground text-xs">Giriş bilgilerinizi girin.</p>
+      <p className="text-muted-foreground text-xs">{tenant?.name ? `${tenant.name} için giriş yapın.` : 'Giriş bilgilerinizi girin.'}</p>
       <div className="h-px bg-border my-3" />
       
       <div className="mb-3">
@@ -79,3 +95,4 @@ const AdminLoginScreen = () => {
 };
 
 export default AdminLoginScreen;
+
