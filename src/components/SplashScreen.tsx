@@ -9,6 +9,22 @@ import { supabase } from '@/integrations/supabase/client';
 interface DbCategory { id: string; name: string; sort_order: number; }
 interface DbProduct { id: string; category_id: string | null; name: string; description: string; price: number; tag: string; is_available: boolean; sort_order: number; }
 
+const WaveText = ({ text }: { text: string }) => (
+  <span className="inline-flex overflow-hidden">
+    {text.split('').map((char, i) => (
+      <span
+        key={i}
+        className="inline-block"
+        style={{
+          animation: `wave-morph 2.5s ease-in-out ${i * 0.07}s infinite`,
+        }}
+      >
+        {char === ' ' ? '\u00A0' : char}
+      </span>
+    ))}
+  </span>
+);
+
 const SplashScreen = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
