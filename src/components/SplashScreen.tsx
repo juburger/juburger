@@ -79,7 +79,7 @@ const SplashScreen = () => {
 
           {menuExpanded && grouped.filter(g => !activeCat || g.catId === activeCat).map(group => (
             <div key={group.catId}>
-              <div className="text-xs font-bold mt-3 mb-1.5 pb-1 uppercase tracking-widest text-foreground border-b-2 border-foreground">
+              <div className="text-xs font-bold mt-3 mb-1.5 pb-1 uppercase tracking-widest text-foreground border-b-2 border-foreground" style={{ fontFamily: "'Nimbus Sans L', 'Nimbus Sans', 'Arial Narrow', sans-serif" }}>
                 {group.cat}
               </div>
               {group.items.map(p => (
