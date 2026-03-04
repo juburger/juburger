@@ -8,13 +8,13 @@
 @layer base {
   :root {
     /* Off-white neumorphic base */
-    --background: 40 20% 94%;
+    --background: 0 0% 100%;
     --foreground: 228 20% 25%;
 
-    --card: 40 20% 94%;
+    --card: 0 0% 100%;
     --card-foreground: 228 20% 25%;
 
-    --popover: 40 15% 96%;
+    --popover: 0 0% 100%;
     --popover-foreground: 228 20% 25%;
 
     /* Blue-purple accent (matching reference) */
@@ -36,18 +36,18 @@
     --success: 145 55% 38%;
     --success-foreground: 0 0% 100%;
 
-    --border: 40 10% 86%;
-    --input: 40 20% 94%;
+    --border: 0 0% 90%;
+    --input: 0 0% 100%;
     --ring: 235 55% 58%;
 
     --radius: 20px;
 
     /* Deep neumorphic shadows */
-    --neu-light: 40 20% 99%;
-    --neu-dark: 40 15% 82%;
-    --neu-bg: 40 20% 94%;
+    --neu-light: 0 0% 100%;
+    --neu-dark: 0 0% 85%;
+    --neu-bg: 0 0% 100%;
 
-    --sidebar-background: 40 20% 94%;
+    --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 228 20% 28%;
     --sidebar-primary: 235 55% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
