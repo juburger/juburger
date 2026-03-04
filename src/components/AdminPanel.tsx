@@ -254,6 +254,7 @@ const AdminPanel = () => {
   const popular = Object.entries(itemCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
   const handleLogout = async () => {
+    setHasTenantAccess(false);
     await supabase.auth.signOut();
     navigate('/');
   };
@@ -267,6 +268,11 @@ const AdminPanel = () => {
     { id: 'accounts', label: 'Cari Hesaplar' },
   ];
 
+  if (accessChecking) {
+    return <div className="text-xs text-muted-foreground p-3">Yetki kontrol ediliyor...</div>;
+  }
+
+  if (!hasTenantAccess) return null;
 
   return (
     <WinWindow
