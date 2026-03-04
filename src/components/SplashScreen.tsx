@@ -127,15 +127,13 @@ const SplashScreen = () => {
 
       <div className="flex items-center justify-between mt-6">
         <a href="https://siparis.co" target="_blank" rel="noopener noreferrer" className="text-muted-foreground text-[11px] hover:underline">© 2025 siparis.co</a>
-        {uiTheme === 'mod' && (
-          <button
-            onClick={() => setDark(!dark)}
-            className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-foreground/70 hover:text-foreground transition-colors border border-border"
-            aria-label={dark ? 'Açık mod' : 'Koyu mod'}
-          >
-            {dark ? <Sun size={16} /> : <Moon size={16} />}
-          </button>
-        )}
+        <button
+          onClick={() => navigate('/admin-login')}
+          className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-foreground/70 hover:text-foreground transition-colors"
+          aria-label="Admin"
+        >
+          <Menu size={16} />
+        </button>
       </div>
     </WinWindow>
   );
