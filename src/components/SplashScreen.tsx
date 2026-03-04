@@ -56,7 +56,7 @@ const SplashScreen = () => {
           { label: <span className="text-[11px] whitespace-nowrap font-medium tracking-tight text-foreground">🍽️ Sipariş Ver</span>, onClick: () => navigate(`/register?table=${tableNum}`) },
           { label: <span className="text-[11px] whitespace-nowrap font-medium tracking-tight text-foreground">⭐ Üye Ol</span>, onClick: () => navigate(`/member-signup?table=${tableNum}`) },
         ] : []),
-        { label: <Menu size={14} />, onClick: () => navigate('/admin-login') },
+        ...(uiTheme === 'mod' ? [{ label: <span className="w-[60px] h-[60px] rounded-full flex items-center justify-center cursor-pointer text-foreground/70 hover:text-foreground transition-colors">{dark ? <Sun size={24} /> : <Moon size={24} />}</span>, onClick: () => setDark(!dark) }] : []),
       ]}
     >
 
