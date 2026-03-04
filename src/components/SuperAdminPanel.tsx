@@ -13,6 +13,7 @@ interface Tenant {
   phone: string;
   address: string;
   is_active: boolean;
+  is_premium: boolean;
   owner_user_id: string;
   created_at: string;
   ad_banner_1: string;
@@ -623,6 +624,11 @@ const SuperAdminPanel: React.FC = () => {
                       <span className={`text-[9px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider ${t.is_active ? 'bg-primary/10 text-primary' : 'bg-destructive/10 text-destructive'}`}>
                         {t.is_active ? 'AKTİF' : 'PASİF'}
                       </span>
+                      {t.is_premium && (
+                        <span className="text-[9px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider bg-yellow-500/15 text-yellow-600">
+                          ⭐ PREMİUM
+                        </span>
+                      )}
                       <span className="text-[9px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider bg-muted text-muted-foreground">
                         {t.ui_theme === 'mod' ? 'MOD' : 'NEU'}
                       </span>
@@ -646,7 +652,16 @@ const SuperAdminPanel: React.FC = () => {
                   onClick={() => openAdminForm(t)}>👤 Admin Ekle</button>
                 <button className={`flex-1 py-2 cursor-pointer bg-transparent border-none hover:bg-accent/50 transition-colors rounded-none ${t.is_active ? 'text-destructive' : 'text-primary'}`}
                   onClick={() => toggleActive(t)}>
-                  {t.is_active ? '⏸ Pasif Yap' : '▶ Aktif Yap'}
+                  {t.is_active ? '⏸ Pasif' : '▶ Aktif'}
+                </button>
+                <button className={`flex-1 py-2 cursor-pointer bg-transparent border-none hover:bg-accent/50 transition-colors rounded-none ${t.is_premium ? 'text-yellow-600' : 'text-muted-foreground'}`}
+                  onClick={async () => {
+                    const { error } = await supabase.from('tenants').update({ is_premium: !t.is_premium }).eq('id', t.id);
+                    if (error) { showToast('Güncelleme hatası', false); return; }
+                    showToast(t.is_premium ? 'Premium kapatıldı' : 'Premium açıldı ⭐');
+                    fetchTenants();
+                  }}>
+                  {t.is_premium ? '⭐ Premium ✓' : '⭐ Premium'}
                 </button>
                 <button className="flex-1 py-2 cursor-pointer bg-transparent border-none hover:bg-accent/50 text-foreground transition-colors rounded-none"
                   onClick={() => window.open(`/?tenant=${t.slug}`, '_blank')}>🔗 Önizle</button>
