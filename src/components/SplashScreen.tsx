@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Menu, Sun, Moon } from 'lucide-react';
+import { Menu, Sun, Moon, Instagram } from 'lucide-react';
 import WinWindow, { useModDarkMode } from '@/components/WinWindow';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { useTenant } from '@/contexts/TenantContext';
@@ -43,17 +43,15 @@ const SplashScreen = () => {
     items: products.filter(p => p.category_id === c.id),
   })).filter(g => g.items.length > 0);
 
-  const logoImg = tenant?.logo_url
-    ? <img src={tenant.logo_url} alt="" className="w-[60px] h-[60px] rounded-full object-cover" />
-    : null;
-
-  const icon = logoImg && tenant?.logo_link
-    ? <a href={tenant.logo_link.startsWith('http') ? tenant.logo_link : `https://${tenant.logo_link}`} target="_blank" rel="noopener noreferrer">{logoImg}</a>
-    : logoImg;
+  // Instagram icon for header (replaces logo)
+  const instagramUrl = (tenant as any)?.instagram_url;
+  const instagramIcon = instagramUrl
+    ? <a href={instagramUrl.startsWith('http') ? instagramUrl : `https://${instagramUrl}`} target="_blank" rel="noopener noreferrer" className="w-[60px] h-[60px] rounded-full flex items-center justify-center"><Instagram size={28} className="text-foreground" /></a>
+    : <span className="w-[60px] h-[60px] rounded-full flex items-center justify-center"><Instagram size={28} className="text-foreground/40" /></span>;
 
   return (
     <WinWindow
-      icon={icon}
+      icon={instagramIcon}
       title=""
       controls={[
         ...(isPremium ? [
@@ -64,6 +62,18 @@ const SplashScreen = () => {
       ]}
     >
 
+      {/* Centered business logo */}
+      {tenant?.logo_url && (
+        <div className="flex justify-center mb-4">
+          {tenant.logo_link ? (
+            <a href={tenant.logo_link.startsWith('http') ? tenant.logo_link : `https://${tenant.logo_link}`} target="_blank" rel="noopener noreferrer">
+              <img src={tenant.logo_url} alt={tenant.name} className="w-[80px] h-[80px] rounded-full object-cover" />
+            </a>
+          ) : (
+            <img src={tenant.logo_url} alt={tenant.name} className="w-[80px] h-[80px] rounded-full object-cover" />
+          )}
+        </div>
+      )}
 
       {loading ? (
         <p className="text-muted-foreground text-center py-4 text-sm">Yükleniyor...</p>
