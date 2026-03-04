@@ -66,33 +66,38 @@ const SplashScreen = () => {
       ) : (
         <>
            <div className="flex flex-col items-center gap-2 mb-3">
-             {categories.map(c => (
-               <button key={c.id}
-                   className={`text-base px-4 py-2 cursor-pointer transition-all font-normal tracking-tight text-foreground ${activeCat === c.id ? 'opacity-50' : ''}`}
-                  style={{ fontFamily: "'Helvetica Now Display', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif", fontWeight: 500, letterSpacing: '-0.02em' }}
-                  onClick={() => { if (activeCat === c.id) { setActiveCat(null); setMenuExpanded(false); } else { setActiveCat(c.id); setMenuExpanded(true); } }}>{c.name.toLocaleUpperCase('en-US')}</button>
-             ))}
-           </div>
-
-           {menuExpanded && grouped.filter(g => !activeCat || g.catId === activeCat).map(group => (
-             <div key={group.catId} className="mb-6">
-               {group.items.map(p => (
-                 <div key={p.id} className="flex items-start justify-between py-3 gap-2">
-                   <div className="flex-1">
-                     <div className="text-sm lowercase text-foreground" style={{ fontFamily: "'Helvetica Now Display', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif", fontWeight: 500, letterSpacing: '-0.01em' }}>
-                       {p.name}
+             {categories.map(c => {
+               const catProducts = products.filter(p => p.category_id === c.id);
+               return (
+                 <div key={c.id} className="w-full flex flex-col items-center">
+                   <button
+                     className={`text-base px-4 py-2 cursor-pointer transition-all font-normal tracking-tight text-foreground ${activeCat === c.id ? 'opacity-50' : ''}`}
+                     style={{ fontFamily: "'Helvetica Now Display', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif", fontWeight: 500, letterSpacing: '-0.02em' }}
+                     onClick={() => { if (activeCat === c.id) { setActiveCat(null); } else { setActiveCat(c.id); } }}
+                   >{c.name.toLocaleUpperCase('en-US')}</button>
+                   {activeCat === c.id && catProducts.length > 0 && (
+                     <div className="w-full px-4 mb-2">
+                       {catProducts.map(p => (
+                         <div key={p.id} className="flex items-start justify-between py-3 gap-2">
+                           <div className="flex-1">
+                             <div className="text-sm lowercase text-foreground" style={{ fontFamily: "'Helvetica Now Display', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif", fontWeight: 500, letterSpacing: '-0.01em' }}>
+                               {p.name}
+                             </div>
+                             {p.description && (
+                               <div className="text-xs text-foreground mt-1 leading-relaxed" style={{ fontFamily: "'Helvetica Now Display', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif", fontWeight: 500, letterSpacing: '-0.01em' }}>
+                                 {p.description.split(',').map(s => s.trim()).join(' | ')}
+                               </div>
+                             )}
+                           </div>
+                           <span className="text-sm font-medium text-foreground min-w-[46px] text-right pt-0.5" style={{ fontFamily: "'Helvetica Now Display', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif" }}>₺{p.price}</span>
+                         </div>
+                       ))}
                      </div>
-                     {p.description && (
-                       <div className="text-xs text-foreground mt-1 leading-relaxed" style={{ fontFamily: "'Helvetica Now Display', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif", fontWeight: 500, letterSpacing: '-0.01em' }}>
-                         {p.description.split(',').map(s => s.trim()).join(' | ')}
-                       </div>
-                     )}
-                   </div>
-                   <span className="text-sm font-medium text-foreground min-w-[46px] text-right pt-0.5" style={{ fontFamily: "'Helvetica Now Display', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif" }}>₺{p.price}</span>
+                   )}
                  </div>
-               ))}
-             </div>
-          ))}
+               );
+             })}
+           </div>
         </>
       )}
 
