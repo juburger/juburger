@@ -9,6 +9,7 @@ interface Tenant {
   slug: string;
   name: string;
   logo_url: string;
+  logo_link: string;
   primary_color: string;
   phone: string;
   address: string;

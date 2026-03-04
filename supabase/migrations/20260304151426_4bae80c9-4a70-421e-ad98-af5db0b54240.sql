@@ -1,0 +1,1 @@
+ALTER TABLE public.tenants ADD COLUMN logo_link text NOT NULL DEFAULT '';
