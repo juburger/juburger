@@ -43,9 +43,13 @@ const SplashScreen = () => {
     items: products.filter(p => p.category_id === c.id),
   })).filter(g => g.items.length > 0);
 
-  const icon = tenant?.logo_url
+  const logoImg = tenant?.logo_url
     ? <img src={tenant.logo_url} alt="" className="w-[60px] h-[60px] rounded-full object-cover" />
     : null;
+
+  const icon = logoImg && tenant?.logo_link
+    ? <a href={tenant.logo_link.startsWith('http') ? tenant.logo_link : `https://${tenant.logo_link}`} target="_blank" rel="noopener noreferrer">{logoImg}</a>
+    : logoImg;
 
   return (
     <WinWindow
