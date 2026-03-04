@@ -82,6 +82,45 @@ const AdminPanel = () => {
 
   const [isPrintServer, setIsPrintServer] = useState(() => localStorage.getItem('ju_print_server') === '1');
 
+  useEffect(() => {
+    const verifyAccess = async () => {
+      if (!tenantId) {
+        setHasTenantAccess(false);
+        setAccessChecking(false);
+        return;
+      }
+
+      setAccessChecking(true);
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        setHasTenantAccess(false);
+        setAccessChecking(false);
+        navigate('/admin-login', { replace: true });
+        return;
+      }
+
+      const [roleRes, tenantAccessRes] = await Promise.all([
+        supabase.from('user_roles').select('role').eq('user_id', user.id).eq('role', 'admin').maybeSingle(),
+        supabase.from('tenant_users').select('id').eq('tenant_id', tenantId).eq('user_id', user.id).maybeSingle(),
+      ]);
+
+      if (roleRes.error || tenantAccessRes.error || !roleRes.data || !tenantAccessRes.data) {
+        await supabase.auth.signOut();
+        setHasTenantAccess(false);
+        setAccessChecking(false);
+        showToast('Bu işletmenin yönetim paneline erişim izniniz yok', false);
+        navigate('/admin-login', { replace: true });
+        return;
+      }
+
+      setHasTenantAccess(true);
+      setAccessChecking(false);
+    };
+
+    void verifyAccess();
+  }, [tenantId, navigate, showToast]);
+
   const togglePrintServer = (val: boolean) => {
     setIsPrintServer(val);
     localStorage.setItem('ju_print_server', val ? '1' : '0');
