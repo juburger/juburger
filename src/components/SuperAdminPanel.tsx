@@ -33,7 +33,7 @@ const SuperAdminPanel: React.FC = () => {
   const [editTenant, setEditTenant] = useState<Tenant | null>(null);
   const [form, setForm] = useState({
     name: '', slug: '', phone: '', address: '',
-    logo_url: '', primary_color: '#000000',
+    logo_url: '', logo_link: '', primary_color: '#000000',
     owner_email: '', ad_banner_1: '', ad_banner_2: '',
     ad_link_1: '', ad_link_2: '', ui_theme: 'neu',
   });
