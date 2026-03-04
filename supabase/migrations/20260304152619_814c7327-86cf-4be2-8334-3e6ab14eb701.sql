@@ -1,0 +1,1 @@
+ALTER TABLE public.tenants ADD COLUMN show_logo boolean NOT NULL DEFAULT true;
