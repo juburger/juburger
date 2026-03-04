@@ -825,6 +825,7 @@ export type Database = {
           owner_user_id: string
           phone: string
           primary_color: string
+          show_logo: boolean
           slug: string
           ui_theme: string
           updated_at: string
@@ -846,6 +847,7 @@ export type Database = {
           owner_user_id: string
           phone?: string
           primary_color?: string
+          show_logo?: boolean
           slug: string
           ui_theme?: string
           updated_at?: string
@@ -867,6 +869,7 @@ export type Database = {
           owner_user_id?: string
           phone?: string
           primary_color?: string
+          show_logo?: boolean
           slug?: string
           ui_theme?: string
           updated_at?: string

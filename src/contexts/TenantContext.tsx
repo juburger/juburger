@@ -20,6 +20,7 @@ interface Tenant {
   ad_link_1: string;
   ad_link_2: string;
   instagram_url: string;
+  show_logo: boolean;
   ui_theme: UiTheme;
 }
 
