@@ -78,26 +78,21 @@ const SplashScreen = () => {
              ))}
            </div>
 
-          {menuExpanded && grouped.filter(g => !activeCat || g.catId === activeCat).map(group => (
-            <div key={group.catId}>
-              <div className="text-xs font-bold mt-3 mb-1.5 pb-1 uppercase tracking-widest text-foreground border-b-2 border-foreground" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-                {group.cat}
-              </div>
-              {group.items.map(p => (
-                <div key={p.id} className="flex items-start justify-between py-2 border-b border-border/30 gap-2">
-                  <div className="flex-1">
-                    <div className="text-sm font-semibold">
-                      {p.name}
-                      {p.tag === 'n' && <span className="text-[9px] px-1.5 py-0.5 ml-1.5 rounded-full neu-sunken text-foreground font-medium">YENİ</span>}
-                      {p.tag === 's' && <span className="text-[9px] px-1.5 py-0.5 ml-1.5 rounded-full neu-sunken text-foreground font-medium">Acılı</span>}
-                      {p.tag === 'p' && <span className="text-[9px] px-1.5 py-0.5 ml-1.5 rounded-full neu-sunken text-foreground font-medium">POPÜLER</span>}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-0.5 leading-snug">{p.description}</div>
-                  </div>
-                  <span className="text-sm font-bold min-w-[46px] text-right pt-0.5">₺{p.price}</span>
-                </div>
-              ))}
-            </div>
+           {menuExpanded && grouped.filter(g => !activeCat || g.catId === activeCat).map(group => (
+             <div key={group.catId} className="mb-6">
+               {group.items.map(p => (
+                 <div key={p.id} className="py-3">
+                   <div className="text-sm lowercase tracking-wide text-foreground" style={{ fontFamily: "'Jost', sans-serif" }}>
+                     {p.name}
+                   </div>
+                   {p.description && (
+                     <div className="text-xs text-muted-foreground mt-1 leading-relaxed" style={{ fontFamily: "'Jost', sans-serif" }}>
+                       {p.description.split(',').map(s => s.trim()).join(' | ')}
+                     </div>
+                   )}
+                 </div>
+               ))}
+             </div>
           ))}
         </>
       )}
