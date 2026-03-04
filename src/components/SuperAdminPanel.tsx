@@ -511,6 +511,7 @@ const SuperAdminPanel: React.FC = () => {
             <div className="text-[9px] text-muted-foreground mt-0.5">Instagram ikonuna tıklanınca açılacak link</div>
           </div>
 
+          <div>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Marka Rengi</div>
             <div className="flex items-center gap-3">
               <input type="color" value={form.primary_color} className="w-10 h-10 cursor-pointer rounded-full border-none"
