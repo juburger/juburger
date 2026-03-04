@@ -168,7 +168,7 @@ const AdminPanel = () => {
 
   // Load orders realtime
   useEffect(() => {
-    if (!tenantId) return;
+    if (!tenantId || !hasTenantAccess) return;
 
     const fetchOrders = async () => {
       const { data } = await supabase.from('orders').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false }).limit(50);
@@ -196,18 +196,18 @@ const AdminPanel = () => {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [tenantId, triggerPrint]);
+  }, [tenantId, hasTenantAccess, triggerPrint]);
 
   // Load settings
   useEffect(() => {
-    if (!tenantId) return;
+    if (!tenantId || !hasTenantAccess) return;
 
     const fetchSettings = async () => {
       const { data } = await supabase.from('settings').select('*').eq('id', 'payment').eq('tenant_id', tenantId).maybeSingle();
       if (data) setSettings(data as any);
     };
     fetchSettings();
-  }, [tenantId]);
+  }, [tenantId, hasTenantAccess]);
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
