@@ -126,7 +126,7 @@ const SplashScreen = () => {
       )}
 
       <div className="flex items-center justify-between mt-6">
-        <p className="text-muted-foreground text-[11px]">© 2025 siparis.co</p>
+        <a href="https://siparis.co" target="_blank" rel="noopener noreferrer" className="text-muted-foreground text-[11px] hover:underline">© 2025 siparis.co</a>
         {uiTheme === 'mod' && (
           <button
             onClick={() => setDark(!dark)}
