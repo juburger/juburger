@@ -1,0 +1,1 @@
+ALTER TABLE public.tenants ADD COLUMN instagram_url text NOT NULL DEFAULT '';

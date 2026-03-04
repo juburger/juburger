@@ -21,6 +21,7 @@ interface Tenant {
   ad_banner_2: string;
   ad_link_1: string;
   ad_link_2: string;
+  instagram_url: string;
   ui_theme: string;
 }
 
@@ -35,7 +36,7 @@ const SuperAdminPanel: React.FC = () => {
     name: '', slug: '', phone: '', address: '',
     logo_url: '', logo_link: '', primary_color: '#000000',
     owner_email: '', ad_banner_1: '', ad_banner_2: '',
-    ad_link_1: '', ad_link_2: '', ui_theme: 'neu',
+    ad_link_1: '', ad_link_2: '', instagram_url: '', ui_theme: 'neu',
   });
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -166,7 +167,7 @@ const SuperAdminPanel: React.FC = () => {
 
   const openAdd = () => {
     setEditTenant(null);
-    setForm({ name: '', slug: '', phone: '', address: '', logo_url: '', logo_link: '', primary_color: '#000000', owner_email: '', ad_banner_1: '', ad_banner_2: '', ad_link_1: '', ad_link_2: '', ui_theme: 'neu' });
+    setForm({ name: '', slug: '', phone: '', address: '', logo_url: '', logo_link: '', primary_color: '#000000', owner_email: '', ad_banner_1: '', ad_banner_2: '', ad_link_1: '', ad_link_2: '', instagram_url: '', ui_theme: 'neu' });
     setShowForm(true);
   };
 
@@ -177,6 +178,7 @@ const SuperAdminPanel: React.FC = () => {
       logo_url: t.logo_url, logo_link: t.logo_link || '', primary_color: t.primary_color, owner_email: '',
       ad_banner_1: t.ad_banner_1 || '', ad_banner_2: t.ad_banner_2 || '',
       ad_link_1: t.ad_link_1 || '', ad_link_2: t.ad_link_2 || '',
+      instagram_url: (t as any).instagram_url || '',
       ui_theme: t.ui_theme || 'neu',
     });
     setShowForm(true);
@@ -203,6 +205,7 @@ const SuperAdminPanel: React.FC = () => {
           ad_banner_2: form.ad_banner_2.trim(),
           ad_link_1: form.ad_link_1.trim(),
           ad_link_2: form.ad_link_2.trim(),
+          instagram_url: form.instagram_url.trim(),
           ui_theme: form.ui_theme,
         };
         console.log('Updating tenant:', editTenant.id, updateData);
@@ -499,6 +502,14 @@ const SuperAdminPanel: React.FC = () => {
               <div className="text-[9px] text-muted-foreground mt-0.5">Logoya tıklanınca açılacak link (boş bırakılabilir)</div>
             </div>
           )}
+
+          <div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Instagram URL</div>
+            <input className="neu-input text-[11px]" value={form.instagram_url}
+              onChange={e => setForm({ ...form, instagram_url: e.target.value })}
+              placeholder="https://instagram.com/isletme (opsiyonel)" />
+            <div className="text-[9px] text-muted-foreground mt-0.5">Instagram ikonuna tıklanınca açılacak link</div>
+          </div>
 
           <div>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Marka Rengi</div>
