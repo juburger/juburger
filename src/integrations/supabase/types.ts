@@ -816,6 +816,7 @@ export type Database = {
           address: string
           created_at: string
           id: string
+          instagram_url: string
           is_active: boolean
           is_premium: boolean
           logo_link: string
@@ -836,6 +837,7 @@ export type Database = {
           address?: string
           created_at?: string
           id?: string
+          instagram_url?: string
           is_active?: boolean
           is_premium?: boolean
           logo_link?: string
@@ -856,6 +858,7 @@ export type Database = {
           address?: string
           created_at?: string
           id?: string
+          instagram_url?: string
           is_active?: boolean
           is_premium?: boolean
           logo_link?: string
