@@ -26,10 +26,17 @@ interface Tenant {
   show_logo: boolean;
 }
 
+interface TenantAdmin {
+  tenant_id: string;
+  email: string;
+  role: string;
+}
+
 const SuperAdminPanel: React.FC = () => {
   const navigate = useNavigate();
   const { showToast } = useToast95Context();
   const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [tenantAdmins, setTenantAdmins] = useState<Record<string, TenantAdmin[]>>({});
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editTenant, setEditTenant] = useState<Tenant | null>(null);
@@ -152,15 +159,24 @@ const SuperAdminPanel: React.FC = () => {
   };
 
   const fetchTenants = async () => {
-    const { data, error } = await supabase
-      .from('tenants')
-      .select('*')
-      .order('created_at', { ascending: false });
+    const [{ data, error }, { data: adminsData }] = await Promise.all([
+      supabase.from('tenants').select('*').order('created_at', { ascending: false }),
+      supabase.from('tenant_users').select('tenant_id, email, role'),
+    ]);
     if (error) {
       showToast('İşletmeler yüklenemedi', false);
       console.error(error);
     }
     if (data) setTenants(data as Tenant[]);
+    if (adminsData) {
+      const grouped: Record<string, TenantAdmin[]> = {};
+      for (const a of adminsData) {
+        if (!a.email) continue;
+        if (!grouped[a.tenant_id]) grouped[a.tenant_id] = [];
+        grouped[a.tenant_id].push(a as TenantAdmin);
+      }
+      setTenantAdmins(grouped);
+    }
     setLoading(false);
   };
 
@@ -309,6 +325,7 @@ const SuperAdminPanel: React.FC = () => {
       if (!res.ok) throw new Error(result.error || 'Bilinmeyen hata');
       showToast(`Admin oluşturuldu: ${adminForm.email} ✓`);
       setShowAdminForm(false);
+      fetchTenants();
     } catch (err: any) {
       showToast('Hata: ' + err.message, false);
     } finally {
@@ -673,6 +690,14 @@ const SuperAdminPanel: React.FC = () => {
                       {t.phone && <div>📞 {t.phone}</div>}
                       {t.address && <div>📍 {t.address}</div>}
                       <div>📅 {new Date(t.created_at).toLocaleDateString('tr-TR')}</div>
+                      {tenantAdmins[t.id] && tenantAdmins[t.id].length > 0 && (
+                        <div className="mt-1 pt-1 border-t border-border/30">
+                          <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">👤 Admin Hesapları</div>
+                          {tenantAdmins[t.id].map((a, i) => (
+                            <div key={i} className="text-[11px]">📧 {a.email}</div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-1">

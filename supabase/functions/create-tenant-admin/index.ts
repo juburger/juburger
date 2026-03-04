@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
     // Add tenant_users entry
     const { error: tenantError } = await supabaseAdmin
       .from("tenant_users")
-      .insert({ user_id: userId, tenant_id, role: "admin" });
+      .insert({ user_id: userId, tenant_id, role: "admin", email });
 
     if (tenantError) throw new Error("İşletme bağlantısı kurulamadı: " + tenantError.message);
 
