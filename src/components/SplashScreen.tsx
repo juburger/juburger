@@ -50,7 +50,7 @@ const SplashScreen = () => {
   return (
     <WinWindow
       icon={icon}
-      title={`Masa ${tableNum}`}
+      title=""
       controls={[
         ...(isPremium ? [
           { label: <span className="text-[11px] whitespace-nowrap font-medium tracking-tight text-foreground">🍽️ Sipariş Ver</span>, onClick: () => navigate(`/register?table=${tableNum}`) },
@@ -61,7 +61,9 @@ const SplashScreen = () => {
     >
 
       {/* Read-only menu */}
-      <div className="text-xs font-bold uppercase tracking-widest text-foreground mb-2" style={{ border: '2px solid hsl(var(--foreground))', borderRadius: '50px', padding: '8px 16px', display: 'inline-block' }}>Menü</div>
+      <div className="text-center mb-4">
+        <span style={{ fontFamily: "'Haas Grot Text Trial', 'Haas Grotesk', sans-serif", fontStyle: 'italic', fontSize: '28px', fontWeight: 800, letterSpacing: '0.15em' }} className="text-foreground uppercase">MENU</span>
+      </div>
 
       {loading ? (
         <p className="text-muted-foreground text-center py-4 text-sm">Yükleniyor...</p>
