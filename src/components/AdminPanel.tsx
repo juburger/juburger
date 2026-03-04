@@ -64,6 +64,8 @@ const AdminPanel = () => {
   const navigate = useNavigate();
   const { showToast } = useToast95Context();
   const { tenant, tenantId } = useTenant();
+  const [hasTenantAccess, setHasTenantAccess] = useState(false);
+  const [accessChecking, setAccessChecking] = useState(true);
   const [tab, setTab] = useState<TabType>('orders');
   const [orders, setOrders] = useState<Order[]>([]);
   const [settings, setSettings] = useState({
