@@ -68,9 +68,9 @@ const SplashScreen = () => {
            <div className="flex flex-col items-center gap-2 mb-3">
              {categories.map(c => (
                <button key={c.id}
-                  className={`text-base px-4 py-2 cursor-pointer transition-all font-normal uppercase tracking-tight text-foreground ${activeCat === c.id ? 'opacity-50' : ''}`}
+                   className={`text-base px-4 py-2 cursor-pointer transition-all font-normal tracking-tight text-foreground ${activeCat === c.id ? 'opacity-50' : ''}`}
                   style={{ fontFamily: "'Helvetica Now Display', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif", fontWeight: 500, letterSpacing: '-0.02em' }}
-                 onClick={() => { setActiveCat(activeCat === c.id ? null : c.id); setMenuExpanded(true); }}>{c.name.replace(/İ/g, 'I').replace(/ı/g, 'i')}</button>
+                  onClick={() => { setActiveCat(activeCat === c.id ? null : c.id); setMenuExpanded(true); }}>{c.name.toLocaleUpperCase('en-US')}</button>
              ))}
            </div>
 
