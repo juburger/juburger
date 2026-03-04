@@ -40,6 +40,8 @@ const AdminProducts = () => {
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [form, setForm] = useState({ name: '', description: '', price: '', tag: '', category_id: '', is_available: true });
   const [catName, setCatName] = useState('');
+  const [editCatId, setEditCatId] = useState<string | null>(null);
+  const [editCatName, setEditCatName] = useState('');
   const [productOptions, setProductOptions] = useState<ProductOption[]>([]);
   const [newOptionName, setNewOptionName] = useState('');
   const [newOptionPrice, setNewOptionPrice] = useState('');
@@ -148,6 +150,17 @@ const AdminProducts = () => {
     await supabase.from('categories').delete().eq('id', id);
     showToast('Kategori silindi');
     if (selectedCat === id) setSelectedCat('all');
+    fetchData();
+  };
+
+  const renameCategory = async (id: string) => {
+    const newName = editCatName.trim();
+    if (!newName) return;
+    const { error } = await supabase.from('categories').update({ name: newName }).eq('id', id);
+    if (error) { showToast('Kategori güncellenemedi', false); return; }
+    setEditCatId(null);
+    setEditCatName('');
+    showToast('Kategori güncellendi ✓');
     fetchData();
   };
 
@@ -298,7 +311,17 @@ const AdminProducts = () => {
               <div className="text-[10px] text-muted-foreground mb-1">Mevcut kategoriler:</div>
               {categories.map((c, i) => (
                 <div key={c.id} className="flex justify-between items-center text-[11px] py-0.5">
-                  <span>{c.name}</span>
+                  {editCatId === c.id ? (
+                    <div className="flex gap-1 items-center flex-1 mr-1">
+                      <input className="win-input text-[11px] flex-1" value={editCatName} onChange={e => setEditCatName(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') renameCategory(c.id); if (e.key === 'Escape') setEditCatId(null); }}
+                        autoFocus />
+                      <button className="win-btn win-btn-primary text-[9px] py-0 px-1.5" onClick={() => renameCategory(c.id)}>✓</button>
+                      <button className="win-btn text-[9px] py-0 px-1.5" onClick={() => setEditCatId(null)}>✕</button>
+                    </div>
+                  ) : (
+                    <span className="cursor-pointer hover:underline" onClick={() => { setEditCatId(c.id); setEditCatName(c.name); }}>{c.name}</span>
+                  )}
                   <div className="flex items-center gap-1">
                     <button className="bg-transparent border-none cursor-pointer p-0 text-muted-foreground hover:text-foreground disabled:opacity-30" disabled={i === 0} onClick={() => moveCategory(c, 'up')}><ChevronUp size={14} /></button>
                     <button className="bg-transparent border-none cursor-pointer p-0 text-muted-foreground hover:text-foreground disabled:opacity-30" disabled={i === categories.length - 1} onClick={() => moveCategory(c, 'down')}><ChevronDown size={14} /></button>
