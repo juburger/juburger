@@ -73,7 +73,7 @@ const SplashScreen = () => {
              {categories.map(c => (
                <button key={c.id}
                  className={`text-base px-4 py-2 cursor-pointer transition-all font-normal uppercase tracking-[0.15em] text-foreground ${activeCat === c.id ? 'opacity-50' : ''}`}
-                 style={{ fontFamily: "'Jost', sans-serif" }}
+                  style={{ fontFamily: "'Helvetica Now Display', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif", fontWeight: 500 }}
                  onClick={() => { setActiveCat(activeCat === c.id ? null : c.id); setMenuExpanded(true); }}>{c.name}</button>
              ))}
            </div>
@@ -82,11 +82,11 @@ const SplashScreen = () => {
              <div key={group.catId} className="mb-6">
                {group.items.map(p => (
                  <div key={p.id} className="py-3">
-                   <div className="text-sm lowercase tracking-wide text-foreground" style={{ fontFamily: "'Jost', sans-serif" }}>
+                   <div className="text-sm lowercase tracking-wide text-foreground" style={{ fontFamily: "'Helvetica Now Display', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif", fontWeight: 500 }}>
                      {p.name}
                    </div>
                    {p.description && (
-                     <div className="text-xs text-muted-foreground mt-1 leading-relaxed" style={{ fontFamily: "'Jost', sans-serif" }}>
+                     <div className="text-xs text-muted-foreground mt-1 leading-relaxed" style={{ fontFamily: "'Helvetica Now Display', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif", fontWeight: 500 }}>
                        {p.description.split(',').map(s => s.trim()).join(' | ')}
                      </div>
                    )}
