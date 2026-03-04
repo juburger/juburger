@@ -47,7 +47,7 @@ const SplashScreen = () => {
   // Instagram icon (left header)
   const instagramIcon = instagramUrl
     ? <a href={instagramUrl.startsWith('http') ? instagramUrl : `https://${instagramUrl}`} target="_blank" rel="noopener noreferrer" className="w-7 h-7 flex items-center justify-center"><Instagram size={20} className="text-foreground" /></a>
-    : <span className="w-7 h-7 flex items-center justify-center"><Instagram size={20} className="text-foreground/40" /></span>;
+    : <span className="w-7 h-7 flex items-center justify-center"><Instagram size={20} className="text-foreground" /></span>;
 
   // Dark mode toggle (right header) — same size/color as instagram
   const darkToggle = uiTheme === 'mod'
