@@ -60,10 +60,6 @@ const SplashScreen = () => {
       ]}
     >
 
-      {/* Read-only menu */}
-      <div className="text-center mb-4">
-        <span style={{ fontFamily: "'Haas Grot Text Trial', 'Haas Grotesk', sans-serif", fontStyle: 'italic', fontSize: '28px', fontWeight: 800, letterSpacing: '0.15em' }} className="text-foreground uppercase">MENU</span>
-      </div>
 
       {loading ? (
         <p className="text-muted-foreground text-center py-4 text-sm">Yükleniyor...</p>
