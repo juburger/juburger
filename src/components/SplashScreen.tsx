@@ -15,6 +15,7 @@ const SplashScreen = () => {
   const tableNum = searchParams.get('table') || '3';
   const { showToast } = useToast95Context();
   const { tenant, tenantId, uiTheme } = useTenant();
+  const isPremium = tenant?.is_premium ?? false;
   const [dark, setDark] = useModDarkMode();
   const [categories, setCategories] = useState<DbCategory[]>([]);
   const [products, setProducts] = useState<DbProduct[]>([]);
@@ -51,8 +52,10 @@ const SplashScreen = () => {
       icon={icon}
       title={`Masa ${tableNum}`}
       controls={[
-        { label: <span className="text-[11px] whitespace-nowrap font-medium tracking-tight text-foreground">🍽️ Sipariş Ver</span>, onClick: () => navigate(`/register?table=${tableNum}`) },
-        { label: <span className="text-[11px] whitespace-nowrap font-medium tracking-tight text-foreground">⭐ Üye Ol</span>, onClick: () => navigate(`/member-signup?table=${tableNum}`) },
+        ...(isPremium ? [
+          { label: <span className="text-[11px] whitespace-nowrap font-medium tracking-tight text-foreground">🍽️ Sipariş Ver</span>, onClick: () => navigate(`/register?table=${tableNum}`) },
+          { label: <span className="text-[11px] whitespace-nowrap font-medium tracking-tight text-foreground">⭐ Üye Ol</span>, onClick: () => navigate(`/member-signup?table=${tableNum}`) },
+        ] : []),
         { label: <Menu size={14} />, onClick: () => navigate('/admin-login') },
       ]}
     >

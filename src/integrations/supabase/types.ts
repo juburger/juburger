@@ -817,6 +817,7 @@ export type Database = {
           created_at: string
           id: string
           is_active: boolean
+          is_premium: boolean
           logo_url: string
           name: string
           owner_user_id: string
@@ -835,6 +836,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          is_premium?: boolean
           logo_url?: string
           name: string
           owner_user_id: string
@@ -853,6 +855,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          is_premium?: boolean
           logo_url?: string
           name?: string
           owner_user_id?: string

@@ -13,6 +13,7 @@ interface Tenant {
   phone: string;
   address: string;
   is_active: boolean;
+  is_premium: boolean;
   ad_banner_1: string;
   ad_banner_2: string;
   ad_link_1: string;
