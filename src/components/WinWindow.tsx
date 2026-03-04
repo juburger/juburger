@@ -91,7 +91,7 @@ const ModLayout = ({ icon, title, menuItems, controls, statusItems, children, bo
   return (
   <div className="min-h-screen bg-background overflow-x-hidden">
     {/* Minimal top bar */}
-    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
+    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl">
       <div className="flex items-center justify-between px-5 py-3">
         <div className="flex items-center gap-3">
           {icon && <span className="text-base">{icon}</span>}
