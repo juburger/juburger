@@ -59,10 +59,10 @@ const SplashScreen = () => {
   const logoEl = showLogo ? (
     tenant!.logo_link ? (
       <a href={tenant!.logo_link.startsWith('http') ? tenant!.logo_link : `https://${tenant!.logo_link}`} target="_blank" rel="noopener noreferrer">
-        <img src={tenant!.logo_url} alt={tenant!.name} className="w-10 h-10 rounded-full object-cover" />
+        <img src={tenant!.logo_url} alt={tenant!.name} className="w-12 h-12 rounded-full object-cover" />
       </a>
     ) : (
-      <img src={tenant!.logo_url} alt={tenant!.name} className="w-10 h-10 rounded-full object-cover" />
+      <img src={tenant!.logo_url} alt={tenant!.name} className="w-12 h-12 rounded-full object-cover" />
     )
   ) : null;
 
