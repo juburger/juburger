@@ -23,6 +23,7 @@ interface Tenant {
   ad_link_2: string;
   instagram_url: string;
   ui_theme: string;
+  show_logo: boolean;
 }
 
 const SuperAdminPanel: React.FC = () => {
@@ -36,7 +37,7 @@ const SuperAdminPanel: React.FC = () => {
     name: '', slug: '', phone: '', address: '',
     logo_url: '', logo_link: '', primary_color: '#000000',
     owner_email: '', ad_banner_1: '', ad_banner_2: '',
-    ad_link_1: '', ad_link_2: '', instagram_url: '', ui_theme: 'neu',
+    ad_link_1: '', ad_link_2: '', instagram_url: '', ui_theme: 'neu', show_logo: true,
   });
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -167,7 +168,7 @@ const SuperAdminPanel: React.FC = () => {
 
   const openAdd = () => {
     setEditTenant(null);
-    setForm({ name: '', slug: '', phone: '', address: '', logo_url: '', logo_link: '', primary_color: '#000000', owner_email: '', ad_banner_1: '', ad_banner_2: '', ad_link_1: '', ad_link_2: '', instagram_url: '', ui_theme: 'neu' });
+    setForm({ name: '', slug: '', phone: '', address: '', logo_url: '', logo_link: '', primary_color: '#000000', owner_email: '', ad_banner_1: '', ad_banner_2: '', ad_link_1: '', ad_link_2: '', instagram_url: '', ui_theme: 'neu', show_logo: true });
     setShowForm(true);
   };
 
@@ -179,6 +180,7 @@ const SuperAdminPanel: React.FC = () => {
       ad_banner_1: t.ad_banner_1 || '', ad_banner_2: t.ad_banner_2 || '',
       ad_link_1: t.ad_link_1 || '', ad_link_2: t.ad_link_2 || '',
       instagram_url: (t as any).instagram_url || '',
+      show_logo: (t as any).show_logo !== false,
       ui_theme: t.ui_theme || 'neu',
     });
     setShowForm(true);
@@ -206,6 +208,7 @@ const SuperAdminPanel: React.FC = () => {
           ad_link_1: form.ad_link_1.trim(),
           ad_link_2: form.ad_link_2.trim(),
           instagram_url: form.instagram_url.trim(),
+          show_logo: form.show_logo,
           ui_theme: form.ui_theme,
         };
         console.log('Updating tenant:', editTenant.id, updateData);
@@ -492,6 +495,15 @@ const SuperAdminPanel: React.FC = () => {
               }} />
             </label>
           </div>
+
+          {form.logo_url && (
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={form.show_logo} onChange={e => setForm({ ...form, show_logo: e.target.checked })} className="w-4 h-4 rounded" />
+                <span className="text-[11px] text-foreground">Logoyu Göster</span>
+              </label>
+            </div>
+          )}
 
           {form.logo_url && (
             <div>

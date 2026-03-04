@@ -63,7 +63,7 @@ const SplashScreen = () => {
     >
 
       {/* Centered business logo */}
-      {tenant?.logo_url && (
+      {tenant?.logo_url && (tenant as any)?.show_logo !== false && (
         <div className="flex justify-center mb-4">
           {tenant.logo_link ? (
             <a href={tenant.logo_link.startsWith('http') ? tenant.logo_link : `https://${tenant.logo_link}`} target="_blank" rel="noopener noreferrer">
