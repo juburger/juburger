@@ -83,7 +83,6 @@ const SplashScreen = () => {
         <div className="flex-1 flex justify-center">{logoEl}</div>
         <div className="w-7 flex justify-end">{darkToggle}</div>
       </div>
-      )}
 
       {loading ? (
         <p className="text-muted-foreground text-center py-4 text-sm">Yükleniyor...</p>
