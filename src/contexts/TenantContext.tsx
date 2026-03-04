@@ -125,13 +125,13 @@ export const TenantProvider = ({ children }: { children: ReactNode }) => {
         setMeta('og:description', `${t.name} - Sipariş Sistemi`);
         if (t.logo_url) {
           setMeta('og:image', t.logo_url);
-          let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
-          if (!link) {
-            link = document.createElement('link');
-            link.rel = 'icon';
-            document.head.appendChild(link);
-          }
+          // Remove all existing favicon links to prevent conflicts
+          document.querySelectorAll("link[rel='icon'], link[rel='shortcut icon']").forEach(el => el.remove());
+          const link = document.createElement('link');
+          link.rel = 'icon';
+          link.type = 'image/png';
           link.href = t.logo_url;
+          document.head.appendChild(link);
           let appleLink = document.querySelector("link[rel='apple-touch-icon']") as HTMLLinkElement;
           if (appleLink) appleLink.href = t.logo_url;
         }
