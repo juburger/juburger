@@ -77,15 +77,18 @@ const SplashScreen = () => {
            {menuExpanded && grouped.filter(g => !activeCat || g.catId === activeCat).map(group => (
              <div key={group.catId} className="mb-6">
                {group.items.map(p => (
-                 <div key={p.id} className="py-3">
-                   <div className="text-sm lowercase text-foreground" style={{ fontFamily: "'Helvetica Now Display', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif", fontWeight: 500, letterSpacing: '-0.01em' }}>
-                     {p.name}
-                   </div>
-                   {p.description && (
-                     <div className="text-xs text-muted-foreground mt-1 leading-relaxed" style={{ fontFamily: "'Helvetica Now Display', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif", fontWeight: 500, letterSpacing: '-0.01em' }}>
-                       {p.description.split(',').map(s => s.trim()).join(' | ')}
+                 <div key={p.id} className="flex items-start justify-between py-3 gap-2">
+                   <div className="flex-1">
+                     <div className="text-sm lowercase text-foreground" style={{ fontFamily: "'Helvetica Now Display', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif", fontWeight: 500, letterSpacing: '-0.01em' }}>
+                       {p.name}
                      </div>
-                   )}
+                     {p.description && (
+                       <div className="text-xs text-foreground mt-1 leading-relaxed" style={{ fontFamily: "'Helvetica Now Display', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif", fontWeight: 500, letterSpacing: '-0.01em' }}>
+                         {p.description.split(',').map(s => s.trim()).join(' | ')}
+                       </div>
+                     )}
+                   </div>
+                   <span className="text-sm font-medium text-foreground min-w-[46px] text-right pt-0.5" style={{ fontFamily: "'Helvetica Now Display', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif" }}>₺{p.price}</span>
                  </div>
                ))}
              </div>
