@@ -44,7 +44,7 @@ const SplashScreen = () => {
   })).filter(g => g.items.length > 0);
 
   const icon = tenant?.logo_url
-    ? <img src={tenant.logo_url} alt="" className="w-10 h-10 rounded-full object-cover" />
+    ? <img src={tenant.logo_url} alt="" className="w-[60px] h-[60px] rounded-full object-cover" />
     : null;
 
   return (
