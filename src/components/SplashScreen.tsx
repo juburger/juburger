@@ -61,7 +61,7 @@ const SplashScreen = () => {
     >
 
       {/* Read-only menu */}
-      <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">Menü</div>
+      <div className="text-xs font-bold uppercase tracking-widest text-foreground mb-2" style={{ border: '2px solid hsl(var(--foreground))', borderRadius: '50px', padding: '8px 16px', display: 'inline-block' }}>Menü</div>
 
       {loading ? (
         <p className="text-muted-foreground text-center py-4 text-sm">Yükleniyor...</p>
@@ -70,14 +70,14 @@ const SplashScreen = () => {
           <div className="grid grid-cols-2 gap-2 mb-3">
             {categories.map(c => (
               <button key={c.id}
-                className={`text-sm px-4 py-2.5 cursor-pointer rounded-full transition-all font-medium text-foreground border-2 border-border ${activeCat === c.id ? 'neu-sunken' : 'neu-flat'}`}
+                className={`text-sm px-4 py-2.5 cursor-pointer rounded-full transition-all font-bold uppercase tracking-wide text-foreground border-2 border-foreground ${activeCat === c.id ? 'neu-sunken' : 'neu-flat'}`}
                 onClick={() => { setActiveCat(activeCat === c.id ? null : c.id); setMenuExpanded(true); }}>{c.name}</button>
             ))}
           </div>
 
           {menuExpanded && grouped.filter(g => !activeCat || g.catId === activeCat).map(group => (
             <div key={group.catId}>
-              <div className="text-xs font-bold mt-3 mb-1.5 pb-1 uppercase tracking-widest text-muted-foreground border-b border-border/50">
+              <div className="text-xs font-bold mt-3 mb-1.5 pb-1 uppercase tracking-widest text-foreground border-b-2 border-foreground">
                 {group.cat}
               </div>
               {group.items.map(p => (
