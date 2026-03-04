@@ -1,0 +1,1 @@
+ALTER TABLE public.tenant_users ADD COLUMN email text NOT NULL DEFAULT '';
