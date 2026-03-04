@@ -43,6 +43,7 @@ const SplashScreen = () => {
     items: products.filter(p => p.category_id === c.id),
   })).filter(g => g.items.length > 0);
 
+  const instagramUrl = (tenant as any)?.instagram_url;
   // Instagram icon (left header)
   const instagramIcon = instagramUrl
     ? <a href={instagramUrl.startsWith('http') ? instagramUrl : `https://${instagramUrl}`} target="_blank" rel="noopener noreferrer" className="w-7 h-7 flex items-center justify-center"><Instagram size={20} className="text-foreground" /></a>
