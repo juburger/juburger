@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast95Context } from '@/contexts/Toast95Context';
@@ -30,7 +30,7 @@ const AdminQRCodes = () => {
       if (!tenantId) return [];
       const { data } = await supabase
         .from('tables')
-        .select('id, table_num, capacity, is_active, area_id')
+        .select('id, table_num, capacity, is_active, area_id, slug')
         .eq('tenant_id', tenantId)
         .eq('is_active', true)
         .order('table_num');
@@ -39,7 +39,6 @@ const AdminQRCodes = () => {
     enabled: !!tenantId,
   });
 
-  // Build display name like "İç Alan 1", "Yol 2"
   const getDisplayName = (t: any) => {
     const area = areas.find((a: any) => a.id === t.area_id);
     if (!area) return `Masa ${t.table_num}`;
@@ -48,8 +47,10 @@ const AdminQRCodes = () => {
     return `${area.name} ${localIdx}`;
   };
 
-  const downloadQR = (tableNum: number) => {
-    const svg = document.getElementById(`qr-${tableNum}`);
+  const getSlug = (t: any) => t.slug || `masa-${t.table_num}`;
+
+  const downloadQR = (tableSlug: string, displayName: string) => {
+    const svg = document.getElementById(`qr-${tableSlug}`);
     if (!svg) return;
 
     const svgData = new XMLSerializer().serializeToString(svg);
@@ -61,17 +62,19 @@ const AdminQRCodes = () => {
     img.onload = () => {
       ctx?.drawImage(img, 0, 0, 512, 512);
       const link = document.createElement('a');
-      link.download = `masa-${tableNum}-qr.png`;
+      link.download = `${tableSlug}-qr.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
-      showToast(`Masa ${tableNum} QR kodu indirildi!`);
+      showToast(`${displayName} QR kodu indirildi!`);
     };
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
   };
 
   const downloadAll = () => {
     tables.forEach((t: any, i: number) => {
-      setTimeout(() => downloadQR(t.table_num), i * 300);
+      const slug = getSlug(t);
+      const displayName = getDisplayName(t);
+      setTimeout(() => downloadQR(slug, displayName), i * 300);
     });
   };
 
@@ -88,12 +91,13 @@ const AdminQRCodes = () => {
       <hr className="border-t border-foreground my-2" />
       <div className="grid grid-cols-2 gap-2.5">
       {tables.map((t: any) => {
-          const url = `${BASE_URL}/?table=${t.table_num}`;
+          const slug = getSlug(t);
+          const url = `${BASE_URL}/?table=${slug}`;
           const displayName = getDisplayName(t);
           return (
-            <div key={t.table_num} className="border border-foreground p-2.5 text-center">
+            <div key={t.id} className="border border-foreground p-2.5 text-center">
               <QRCodeSVG
-                id={`qr-${t.table_num}`}
+                id={`qr-${slug}`}
                 value={url}
                 size={100}
                 level="M"
@@ -103,7 +107,7 @@ const AdminQRCodes = () => {
               <div className="text-[9px] text-muted-foreground break-all mt-0.5 mb-1.5">{url}</div>
               <button
                 className="win-btn text-[10px] py-0.5 px-2 w-full"
-                onClick={() => downloadQR(t.table_num)}
+                onClick={() => downloadQR(slug, displayName)}
               >
                 📥 İndir
               </button>

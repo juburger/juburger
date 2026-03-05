@@ -9,7 +9,7 @@ import { useTenantId } from '@/hooks/useTenantQuery';
 const MemberSignupScreen = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const tableNum = searchParams.get('table') || '3';
+  const tableSlug = searchParams.get('table') || '';
   const { showToast } = useToast95Context();
 
   const [name, setName] = useState('');
@@ -45,7 +45,7 @@ const MemberSignupScreen = () => {
       if (error) throw error;
 
       showToast('Üyelik oluşturuldu! 🎉');
-      setTimeout(() => navigate(`/register?table=${tableNum}`), 1500);
+      setTimeout(() => navigate(`/register?table=${tableSlug}`), 1500);
     } catch (err: any) {
       showToast('Hata: ' + err.message, false);
     } finally {
@@ -58,7 +58,7 @@ const MemberSignupScreen = () => {
       icon="⭐"
       title="Üye Ol"
       controls={[
-        { label: <ChevronLeft size={14} />, onClick: () => navigate(`/register?table=${tableNum}`) },
+        { label: <ChevronLeft size={14} />, onClick: () => navigate(`/register?table=${tableSlug}`) },
       ]}
     >
       <h1 className="text-base font-bold mb-1">Üyelik Oluştur</h1>

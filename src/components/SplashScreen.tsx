@@ -28,7 +28,7 @@ const WaveText = ({ text }: { text: string }) => (
 const SplashScreen = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const tableNum = searchParams.get('table') || '3';
+  const tableSlug = searchParams.get('table') || '';
   const { showToast } = useToast95Context();
   const { tenant, tenantId, uiTheme } = useTenant();
   const isPremium = tenant?.is_premium ?? false;
@@ -60,17 +60,14 @@ const SplashScreen = () => {
   })).filter(g => g.items.length > 0);
 
   const instagramUrl = (tenant as any)?.instagram_url;
-  // Instagram icon (left header)
   const instagramIcon = instagramUrl
     ? <a href={instagramUrl.startsWith('http') ? instagramUrl : `https://${instagramUrl}`} target="_blank" rel="noopener noreferrer" className="w-7 h-7 flex items-center justify-center"><Instagram size={20} className="text-foreground" /></a>
     : <span className="w-7 h-7 flex items-center justify-center"><Instagram size={20} className="text-foreground" /></span>;
 
-  // Dark mode toggle (right header) — same size/color as instagram
   const darkToggle = uiTheme === 'mod'
     ? <button onClick={() => setDark(!dark)} className="w-7 h-7 flex items-center justify-center cursor-pointer text-foreground">{dark ? <Sun size={20} /> : <Moon size={20} />}</button>
     : null;
 
-  // Centered logo between icons
   const showLogo = tenant?.logo_url && (tenant as any)?.show_logo !== false;
   const logoEl = showLogo ? (
     tenant!.logo_link ? (
@@ -82,19 +79,21 @@ const SplashScreen = () => {
     )
   ) : null;
 
+  const tableParam = tableSlug ? `table=${tableSlug}` : '';
+
   return (
     <WinWindow
       icon={null}
       title=""
       controls={[
         ...(isPremium ? [
-          { label: <span className="text-[11px] whitespace-nowrap font-medium tracking-tight text-foreground">🍽️ Sipariş Ver</span>, onClick: () => navigate(`/register?table=${tableNum}`) },
-          { label: <span className="text-[11px] whitespace-nowrap font-medium tracking-tight text-foreground">⭐ Üye Ol</span>, onClick: () => navigate(`/member-signup?table=${tableNum}`) },
+          { label: <span className="text-[11px] whitespace-nowrap font-medium tracking-tight text-foreground">🍽️ Sipariş Ver</span>, onClick: () => navigate(`/register?${tableParam}`) },
+          { label: <span className="text-[11px] whitespace-nowrap font-medium tracking-tight text-foreground">⭐ Üye Ol</span>, onClick: () => navigate(`/member-signup?${tableParam}`) },
         ] : []),
       ]}
     >
 
-      {/* Custom header row: Instagram — Logo — Dark mode toggle */}
+      {/* Custom header row */}
       <div className="flex items-center justify-between mb-4">
         <div className="w-7">{instagramIcon}</div>
         <div className="flex-1 flex justify-center">{logoEl}</div>
