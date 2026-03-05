@@ -737,6 +737,7 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
+          slug: string
           table_num: number
           tenant_id: string | null
         }
@@ -746,6 +747,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          slug?: string
           table_num: number
           tenant_id?: string | null
         }
@@ -755,6 +757,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          slug?: string
           table_num?: number
           tenant_id?: string | null
         }
@@ -912,6 +915,7 @@ export type Database = {
         Returns: boolean
       }
       hash_pin: { Args: { plain_pin: string }; Returns: string }
+      slugify_turkish: { Args: { input: string }; Returns: string }
       verify_pin: {
         Args: { p_staff_id: string; plain_pin: string }
         Returns: boolean

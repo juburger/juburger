@@ -5,22 +5,22 @@ import WinWindow from '@/components/WinWindow';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenantId } from '@/hooks/useTenantQuery';
+import { useTableFromSlug } from '@/hooks/useTableSlug';
 
 const RegisterScreen = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const defaultTable = searchParams.get('table') || '3';
+  const tableSlug = searchParams.get('table') || '';
   const existingMemberId = searchParams.get('member') || '';
   const [name, setName] = useState('');
-  const [table, setTable] = useState(defaultTable);
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [memberMode, setMemberMode] = useState(!!existingMemberId);
   const [memberFound, setMemberFound] = useState<{ id: string; name: string; points: number } | null>(null);
   const { showToast } = useToast95Context();
   const tenantId = useTenantId();
+  const { data: tableInfo } = useTableFromSlug(tableSlug);
 
-  // Auto-load member if returning with member param
   useEffect(() => {
     if (existingMemberId) {
       const loadMember = async () => {
@@ -72,7 +72,8 @@ const RegisterScreen = () => {
       }
 
       const memberId = memberFound?.id || '';
-      navigate(`/menu?table=${table}&name=${encodeURIComponent(name.trim())}${memberId ? `&member=${memberId}` : ''}`);
+      const slug = tableInfo?.slug || tableSlug;
+      navigate(`/menu?table=${slug}&name=${encodeURIComponent(name.trim())}${memberId ? `&member=${memberId}` : ''}`);
     } catch (err: any) {
       showToast('Giriş hatası: ' + err.message, false);
     } finally {
@@ -80,17 +81,25 @@ const RegisterScreen = () => {
     }
   };
 
+  const displayName = tableInfo?.displayName || tableSlug || 'Masa';
+
   return (
     <WinWindow
       icon="📝"
       title="Kayıt"
       controls={[
-        { label: <ChevronLeft size={14} />, onClick: () => navigate('/') },
-        { label: <X size={14} />, onClick: () => navigate('/') },
+        { label: <ChevronLeft size={14} />, onClick: () => navigate(`/?table=${tableSlug}`) },
+        { label: <X size={14} />, onClick: () => navigate(`/?table=${tableSlug}`) },
       ]}
     >
       <h1 className="text-base font-bold mb-1">Bilgilerinizi girin</h1>
-      <p className="text-muted-foreground text-xs">Sipariş takibi için ad ve masa no gereklidir.</p>
+      <p className="text-muted-foreground text-xs">Sipariş takibi için ad gereklidir.</p>
+      
+      {/* Table info */}
+      <div className="mt-2 p-2 rounded-lg bg-muted/50 text-sm font-semibold text-center">
+        📍 {displayName}
+      </div>
+      
       <div className="h-px bg-border my-3" />
 
       {/* Member toggle */}
@@ -125,7 +134,7 @@ const RegisterScreen = () => {
           )}
           {!memberFound && (
             <div className="mt-2 text-[10px] text-muted-foreground">
-              Üye değil misiniz? <button className="text-primary underline" onClick={() => navigate(`/member-signup?table=${table}`)}>Üye Ol</button>
+              Üye değil misiniz? <button className="text-primary underline" onClick={() => navigate(`/member-signup?table=${tableSlug}`)}>Üye Ol</button>
             </div>
           )}
         </div>
@@ -148,15 +157,6 @@ const RegisterScreen = () => {
           <input className="neu-input" type="text" value={name} onChange={e => setName(e.target.value)} />
         </div>
       )}
-      
-      <div className="mb-3">
-        <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Masa Numarası *</div>
-        <select className="neu-input" value={table} onChange={e => setTable(e.target.value)}>
-          {Array.from({ length: 10 }, (_, i) => i + 1).map(n => (
-            <option key={n} value={n}>Masa {n}</option>
-          ))}
-        </select>
-      </div>
       
       <div className="h-px bg-border/40 my-3" />
       <div className="flex justify-center mt-3">

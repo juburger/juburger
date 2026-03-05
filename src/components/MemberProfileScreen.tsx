@@ -32,7 +32,7 @@ const MemberProfileScreen = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const memberId = searchParams.get('member') || '';
-  const tableNum = searchParams.get('table') || '3';
+  const tableSlug = searchParams.get('table') || '';
   const [member, setMember] = useState<MemberInfo | null>(null);
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,7 +82,7 @@ const MemberProfileScreen = () => {
     <WinWindow
       icon="⭐"
       title="Profilim"
-      controls={[{ label: <ChevronLeft size={14} />, onClick: () => navigate(`/menu?table=${tableNum}&name=${encodeURIComponent(member.name)}&member=${memberId}`) }]}
+      controls={[{ label: <ChevronLeft size={14} />, onClick: () => navigate(`/menu?table=${tableSlug}&name=${encodeURIComponent(member.name)}&member=${memberId}`) }]}
     >
       {/* Member card */}
       <div className="p-3 border border-primary/30 rounded-lg bg-primary/5 mb-3">

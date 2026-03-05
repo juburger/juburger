@@ -6,12 +6,13 @@ import { useTenant } from '@/contexts/TenantContext';
 interface CartDrawerProps {
   open: boolean;
   onClose: () => void;
+  tableSlug: string;
   tableNum: string;
   userName: string;
   memberId?: string;
 }
 
-const CartDrawer = ({ open, onClose, tableNum, userName, memberId }: CartDrawerProps) => {
+const CartDrawer = ({ open, onClose, tableSlug, tableNum, userName, memberId }: CartDrawerProps) => {
   const navigate = useNavigate();
   const { cart, addItem, removeItem, clearCart, cartTotal } = useCart();
   const { uiTheme } = useTenant();
@@ -22,7 +23,7 @@ const CartDrawer = ({ open, onClose, tableNum, userName, memberId }: CartDrawerP
   const goCheckout = () => {
     if (!cart.length) return;
     onClose();
-    navigate(`/checkout?table=${tableNum}&name=${encodeURIComponent(userName)}${memberId ? `&member=${memberId}` : ''}`);
+    navigate(`/checkout?table=${tableSlug}&name=${encodeURIComponent(userName)}${memberId ? `&member=${memberId}` : ''}`);
   };
 
   return (

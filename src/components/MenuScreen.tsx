@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useTenant } from '@/contexts/TenantContext';
 import type { MenuItem } from '@/data/menu';
 import CartDrawer from '@/components/CartDrawer';
+import { useTableFromSlug } from '@/hooks/useTableSlug';
 
 interface DbCategory { id: string; name: string; sort_order: number; }
 interface DbProduct { id: string; category_id: string | null; name: string; description: string; price: number; tag: string; is_available: boolean; sort_order: number; }
@@ -15,7 +16,7 @@ interface DbProduct { id: string; category_id: string | null; name: string; desc
 const MenuScreen = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const tableNum = searchParams.get('table') || '3';
+  const tableSlug = searchParams.get('table') || '';
   const userName = decodeURIComponent(searchParams.get('name') || 'Misafir');
   const memberId = searchParams.get('member') || '';
   const { cart, addItem, removeItem, cartCount, cartTotal } = useCart();
@@ -26,6 +27,7 @@ const MenuScreen = () => {
   const [categories, setCategories] = useState<DbCategory[]>([]);
   const [products, setProducts] = useState<DbProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const { data: tableInfo } = useTableFromSlug(tableSlug);
 
   useEffect(() => {
     const fetch = async () => {
@@ -43,6 +45,7 @@ const MenuScreen = () => {
 
   const count = cartCount();
   const total = cartTotal();
+  const displayName = tableInfo?.displayName || tableSlug;
 
   const grouped = categories.map(c => ({
     cat: c.name,
@@ -62,13 +65,13 @@ const MenuScreen = () => {
     <>
       <WinWindow
         icon="🍔"
-        title={`Menü — Masa ${tableNum}`}
+        title={`Menü — ${displayName}`}
         menuItems={[
-          { label: '← Ana Sayfa', onClick: () => navigate(memberId ? `/register?table=${tableNum}&member=${memberId}` : '/') },
+          { label: '← Ana Sayfa', onClick: () => navigate(memberId ? `/register?table=${tableSlug}&member=${memberId}` : `/?table=${tableSlug}`) },
         ]}
         controls={[
-          { label: <Home size={14} />, onClick: () => navigate(memberId ? `/register?table=${tableNum}&member=${memberId}` : '/') },
-          ...(memberId ? [{ label: <User size={14} />, onClick: () => navigate(`/member-profile?member=${memberId}&table=${tableNum}`) }] : []),
+          { label: <Home size={14} />, onClick: () => navigate(memberId ? `/register?table=${tableSlug}&member=${memberId}` : `/?table=${tableSlug}`) },
+          ...(memberId ? [{ label: <User size={14} />, onClick: () => navigate(`/member-profile?member=${memberId}&table=${tableSlug}`) }] : []),
           { label: <ShoppingCart size={14} />, onClick: () => setDrawerOpen(true) },
         ]}
         bodyClass="pb-14"
@@ -80,7 +83,7 @@ const MenuScreen = () => {
           </div>
           <div className="text-right">
             <div className="text-muted-foreground text-xs">Masa</div>
-            <strong className="text-lg">#{tableNum}</strong>
+            <strong className="text-lg">{displayName}</strong>
           </div>
         </div>
         <div className="h-px bg-border my-3" />
@@ -155,7 +158,7 @@ const MenuScreen = () => {
         <button className="neu-flat px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1.5 cursor-pointer">₺{total} <ArrowRight size={14} /> Sepet</button>
       </div>
 
-      <CartDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} tableNum={tableNum} userName={userName} memberId={memberId} />
+      <CartDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} tableSlug={tableSlug} tableNum={tableInfo?.table_num?.toString() || tableSlug} userName={userName} memberId={memberId} />
     </>
   );
 };

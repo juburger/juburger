@@ -6,16 +6,18 @@ import { useCart } from '@/contexts/CartContext';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenant } from '@/contexts/TenantContext';
+import { useTableFromSlug } from '@/hooks/useTableSlug';
 
 const CheckoutScreen = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const tableNum = searchParams.get('table') || '3';
+  const tableSlug = searchParams.get('table') || '';
   const userName = decodeURIComponent(searchParams.get('name') || 'Misafir');
   const memberId = searchParams.get('member') || '';
   const { cart, cartTotal, clearCart } = useCart();
   const { showToast } = useToast95Context();
   const { tenantId } = useTenant();
+  const { data: tableInfo } = useTableFromSlug(tableSlug);
   const [selPay, setSelPay] = useState('card');
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
@@ -34,7 +36,6 @@ const CheckoutScreen = () => {
   const pointDiscount = usePoints ? Math.round(pointsToUse * loyaltySettings.point_value) : 0;
   const grand = grandBeforePoints - pointDiscount;
 
-  // Points earned: 1/10 of actual spending (after point discount)
   const earnedPoints = isMember ? Math.floor(grand / 10) : 0;
 
   useEffect(() => {
@@ -49,7 +50,6 @@ const CheckoutScreen = () => {
     }
   }, [memberId]);
 
-  // Update pointsToUse when toggling or when maxPointsForOrder changes
   useEffect(() => {
     if (usePoints) {
       setPointsToUse(maxPointsForOrder);
@@ -68,16 +68,17 @@ const CheckoutScreen = () => {
 
   const payOpts = allPayOpts.filter(o => !o.requiresMember || isMember);
 
-  const backUrl = `/menu?table=${tableNum}&name=${encodeURIComponent(userName)}${memberId ? `&member=${memberId}` : ''}`;
+  const backUrl = `/menu?table=${tableSlug}&name=${encodeURIComponent(userName)}${memberId ? `&member=${memberId}` : ''}`;
 
   const placeOrder = async () => {
     if (!cart.length) return;
+    if (!tableInfo) { showToast('Masa bilgisi yüklenemedi', false); return; }
     setLoading(true);
     try {
       const { data: result, error } = await supabase.functions.invoke('place-order', {
         body: {
           items: cart.map(i => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })),
-          table_num: parseInt(tableNum),
+          table_num: tableInfo.table_num,
           user_name: userName,
           payment_type: selPay,
           note,
@@ -138,7 +139,6 @@ const CheckoutScreen = () => {
               Kullanılabilir puan: <span className="font-bold text-primary">{availablePoints}</span>
             </div>
 
-            {/* Points redemption */}
             {canUsePoints ? (
               <div className="mt-2 p-2 rounded-lg bg-background/60 border border-border/50">
                 <label className="flex items-center gap-2 cursor-pointer">
