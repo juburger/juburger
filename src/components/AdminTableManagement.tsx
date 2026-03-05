@@ -75,8 +75,8 @@ const AdminTableManagement = () => {
       .toLowerCase();
   };
 
-  const generateSlug = (areaName: string, localIndex: number) => {
-    return `${slugifyTurkish(areaName)}-${localIndex}`;
+  const generateSlug = (tableName: string) => {
+    return slugifyTurkish(tableName);
   };
 
   // Add single custom-named table
@@ -85,9 +85,7 @@ const AdminTableManagement = () => {
     const name = customTableName.trim();
     if (!name) { showToast('Masa adı girin', false); return; }
     const maxNum = tables.length > 0 ? Math.max(...tables.map(t => t.table_num)) : 0;
-    const currentAreaTables = tables.filter(t => t.area_id === selectedArea.id);
-    const localIndex = currentAreaTables.length + 1;
-    const slug = generateSlug(selectedArea.name, localIndex);
+    const slug = generateSlug(name);
     const { error } = await supabase.from('tables').insert({
       table_num: maxNum + 1,
       area_id: selectedArea.id,
