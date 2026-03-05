@@ -1,6 +1,8 @@
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '@/integrations/supabase/client';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 import { useToast95Context } from '@/contexts/Toast95Context';
 import { useTenant } from '@/contexts/TenantContext';
 import { useQuery } from '@tanstack/react-query';
@@ -49,33 +51,46 @@ const AdminQRCodes = () => {
 
   const getSlug = (t: any) => t.slug || `masa-${t.table_num}`;
 
-  const downloadQR = (tableSlug: string, displayName: string) => {
-    const svg = document.getElementById(`qr-${tableSlug}`);
-    if (!svg) return;
-
-    const svgData = new XMLSerializer().serializeToString(svg);
-    const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 512;
-    const ctx = canvas.getContext('2d');
-    const img = new Image();
-    img.onload = () => {
-      ctx?.drawImage(img, 0, 0, 512, 512);
-      const link = document.createElement('a');
-      link.download = `${tableSlug}-qr.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      showToast(`${displayName} QR kodu indirildi!`);
-    };
-    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+  const svgToPngBlob = (svgEl: Element): Promise<Blob> => {
+    return new Promise((resolve) => {
+      const svgData = new XMLSerializer().serializeToString(svgEl);
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d')!;
+      const img = new Image();
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0, 512, 512);
+        canvas.toBlob((blob) => resolve(blob!), 'image/png');
+      };
+      img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+    });
   };
 
-  const downloadAll = () => {
-    tables.forEach((t: any, i: number) => {
+  const downloadQR = async (tableSlug: string, displayName: string) => {
+    const svg = document.getElementById(`qr-${tableSlug}`);
+    if (!svg) return;
+    const blob = await svgToPngBlob(svg);
+    saveAs(blob, `${tableSlug}-qr.png`);
+    showToast(`${displayName} QR kodu indirildi!`);
+  };
+
+  const downloadAll = async () => {
+    const zip = new JSZip();
+    const folder = zip.folder(tenant?.slug ? `${tenant.slug}-qr-kodlar` : 'qr-kodlar')!;
+
+    for (const t of tables) {
       const slug = getSlug(t);
+      const svg = document.getElementById(`qr-${slug}`);
+      if (!svg) continue;
+      const blob = await svgToPngBlob(svg);
       const displayName = getDisplayName(t);
-      setTimeout(() => downloadQR(slug, displayName), i * 300);
-    });
+      folder.file(`${displayName}-${slug}.png`, blob);
+    }
+
+    const content = await zip.generateAsync({ type: 'blob' });
+    saveAs(content, `${tenant?.slug || 'qr'}-kodlar.zip`);
+    showToast('Tüm QR kodlar ZIP olarak indirildi!');
   };
 
   return (
