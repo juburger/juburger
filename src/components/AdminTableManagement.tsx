@@ -60,12 +60,34 @@ const AdminTableManagement = () => {
     }
   };
 
+  // Generate URL-friendly slug from Turkish text
+  const slugifyTurkish = (text: string) => {
+    return text
+      .replace(/İ/g, 'i').replace(/ı/g, 'i')
+      .replace(/Ö/g, 'o').replace(/ö/g, 'o')
+      .replace(/Ü/g, 'u').replace(/ü/g, 'u')
+      .replace(/Ç/g, 'c').replace(/ç/g, 'c')
+      .replace(/Ş/g, 's').replace(/ş/g, 's')
+      .replace(/Ğ/g, 'g').replace(/ğ/g, 'g')
+      .replace(/\s+/g, '-')
+      .replace(/[^a-zA-Z0-9-]/g, '')
+      .replace(/-+/g, '-')
+      .toLowerCase();
+  };
+
+  const generateSlug = (areaName: string, localIndex: number) => {
+    return `${slugifyTurkish(areaName)}-${localIndex}`;
+  };
+
   // Add single custom-named table
   const addCustomTable = async () => {
     if (!selectedArea) return;
     const name = customTableName.trim();
     if (!name) { showToast('Masa adı girin', false); return; }
     const maxNum = tables.length > 0 ? Math.max(...tables.map(t => t.table_num)) : 0;
+    const currentAreaTables = tables.filter(t => t.area_id === selectedArea.id);
+    const localIndex = currentAreaTables.length + 1;
+    const slug = generateSlug(selectedArea.name, localIndex);
     const { error } = await supabase.from('tables').insert({
       table_num: maxNum + 1,
       area_id: selectedArea.id,
@@ -73,7 +95,8 @@ const AdminTableManagement = () => {
       is_active: true,
       name,
       tenant_id: tenantId,
-    });
+      slug,
+    } as any);
     if (error) { showToast('Masa eklenemedi', false); return; }
     setCustomTableName('');
     showToast(`Masa eklendi ✓`);
