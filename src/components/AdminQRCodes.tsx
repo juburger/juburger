@@ -51,16 +51,27 @@ const AdminQRCodes = () => {
 
   const getSlug = (t: any) => t.slug || `masa-${t.table_num}`;
 
-  const svgToPngBlob = (svgEl: Element): Promise<Blob> => {
+  const svgToPngBlob = (svgEl: Element, label?: string): Promise<Blob> => {
     return new Promise((resolve) => {
       const svgData = new XMLSerializer().serializeToString(svgEl);
+      const qrSize = 512;
+      const labelHeight = label ? 64 : 0;
       const canvas = document.createElement('canvas');
-      canvas.width = 512;
-      canvas.height = 512;
+      canvas.width = qrSize;
+      canvas.height = qrSize + labelHeight;
       const ctx = canvas.getContext('2d')!;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
       const img = new Image();
       img.onload = () => {
-        ctx.drawImage(img, 0, 0, 512, 512);
+        ctx.drawImage(img, 0, 0, qrSize, qrSize);
+        if (label) {
+          ctx.fillStyle = '#000000';
+          ctx.font = 'bold 32px Arial, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(label, qrSize / 2, qrSize + labelHeight / 2);
+        }
         canvas.toBlob((blob) => resolve(blob!), 'image/png');
       };
       img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
@@ -70,7 +81,7 @@ const AdminQRCodes = () => {
   const downloadQR = async (tableSlug: string, displayName: string) => {
     const svg = document.getElementById(`qr-${tableSlug}`);
     if (!svg) return;
-    const blob = await svgToPngBlob(svg);
+    const blob = await svgToPngBlob(svg, displayName);
     saveAs(blob, `${tableSlug}-qr.png`);
     showToast(`${displayName} QR kodu indirildi!`);
   };
@@ -83,9 +94,9 @@ const AdminQRCodes = () => {
       const slug = getSlug(t);
       const svg = document.getElementById(`qr-${slug}`);
       if (!svg) continue;
-      const blob = await svgToPngBlob(svg);
-      const displayName = getDisplayName(t);
-      folder.file(`${displayName}-${slug}.png`, blob);
+      const dn = getDisplayName(t);
+      const blob = await svgToPngBlob(svg, dn);
+      folder.file(`${dn}-${slug}.png`, blob);
     }
 
     const content = await zip.generateAsync({ type: 'blob' });
