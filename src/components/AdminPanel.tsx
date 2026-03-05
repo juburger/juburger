@@ -279,7 +279,7 @@ const AdminPanel = () => {
       icon="⚙️"
       title={`${tenant?.name || 'siparis.co'} — Yönetici Paneli`}
       menuItems={[
-        { label: '← Geri', onClick: () => navigate(-1 as any) },
+        { label: '← Geri', onClick: () => setTab('orders') },
         
         { label: 'Raporlar', onClick: () => setTab('reports') },
         { label: 'Üyeler', onClick: () => setTab('members') },
