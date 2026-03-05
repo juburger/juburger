@@ -10,13 +10,27 @@ const AdminQRCodes = () => {
   const { tenant, tenantId } = useTenant();
   const BASE_URL = tenant?.slug ? `https://${tenant.slug}.siparis.co` : 'https://juburger.lovable.app';
 
+  const { data: areas = [] } = useQuery({
+    queryKey: ['areas-qr', tenantId],
+    queryFn: async () => {
+      if (!tenantId) return [];
+      const { data } = await supabase
+        .from('table_areas')
+        .select('*')
+        .eq('tenant_id', tenantId)
+        .order('sort_order');
+      return (data || []) as any[];
+    },
+    enabled: !!tenantId,
+  });
+
   const { data: tables = [] } = useQuery({
     queryKey: ['tables-qr', tenantId],
     queryFn: async () => {
       if (!tenantId) return [];
       const { data } = await supabase
         .from('tables')
-        .select('table_num, capacity, is_active, area_id, table_areas(name)')
+        .select('id, table_num, capacity, is_active, area_id')
         .eq('tenant_id', tenantId)
         .eq('is_active', true)
         .order('table_num');
@@ -24,6 +38,15 @@ const AdminQRCodes = () => {
     },
     enabled: !!tenantId,
   });
+
+  // Build display name like "İç Alan 1", "Yol 2"
+  const getDisplayName = (t: any) => {
+    const area = areas.find((a: any) => a.id === t.area_id);
+    if (!area) return `Masa ${t.table_num}`;
+    const areaTables = tables.filter((tb: any) => tb.area_id === area.id).sort((a: any, b: any) => a.table_num - b.table_num);
+    const localIdx = areaTables.findIndex((tb: any) => tb.id === t.id) + 1;
+    return `${area.name} ${localIdx}`;
+  };
 
   const downloadQR = (tableNum: number) => {
     const svg = document.getElementById(`qr-${tableNum}`);
@@ -64,9 +87,9 @@ const AdminQRCodes = () => {
       </div>
       <hr className="border-t border-foreground my-2" />
       <div className="grid grid-cols-2 gap-2.5">
-        {tables.map((t: any) => {
+      {tables.map((t: any) => {
           const url = `${BASE_URL}/?table=${t.table_num}`;
-          const areaName = t.table_areas?.name || '';
+          const displayName = getDisplayName(t);
           return (
             <div key={t.table_num} className="border border-foreground p-2.5 text-center">
               <QRCodeSVG
@@ -76,8 +99,7 @@ const AdminQRCodes = () => {
                 level="M"
                 className="mx-auto mb-1.5"
               />
-              <div className="text-xs font-bold">Masa {t.table_num}</div>
-              {areaName && <div className="text-[10px] text-muted-foreground">{areaName}</div>}
+              <div className="text-xs font-bold">{displayName}</div>
               <div className="text-[9px] text-muted-foreground break-all mt-0.5 mb-1.5">{url}</div>
               <button
                 className="win-btn text-[10px] py-0.5 px-2 w-full"
