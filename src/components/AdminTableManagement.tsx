@@ -85,7 +85,17 @@ const AdminTableManagement = () => {
     const name = customTableName.trim();
     if (!name) { showToast('Masa adı girin', false); return; }
     const maxNum = tables.length > 0 ? Math.max(...tables.map(t => t.table_num)) : 0;
-    const slug = generateSlug(name);
+    let slug = generateSlug(name);
+    // Check for duplicate slug and append suffix if needed
+    const { data: existing } = await supabase.from('tables').select('slug').eq('tenant_id', tenantId).like('slug', `${slug}%` as any);
+    if (existing && existing.length > 0) {
+      const existingSlugs = new Set(existing.map((e: any) => e.slug));
+      if (existingSlugs.has(slug)) {
+        let suffix = 2;
+        while (existingSlugs.has(`${slug}-${suffix}`)) suffix++;
+        slug = `${slug}-${suffix}`;
+      }
+    }
     const { error } = await supabase.from('tables').insert({
       table_num: maxNum + 1,
       area_id: selectedArea.id,
