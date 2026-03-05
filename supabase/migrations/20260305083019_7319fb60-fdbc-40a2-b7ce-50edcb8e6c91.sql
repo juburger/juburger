@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX tables_tenant_slug_unique ON public.tables (tenant_id, slug) WHERE slug != '';
