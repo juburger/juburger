@@ -43,10 +43,19 @@ const AdminQRCodes = () => {
 
   const getDisplayName = (t: any) => {
     const area = areas.find((a: any) => a.id === t.area_id);
-    if (!area) return `Masa ${t.table_num}`;
+    if (!area) return `M-${t.table_num}`;
     const areaTables = tables.filter((tb: any) => tb.area_id === area.id).sort((a: any, b: any) => a.table_num - b.table_num);
     const localIdx = areaTables.findIndex((tb: any) => tb.id === t.id) + 1;
     return `${area.name} ${localIdx}`;
+  };
+
+  const getShortName = (t: any) => {
+    const area = areas.find((a: any) => a.id === t.area_id);
+    if (!area) return `M-${t.table_num}`;
+    const areaTables = tables.filter((tb: any) => tb.area_id === area.id).sort((a: any, b: any) => a.table_num - b.table_num);
+    const localIdx = areaTables.findIndex((tb: any) => tb.id === t.id) + 1;
+    const initial = area.name.charAt(0).toUpperCase();
+    return `${initial}-${localIdx}`;
   };
 
   const getSlug = (t: any) => t.slug || `masa-${t.table_num}`;
@@ -78,10 +87,10 @@ const AdminQRCodes = () => {
     });
   };
 
-  const downloadQR = async (tableSlug: string, displayName: string) => {
+  const downloadQR = async (tableSlug: string, displayName: string, shortName: string) => {
     const svg = document.getElementById(`qr-${tableSlug}`);
     if (!svg) return;
-    const blob = await svgToPngBlob(svg, displayName);
+    const blob = await svgToPngBlob(svg, shortName);
     saveAs(blob, `${tableSlug}-qr.png`);
     showToast(`${displayName} QR kodu indirildi!`);
   };
@@ -95,7 +104,8 @@ const AdminQRCodes = () => {
       const svg = document.getElementById(`qr-${slug}`);
       if (!svg) continue;
       const dn = getDisplayName(t);
-      const blob = await svgToPngBlob(svg, dn);
+      const sn = getShortName(t);
+      const blob = await svgToPngBlob(svg, sn);
       folder.file(`${dn}-${slug}.png`, blob);
     }
 
@@ -120,6 +130,7 @@ const AdminQRCodes = () => {
           const slug = getSlug(t);
           const url = `${BASE_URL}/?table=${slug}`;
           const displayName = getDisplayName(t);
+          const shortName = getShortName(t);
           return (
             <div key={t.id} className="border border-foreground p-2.5 text-center">
               <QRCodeSVG
@@ -133,7 +144,7 @@ const AdminQRCodes = () => {
               <div className="text-[9px] text-muted-foreground break-all mt-0.5 mb-1.5">{url}</div>
               <button
                 className="win-btn text-[10px] py-0.5 px-2 w-full"
-                onClick={() => downloadQR(slug, displayName)}
+                onClick={() => downloadQR(slug, displayName, shortName)}
               >
                 📥 İndir
               </button>
